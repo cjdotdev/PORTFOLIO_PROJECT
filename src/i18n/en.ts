@@ -25,6 +25,8 @@ export const en = {
       "21yo <strong class='text-ink'>Backend Developer</strong> living in <strong class='text-ink'>Benin</strong> 🇧🇯. I build fast, reliable APIs and turn ideas into reality.",
     getInTouch: "Get in touch",
     viewProjects: "View projects",
+    flagLabel: "Where am I from? Show country",
+    flagMessage: "I'm from Gabon 🇬🇦",
   },
   about: {
     title: "About Me",

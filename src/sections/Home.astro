@@ -27,15 +27,40 @@ const blogPosts = getBlogPosts();
     <div class="relative z-10 flex flex-col gap-8 md:flex-row md:items-center">
       <div class="flex-1 min-w-0">
         <div class="flex flex-wrap gap-3 mb-3">
-          <div class="flex-shrink-0 w-24 h-24 overflow-hidden border-2 rounded-full sm:w-14 sm:h-14 md:w-24 md:h-24 border-ink/10">
-            <img
-              src="/me.png"
-              alt={PERSONAL.name}
-              width="96"
-              height="96"
-              class="object-cover w-full h-full"
-              fetchpriority="high"
-            />
+          <div class="relative z-20 flex-shrink-0">
+            <div class="w-24 h-24 overflow-hidden border-2 rounded-full sm:w-14 sm:h-14 md:w-24 md:h-24 border-ink/10">
+              <img
+                src="/me.png"
+                alt={PERSONAL.name}
+                width="96"
+                height="96"
+                class="object-cover w-full h-full"
+                fetchpriority="high"
+              />
+            </div>
+            <button
+              type="button"
+              id="flag-btn"
+              aria-label={t.hero.flagLabel}
+              aria-expanded="false"
+              aria-controls="flag-badge"
+              class="absolute -bottom-1 -right-1 w-8 h-8 rounded-full overflow-hidden border-2 shadow-md transition-transform duration-200 hover:scale-110 active:scale-95 cursor-pointer"
+              style="border-color: rgb(var(--color-surface))"
+            >
+              <svg viewBox="0 0 24 16" class="w-full h-full block" aria-hidden="true">
+                <rect width="24" height="16" fill="#3A75C4" />
+                <rect width="24" height="10.67" fill="#FCD116" />
+                <rect width="24" height="5.33" fill="#009E60" />
+              </svg>
+            </button>
+            <span
+              id="flag-badge"
+              hidden
+              class="absolute top-full left-0 mt-2 whitespace-nowrap font-mono text-[11px] font-medium px-3 py-1.5 rounded-full tracking-wide shadow-md"
+              style="background: rgb(var(--color-ink)); color: #D97757"
+            >
+              {t.hero.flagMessage}
+            </span>
           </div>
           <h1
             class="font-serif leading-tight text-ink"
@@ -175,3 +200,30 @@ const blogPosts = getBlogPosts();
 </main>
 
 <BottomNav t={t} client:load />
+
+<script>
+  const flagBtn = document.getElementById("flag-btn");
+  const flagBadge = document.getElementById("flag-badge");
+
+  flagBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const nowHidden = flagBadge?.toggleAttribute("hidden") ?? true;
+    flagBtn.setAttribute("aria-expanded", String(!nowHidden));
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!flagBadge || flagBadge.hidden) return;
+    if (e.target instanceof Node && !flagBadge.contains(e.target) && e.target !== flagBtn) {
+      flagBadge.hidden = true;
+      flagBtn?.setAttribute("aria-expanded", "false");
+    }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && flagBadge && !flagBadge.hidden) {
+      flagBadge.hidden = true;
+      flagBtn?.setAttribute("aria-expanded", "false");
+      flagBtn?.focus();
+    }
+  });
+</script>

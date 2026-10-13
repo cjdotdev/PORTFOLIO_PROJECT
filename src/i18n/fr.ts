@@ -27,6 +27,8 @@ export const fr: Dict = {
       "21 ans, <strong class='text-ink'>développeur backend</strong> au <strong class='text-ink'>Bénin</strong> 🇧🇯. Je construis des API rapides et fiables et je transforme les idées en réalité.",
     getInTouch: "Me contacter",
     viewProjects: "Voir les projets",
+    flagLabel: "D'où je viens ? Afficher le pays",
+    flagMessage: "Je suis du Gabon 🇬🇦",
   },
   about: {
     title: "À propos de moi",
