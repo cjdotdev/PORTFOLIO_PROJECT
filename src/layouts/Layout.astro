@@ -1,0 +1,134 @@
+---
+import PageLoader from "../components/PageLoader";
+import ThemeToggle from "../components/ThemeToggle";
+import "../styles/global.css";
+import type { Dict, Locale } from "../i18n";
+
+interface Props {
+  t: Dict;
+  locale: Locale;
+  alternate: { en: string; fr: string };
+}
+
+const { t, locale, alternate } = Astro.props;
+const site = Astro.site ? Astro.site.toString().replace(/\/$/, "") : "";
+
+const FLAGS: Record<Locale, string> = {
+  en: "https://flagcdn.com/gb.svg",
+  fr: "https://flagcdn.com/fr.svg",
+};
+---
+
+<!doctype html>
+<html lang={locale} class="scroll-smooth">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{t.meta.title}</title>
+    <meta name="description" content={t.meta.description} />
+    <meta name="keywords" content={t.meta.keywords} />
+    <meta name="author" content="Joel CODJA" />
+    <meta name="creator" content="Joel CODJA" />
+    <link rel="icon" type="image/png" href="/Group%2029.png" />
+
+    <link rel="alternate" hreflang="en" href={`${site}${alternate.en}`} />
+    <link rel="alternate" hreflang="fr" href={`${site}${alternate.fr}`} />
+    <link rel="alternate" hreflang="x-default" href={`${site}${alternate.en}`} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content={locale === "fr" ? "fr_FR" : "en_US"} />
+    <meta property="og:url" content={`${site}${alternate[locale]}`} />
+    <meta property="og:title" content={t.meta.title} />
+    <meta property="og:description" content={t.meta.description} />
+    <meta property="og:site_name" content={t.meta.siteName} />
+    <meta property="og:image" content={`${site}/projects/portfolio.png`} />
+    <meta property="og:image:alt" content={t.meta.title} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={t.meta.title} />
+    <meta name="twitter:description" content={t.meta.description} />
+    <meta name="twitter:image" content={`${site}/me.png`} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <script is:inline>
+      // Apply saved theme before first paint (no flash of wrong theme)
+      try {
+        document.documentElement.setAttribute(
+          "data-theme",
+          localStorage.getItem("theme") || "light"
+        );
+      } catch {
+        document.documentElement.setAttribute("data-theme", "light");
+      }
+    </script>
+  </head>
+  <body class="font-sans antialiased bg-bg text-ink pb-20">
+    <PageLoader client:load />
+
+    <div class="fixed top-3 right-3 z-40 flex items-center gap-2">
+      <ThemeToggle client:load label={t.themeSwitch.label} />
+
+      <details class="group relative">
+        <summary
+          aria-label={t.langSwitch.label}
+          class="flex items-center gap-2 px-2.5 py-1.5 rounded-full cursor-pointer list-none transition-colors text-ink/70 hover:text-ink [&::-webkit-details-marker]:hidden"
+          style="background: rgb(var(--color-surface) / 0.9); border: 1px solid rgb(var(--color-line) / 0.15)"
+        >
+          <img
+            src={FLAGS[locale]}
+            alt={locale === "fr" ? "Français" : "English"}
+            width="20"
+            height="15"
+            class="w-5 h-[15px] rounded-[2px] object-cover"
+          />
+          <svg
+            class="w-3 h-3 transition-transform duration-200 group-open:rotate-180"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
+          </svg>
+        </summary>
+        <ul
+          class="absolute right-0 mt-1.5 min-w-[150px] overflow-hidden rounded-xl py-1"
+          style="background: rgb(var(--color-surface) / 0.98); border: 1px solid rgb(var(--color-line) / 0.15)"
+        >
+          <li>
+            <a
+              href={alternate.en}
+              hreflang="en"
+              aria-current={locale === "en" ? "page" : undefined}
+              class={`flex items-center gap-2.5 px-3 py-2 font-mono text-xs transition-colors hover:bg-ink/5 ${locale === "en" ? "text-ink" : "text-ink/60 hover:text-ink"}`}
+            >
+              <img src={FLAGS.en} alt="" width="20" height="15" class="w-5 h-[15px] rounded-[2px] object-cover" />
+              English
+              {locale === "en" && <span class="ml-auto text-accent">✓</span>}
+            </a>
+          </li>
+          <li>
+            <a
+              href={alternate.fr}
+              hreflang="fr"
+              aria-current={locale === "fr" ? "page" : undefined}
+              class={`flex items-center gap-2.5 px-3 py-2 font-mono text-xs transition-colors hover:bg-ink/5 ${locale === "fr" ? "text-ink" : "text-ink/60 hover:text-ink"}`}
+            >
+              <img src={FLAGS.fr} alt="" width="20" height="15" class="w-5 h-[15px] rounded-[2px] object-cover" />
+              Français
+              {locale === "fr" && <span class="ml-auto text-accent">✓</span>}
+            </a>
+          </li>
+        </ul>
+      </details>
+    </div>
+
+    <slot />
+  </body>
+</html>

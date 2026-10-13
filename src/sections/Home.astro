@@ -1,0 +1,177 @@
+---
+import ProjectCard from "../components/ProjectCard";
+import ContactForm from "../components/ContactForm";
+import ScrollReveal from "../components/ScrollReveal";
+import BottomNav from "../components/BottomNav";
+import BlogCard from "../components/BlogCard.astro";
+import { getBlogPosts } from "../lib/hashnode";
+import { PERSONAL, PROJECTS, EXPERIENCE } from "../data";
+import { localePath, type Dict, type Locale } from "../i18n";
+
+interface Props {
+  t: Dict;
+  locale: Locale;
+}
+
+const { t, locale } = Astro.props;
+const projectsHref = localePath(locale, "/projects");
+const blogHref = localePath(locale, "/blog");
+const blogPosts = await getBlogPosts();
+---
+
+<ScrollReveal client:load />
+
+<main class="px-6 mx-auto max-w-page">
+  {/* HERO SECTION */}
+  <section id="home" class="relative pt-16 pb-8 overflow-hidden animate-fade-up">
+    <div class="relative z-10 flex flex-col gap-8 md:flex-row md:items-center">
+      <div class="flex-1 min-w-0">
+        <div class="flex flex-wrap gap-3 mb-3">
+          <div class="flex-shrink-0 w-24 h-24 overflow-hidden border-2 rounded-full sm:w-14 sm:h-14 md:w-24 md:h-24 border-ink/10">
+            <img
+              src="/me.png"
+              alt={PERSONAL.name}
+              width="96"
+              height="96"
+              class="object-cover w-full h-full"
+              fetchpriority="high"
+            />
+          </div>
+          <h1
+            class="font-serif leading-tight text-ink"
+            style="font-size: clamp(2rem, 6vw, 3.6rem)"
+          >
+            {t.hero.greeting} {PERSONAL.name} <span class="inline-block animate-wave">👋</span>
+          </h1>
+        </div>
+        <p
+          class="max-w-100 mb-5 leading-relaxed text-[20px] text-ink/70"
+          set:html={t.hero.tagline}
+        />
+        <div class="flex flex-col items-center gap-3 sm:flex-row">
+          <a
+            href="#contact"
+            class="inline-flex items-center justify-center gap-2 font-mono text-xs font-medium px-5 py-2.5 rounded-full tracking-wide transition-all duration-200 w-full sm:w-auto hover:opacity-90"
+            style="background: #D97757; color: #ffffff"
+          >
+            {t.hero.getInTouch}
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </a>
+          <a
+            href="#projects"
+            class="inline-flex items-center justify-center gap-2 font-mono text-xs px-5 py-2.5 rounded-full tracking-wide transition-all duration-200 text-ink/70 hover:text-ink w-full sm:w-auto"
+            style="border: 1px solid rgb(var(--color-line) / 0.15)"
+          >
+            {t.hero.viewProjects}
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ABOUT SECTION */}
+  <section id="about" class="pt-8 pb-6 reveal">
+    <h2 class="mb-4 font-serif text-3xl text-ink">{t.about.title}</h2>
+    <p
+      class="max-w-xl mb-4 text-[20px] leading-loose text-ink/70"
+      set:html={t.about.bio}
+    />
+  </section>
+
+  {/* EXPERIENCE SECTION */}
+  <section id="experience" class="pt-6 pb-8 reveal">
+    <h2 class="mb-5 font-serif text-2xl text-ink sm:text-3xl">{t.experience.title}</h2>
+    <div class="flex flex-col gap-4">
+      {EXPERIENCE.map((job) => {
+        const copy = t.experience.items[job.id as keyof typeof t.experience.items];
+        return (
+          <article
+            class="rounded-2xl p-5 transition-all duration-200"
+            style="background: rgb(var(--color-surface)); border: 1px solid rgba(217,119,87,0.30)"
+          >
+            <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 mb-1">
+              <h3 class="font-serif text-xl text-ink">
+                {copy.role}
+                <span class="font-sans text-base font-normal text-ink/70"> · {job.company}</span>
+              </h3>
+              <span class="font-mono text-xs text-ink/60">
+                {job.start} — {job.current ? t.experience.present : job.end}
+              </span>
+            </div>
+            {job.site && (
+              <p class="font-mono text-xs font-bold mb-3" style="color: #D97757">
+                <a href={job.site} target="_blank" rel="noreferrer" class="hover:underline">
+                  {job.site.replace(/^https?:\/\//, "")} ↗
+                </a>
+              </p>
+            )}
+            <p class="text-[15px] leading-relaxed text-ink/70">{copy.desc}</p>
+          </article>
+        );
+      })}
+    </div>
+  </section>
+
+  {/* PROJECTS SECTION */}
+  <section id="projects" class="pt-6 pb-8 reveal">
+    <h2 class="mb-5 font-serif text-2xl text-ink sm:text-3xl">{t.projects.title}</h2>
+    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+      {PROJECTS.slice(0, 2).map((p) => <ProjectCard project={p} t={t} client:visible />)}
+    </div>
+    <div class="flex justify-center mt-6">
+      <a
+        href={projectsHref}
+        class="inline-flex items-center gap-2 font-mono text-xs px-5 py-2.5 rounded-full tracking-wide transition-all duration-200 text-ink/70 hover:text-ink"
+        style="border: 1px solid rgb(var(--color-line) / 0.15)"
+      >
+        {t.projects.viewAll}
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+        </svg>
+      </a>
+    </div>
+  </section>
+
+  {/* BLOG SECTION */}
+  {
+    blogPosts.length > 0 && (
+      <section id="blog" class="pt-6 pb-8 reveal">
+        <h2 class="mb-5 font-serif text-2xl text-ink sm:text-3xl">{t.blog.title}</h2>
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          {blogPosts.slice(0, 2).map((post) => (
+            <BlogCard post={post} locale={locale} readLabel={t.blog.read} />
+          ))}
+        </div>
+        <div class="flex justify-center mt-6">
+          <a
+            href={blogHref}
+            class="inline-flex items-center gap-2 font-mono text-xs px-5 py-2.5 rounded-full tracking-wide transition-all duration-200 text-ink/70 hover:text-ink"
+            style="border: 1px solid rgb(var(--color-line) / 0.15)"
+          >
+            {t.blog.viewAll}
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </a>
+        </div>
+      </section>
+    )
+  }
+
+  {/* CONTACT FORM */}
+  <ContactForm t={t} client:visible />
+
+  {/* FOOTER */}
+  <footer class="flex flex-wrap items-center justify-between gap-4 pt-6 pb-4">
+    <span class="font-mono text-xs text-ink/60">© 2026 Joel CODJA</span>
+    <div class="flex items-center gap-5">
+      <a href={PERSONAL.github} target="_blank" rel="noreferrer" class="font-mono text-xs transition-colors text-ink/60 hover:text-ink">GitHub</a>
+      <a href={PERSONAL.linkedin} target="_blank" rel="noreferrer" class="font-mono text-xs transition-colors text-ink/60 hover:text-ink">LinkedIn</a>
+      <a href={PERSONAL.twitter} target="_blank" rel="noreferrer" class="font-mono text-xs transition-colors text-ink/60 hover:text-ink">Twitter</a>
+    </div>
+  </footer>
+</main>
+
+<BottomNav t={t} client:load />

@@ -1,0 +1,324 @@
+:root {
+  --font-geist: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-dm-serif: "DM Serif Display", ui-serif, Georgia, serif;
+  --font-dm-mono: "DM Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* ── Theme tokens (RGB triplets so Tailwind alpha modifiers work) ── */
+  color-scheme: light;
+  --color-bg: 245 243 238; /* #F5F3EE */
+  --color-surface: 255 255 255; /* #FFFFFF */
+  --color-ink: 26 26 25; /* #1a1a19 */
+  --color-accent: 217 119 87; /* #D97757 */
+  --color-line: 0 0 0; /* neutral border/hairline base */
+  --color-github: 36 41 46; /* #24292e */
+  --track: #f5f3ee;
+  --thumb: #d9d5cc;
+  --heat-empty: #161b22;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --color-bg: 22 27 34; /* #161b22 */
+  --color-surface: 36 41 46; /* #24292e */
+  --color-ink: 245 243 238; /* #F5F3EE */
+  --color-accent: 217 119 87; /* #D97757 */
+  --color-line: 245 243 238;
+  --color-github: 22 27 34; /* #161b22 — darker than surface card */
+  --track: #161b22;
+  --thumb: #24292e;
+  --heat-empty: #24292e;
+}
+
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ── Dot grid backdrop (follows theme: surface bg + accent dots) ── */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.4;
+  background-color: rgb(var(--color-surface));
+  background-image:
+    radial-gradient(rgb(var(--color-accent)) 1.5px, transparent 1.5px),
+    radial-gradient(rgb(var(--color-accent)) 1.5px, rgb(var(--color-surface)) 1.5px);
+  background-size: 20px 20px;
+  background-position: 0 0, 10px 10px;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/* Add this — prevents any child from causing horizontal scroll */
+html {
+  overflow-x: hidden;
+ 
+}
+/* ── Loader ───────────────────────────────────────── */
+.loadingspinner {
+  --square: 26px;
+  --offset: 30px;
+  --duration: 2.4s;
+  --delay: 0.2s;
+  --timing-function: ease-in-out;
+  --in-duration: 0.4s;
+  --in-delay: 0.1s;
+  --in-timing-function: ease-out;
+  width: calc(3 * var(--offset) + var(--square));
+  height: calc(2 * var(--offset) + var(--square));
+  margin: auto;
+  position: relative;
+}
+
+.loadingspinner div {
+  display: inline-block;
+  background: #D97757;
+  border-radius: 2px;
+  width: var(--square);
+  height: var(--square);
+  position: absolute;
+}
+
+.loadingspinner #square1 {
+  left: calc(0 * var(--offset));
+  top: calc(0 * var(--offset));
+  animation: square1 var(--duration) var(--delay) var(--timing-function) infinite,
+             squarefadein var(--in-duration) calc(1 * var(--in-delay)) var(--in-timing-function) both;
+}
+.loadingspinner #square2 {
+  left: calc(0 * var(--offset));
+  top: calc(1 * var(--offset));
+  animation: square2 var(--duration) var(--delay) var(--timing-function) infinite,
+             squarefadein var(--in-duration) calc(1 * var(--in-delay)) var(--in-timing-function) both;
+}
+.loadingspinner #square3 {
+  left: calc(1 * var(--offset));
+  top: calc(1 * var(--offset));
+  animation: square3 var(--duration) var(--delay) var(--timing-function) infinite,
+             squarefadein var(--in-duration) calc(2 * var(--in-delay)) var(--in-timing-function) both;
+}
+.loadingspinner #square4 {
+  left: calc(2 * var(--offset));
+  top: calc(1 * var(--offset));
+  animation: square4 var(--duration) var(--delay) var(--timing-function) infinite,
+             squarefadein var(--in-duration) calc(3 * var(--in-delay)) var(--in-timing-function) both;
+}
+.loadingspinner #square5 {
+  left: calc(3 * var(--offset));
+  top: calc(1 * var(--offset));
+  animation: square5 var(--duration) var(--delay) var(--timing-function) infinite,
+             squarefadein var(--in-duration) calc(4 * var(--in-delay)) var(--in-timing-function) both;
+}
+
+@keyframes square1 {
+  0% { left: calc(0 * var(--offset)); top: calc(0 * var(--offset)); }
+  8.333% { left: calc(0 * var(--offset)); top: calc(1 * var(--offset)); }
+  100% { left: calc(0 * var(--offset)); top: calc(1 * var(--offset)); }
+}
+@keyframes square2 {
+  0% { left: calc(0 * var(--offset)); top: calc(1 * var(--offset)); }
+  8.333% { left: calc(0 * var(--offset)); top: calc(2 * var(--offset)); }
+  16.67% { left: calc(1 * var(--offset)); top: calc(2 * var(--offset)); }
+  25% { left: calc(1 * var(--offset)); top: calc(1 * var(--offset)); }
+  83.33% { left: calc(1 * var(--offset)); top: calc(1 * var(--offset)); }
+  91.67% { left: calc(1 * var(--offset)); top: calc(0 * var(--offset)); }
+  100% { left: calc(0 * var(--offset)); top: calc(0 * var(--offset)); }
+}
+@keyframes square3 {
+  0%, 100% { left: calc(1 * var(--offset)); top: calc(1 * var(--offset)); }
+  16.67% { left: calc(1 * var(--offset)); top: calc(1 * var(--offset)); }
+  25% { left: calc(1 * var(--offset)); top: calc(0 * var(--offset)); }
+  33.33% { left: calc(2 * var(--offset)); top: calc(0 * var(--offset)); }
+  41.67% { left: calc(2 * var(--offset)); top: calc(1 * var(--offset)); }
+  66.67% { left: calc(2 * var(--offset)); top: calc(1 * var(--offset)); }
+  75% { left: calc(2 * var(--offset)); top: calc(2 * var(--offset)); }
+  83.33% { left: calc(1 * var(--offset)); top: calc(2 * var(--offset)); }
+  91.67% { left: calc(1 * var(--offset)); top: calc(1 * var(--offset)); }
+}
+@keyframes square4 {
+  0% { left: calc(2 * var(--offset)); top: calc(1 * var(--offset)); }
+  33.33% { left: calc(2 * var(--offset)); top: calc(1 * var(--offset)); }
+  41.67% { left: calc(2 * var(--offset)); top: calc(2 * var(--offset)); }
+  50% { left: calc(3 * var(--offset)); top: calc(2 * var(--offset)); }
+  58.33% { left: calc(3 * var(--offset)); top: calc(1 * var(--offset)); }
+  100% { left: calc(3 * var(--offset)); top: calc(1 * var(--offset)); }
+}
+@keyframes square5 {
+  0% { left: calc(3 * var(--offset)); top: calc(1 * var(--offset)); }
+  50% { left: calc(3 * var(--offset)); top: calc(1 * var(--offset)); }
+  58.33% { left: calc(3 * var(--offset)); top: calc(0 * var(--offset)); }
+  66.67% { left: calc(2 * var(--offset)); top: calc(0 * var(--offset)); }
+  75% { left: calc(2 * var(--offset)); top: calc(1 * var(--offset)); }
+  100% { left: calc(2 * var(--offset)); top: calc(1 * var(--offset)); }
+}
+@keyframes squarefadein {
+  0% { transform: scale(0.75); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes tooltipIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(4px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* ── SVG stroke loader (CJ) ───────────────────────── */
+.loader {
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin: 0.25em 0;
+}
+
+.loader svg {
+  margin: 0 10px; /* Enhanced spacing to accommodate the bolder lines */
+  width: 64px;
+  height: 64px;
+}
+
+/* Stroke Dash Animations */
+.dash {
+  stroke: #D97757;
+  animation:
+    dashArray 2s ease-in-out infinite,
+    dashOffset 2s linear infinite;
+}
+
+@keyframes dashArray {
+  0% {
+    stroke-dasharray: 0 1 359 0;
+  }
+  50% {
+    stroke-dasharray: 0 359 1 0;
+  }
+  100% {
+    stroke-dasharray: 359 1 0 0;
+  }
+}
+
+@keyframes dashOffset {
+  0% {
+    stroke-dashoffset: 365;
+  }
+  100% {
+    stroke-dashoffset: 5;
+  }
+}
+
+/* ── Scroll behaviour ─────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+}
+/* ── Custom scrollbar — only for elements with .custom-scroll ── */
+.custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+.custom-scroll::-webkit-scrollbar-track { background: var(--track); }
+.custom-scroll::-webkit-scrollbar-thumb { background: var(--thumb); border-radius: 3px; }
+/* ── Custom scrollbar ─────────────────────────────── */
+@media (min-width: 769px) {
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--track); }
+  ::-webkit-scrollbar-thumb { background: var(--thumb); border-radius: 3px; }
+}
+
+@media (max-width: 768px) {
+  html {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  html::-webkit-scrollbar {
+    display: none;
+  }
+}
+/* ── Text selection ───────────────────────────────── */
+::selection { background: rgba(217, 119, 87, 0.25); }
+
+/* ── Scroll-reveal utility ────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.65s ease, transform 0.65s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── Tech-pill icon size ──────────────────────────── */
+.tech-pill-icon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+/* ── Contribution heatmap cells ───────────────────── */
+.cc {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--thumb);
+  flex-shrink: 0;
+}
+.cc.l1 { background: #7c3312; }
+.cc.l2 { background: #c2501a; }
+.cc.l3 { background: #f07030; }
+.cc.l4 { background: #D97757; }
+
+/* ── Bottom nav active state ──────────────────────── */
+.bottom-nav-link { color: #9090a8; transition: color 0.2s; }
+.bottom-nav-link:hover,
+.bottom-nav-link.active { color: #D97757; }
+
+/* ── Post item hover ──────────────────────────────── */
+/* ── Project card hover ───────────────────────────── */
+.project-card {
+  transition: border-color 0.2s, transform 0.2s;
+}
+.project-card:hover {
+  border-color: rgba(217, 119, 87, 0.22);
+  transform: translateY(-2px);
+}
+
+/* ── Modal backdrop ───────────────────────────────── */
+.modal-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  align-items: center;
+  justify-content: center;
+}
+.modal-backdrop.open {
+  display: flex;
+}
+
+/* Bottom nav must not overlap an open project modal */
+body:has(.project-modal) .bottom-nav {
+  display: none;
+}
+
+/* ── Hero glow blobs ──────────────────────────────── */
+.hero-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  opacity: 0.18;
+}
+
+/* ── Cursor blink in SVG ──────────────────────────── */
+@keyframes svgBlink {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 0; }
+}
+.svg-cursor { animation: svgBlink 1.2s ease infinite; }
+
+/* ── LED pulse in Arduino SVG ─────────────────────── */
+@keyframes ledPulse {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 0.3; }
+}
+.svg-led { animation: ledPulse 0.8s ease infinite; }

@@ -1,0 +1,11 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import ProjectsPage from "../../sections/ProjectsPage.astro";
+import { getDict } from "../../i18n";
+
+const t = getDict("fr");
+---
+
+<Layout t={t} locale="fr" alternate={{ en: "/projects/", fr: "/fr/projects/" }}>
+  <ProjectsPage t={t} locale="fr" />
+</Layout>

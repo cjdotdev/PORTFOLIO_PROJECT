@@ -1,0 +1,44 @@
+---
+import ProjectCard from "../components/ProjectCard";
+import { PROJECTS, PERSONAL } from "../data";
+import { localePath, type Dict, type Locale } from "../i18n";
+
+interface Props {
+  t: Dict;
+  locale: Locale;
+}
+
+const { t, locale } = Astro.props;
+const homeHref = localePath(locale, "/");
+---
+
+<main class="px-6 py-16 mx-auto max-w-page">
+  {/* Header */}
+  <div class="mb-10">
+    <a
+      href={homeHref}
+      class="inline-flex items-center gap-2 mb-6 font-mono text-xs transition-colors text-ink/60 hover:text-ink"
+    >
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M7 16l-4-4m0 0l4-4m-4 4h18" />
+      </svg>
+      {t.projects.backHome}
+    </a>
+    <h1 class="mb-2 font-serif text-2xl text-ink sm:text-4xl">{t.projects.allTitle}</h1>
+  </div>
+
+  {/* Grid */}
+  <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+    {PROJECTS.map((p) => <ProjectCard project={p} t={t} client:visible />)}
+  </div>
+
+  {/* FOOTER */}
+  <footer class="flex flex-wrap items-center justify-between gap-4 pt-12 pb-24">
+    <span class="font-mono text-xs text-ink/60">© 2026 Joel CODJA</span>
+    <div class="flex items-center gap-5">
+      <a href={PERSONAL.github} target="_blank" rel="noreferrer" class="font-mono text-xs transition-colors text-ink/60 hover:text-ink">GitHub</a>
+      <a href={PERSONAL.linkedin} target="_blank" rel="noreferrer" class="font-mono text-xs transition-colors text-ink/60 hover:text-ink">LinkedIn</a>
+      <a href={PERSONAL.twitter} target="_blank" rel="noreferrer" class="font-mono text-xs transition-colors text-ink/60 hover:text-ink">Twitter</a>
+    </div>
+  </footer>
+</main>

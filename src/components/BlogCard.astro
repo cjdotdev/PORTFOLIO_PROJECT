@@ -1,0 +1,68 @@
+---
+import type { BlogPost } from "../lib/hashnode";
+import type { Locale } from "../i18n";
+
+interface Props {
+  post: BlogPost;
+  locale: Locale;
+  readLabel: string;
+}
+
+const { post, locale, readLabel } = Astro.props;
+
+const dateLabel = post.date
+  ? new Date(post.date).toLocaleDateString(locale === "fr" ? "fr-FR" : "en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })
+  : "";
+---
+
+<a
+  href={post.url}
+  target="_blank"
+  rel="noreferrer"
+  class="project-card flex flex-col overflow-hidden rounded-2xl"
+  style="background: rgb(var(--color-surface)); border: 1px solid rgba(217,119,87,0.35)"
+>
+  <div class="p-3 pb-0">
+    {
+      post.cover ? (
+        <div class="relative w-full h-40 overflow-hidden rounded-xl">
+          <img
+            src={post.cover}
+            alt={post.title}
+            loading="lazy"
+            class="w-full h-full object-cover object-top"
+          />
+        </div>
+      ) : (
+        <div class="flex items-center justify-center w-full h-40 rounded-xl bg-ink/5">
+          <svg
+            class="w-8 h-8 text-ink/25"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            aria-hidden="true"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-4.5A1.125 1.125 0 0 1 10.5 7.125v-4.5A1.125 1.125 0 0 1 11.625 1.5h6.75a3.375 3.375 0 0 1 3.375 3.375v6.75a3.375 3.375 0 0 1-3.375 3.375h-2.625"
+            />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12h.008v.75H15z" />
+          </svg>
+        </div>
+      )
+    }
+  </div>
+
+  <div class="flex flex-col flex-1 p-4">
+    {dateLabel && <span class="font-mono text-[11px] text-ink/60 mb-1.5">{dateLabel}</span>}
+    <h3 class="text-sm font-medium mb-1.5 text-ink">{post.title}</h3>
+    <p class="flex-1 mb-3 text-sm leading-relaxed text-muted">{post.brief}</p>
+    <span class="mt-auto font-mono text-xs font-medium text-accent">{readLabel} →</span>
+  </div>
+</a>
