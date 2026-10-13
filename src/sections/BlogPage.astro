@@ -11,7 +11,7 @@ interface Props {
 
 const { t, locale } = Astro.props;
 const homeHref = localePath(locale, "/");
-const posts = await getBlogPosts();
+const posts = getBlogPosts();
 ---
 
 <main class="px-6 py-16 mx-auto max-w-page">

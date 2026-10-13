@@ -16,7 +16,7 @@ interface Props {
 const { t, locale } = Astro.props;
 const projectsHref = localePath(locale, "/projects");
 const blogHref = localePath(locale, "/blog");
-const blogPosts = await getBlogPosts();
+const blogPosts = getBlogPosts();
 ---
 
 <ScrollReveal client:load />
