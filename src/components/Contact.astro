@@ -1,0 +1,66 @@
+---
+import ContactForm from "./ContactForm";
+import { PERSONAL } from "../data";
+import type { Dict } from "../i18n";
+
+interface Props {
+  t: Dict;
+}
+
+const { t } = Astro.props;
+---
+
+<section class="contact section container reveal" id="contact" aria-labelledby="contact-title">
+  <div class="intro">
+    <h2 id="contact-title" class="display">{t.contact.title}</h2>
+    <p class="lede">{t.contact.lede}</p>
+  </div>
+  <a class="email" href={`mailto:${PERSONAL.email}`}>{PERSONAL.email}</a>
+  <div class="form">
+    <ContactForm client:visible t={t.contact} />
+  </div>
+</section>
+
+<style>
+  .contact {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: var(--space-8) clamp(2rem, 1rem + 4vw, 5rem);
+  }
+  .intro {
+    display: grid;
+    gap: var(--space-4);
+    align-content: start;
+  }
+  /* The address is the display type: the most direct way to reach Joel, set the largest. */
+  .email {
+    grid-column: 1 / -1;
+    width: fit-content;
+    max-width: 100%;
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 0.6rem + 5.4vw, 4.5rem);
+    font-weight: 500;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+    overflow-wrap: anywhere;
+    text-decoration: underline;
+    text-decoration-color: var(--accent);
+    text-decoration-thickness: 0.06em;
+    text-underline-offset: 0.14em;
+    transition: color var(--duration-fast) var(--ease-standard);
+  }
+  .email:hover {
+    color: var(--accent);
+  }
+  .form {
+    grid-column: 2;
+  }
+  @media (max-width: 55rem) {
+    .contact {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .form {
+      grid-column: 1;
+    }
+  }
+</style>

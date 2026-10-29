@@ -6,6 +6,13 @@ import { getDict } from "../../i18n";
 const t = getDict("fr");
 ---
 
-<Layout t={t} locale="fr" alternate={{ en: "/blog/", fr: "/fr/blog/" }}>
+<Layout
+  t={t}
+  locale="fr"
+  alternate={{ en: "/blog/", fr: "/fr/blog/" }}
+  current="writing"
+  title={t.meta.blogTitle}
+  description={t.meta.blogDescription}
+>
   <BlogPage t={t} locale="fr" />
 </Layout>

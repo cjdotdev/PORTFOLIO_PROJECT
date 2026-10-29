@@ -1,104 +1,77 @@
-// ─── Portfolio Data ────────────────────────────────────────────────
-// Edit this file to update your personal info, jobs, projects, etc.
+// ─── Portfolio data ────────────────────────────────────────────────
+// Facts only. Copy that changes with the language lives in src/i18n.
+
+/** The site's public address. Change it here once the final domain is bought. */
+export const SITE_URL = "https://joelcodja.pages.dev";
 
 export const PERSONAL = {
-  name: "Joel CODJA(K-O-J-A)",
-  initials: "AC",
-  company: "Humanforce",
+  name: "Joel Codja",
+  surname: "Codja",
+  pronunciation: "/ko.dʒa/",
   email: "gide749@gmail.com",
   github: "https://github.com/cjdotdev",
-  githubUsername: "cjdotdev",
   linkedin: "https://www.linkedin.com/in/joel-codja-4356a2361/",
   twitter: "https://x.com/Gide749Gide",
   hashnode: "https://blog-cjdevcom.hashnode.dev",
 };
 
-export const SKILLS = [
-  { name: "TypeScript", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" },
-  { name: "JavaScript", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg" },
-  { name: "React", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" },
-  { name: "Next.js", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg" },
-  { name: "HTML5", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg" },
-  { name: "CSS3", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg" },
-  { name: "Node.js", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg" },
-  { name: "MySQL", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg" },
-  { name: "Docker", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg" },
-  { name: "Redis", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/redis/redis-original.svg" },
-  { name: "Tailwind", icon: "https://cdn.simpleicons.org/tailwindcss" },
-];
-
-export interface Tag {
-  name: string;
-  icon?: string;
-}
+/**
+ * Fallback for the "where I am" block, rendered into the HTML so the page never shows an empty box.
+ * The live answer comes from GET /api/where (functions/api/where.ts), which reads the same fields
+ * from the Pages project's environment and adds the weather. City level only: the coordinates are
+ * the city centre, never anything finer.
+ */
+export const LOCATION = {
+  city: "Cotonou",
+  country: "Benin",
+  from: "Gabon",
+  timezone: "Africa/Porto-Novo",
+  lat: 6.3654,
+  lon: 2.4183,
+};
 
 export interface Project {
-  id: string;
-  tags: Tag[];
-  github?: string;
-  demo?: string;
-  preview: "jobportal" | "kanban" | "crypto" | "desktop" | "auction" | "arduino" | "itaja";
+  id: "makisend" | "linkedin-scheduler" | "contrasto";
+  stack: string[];
+  repo?: string;
+  site?: string;
+  /** Shown on the home page as a case study; the rest only on /projects. */
+  featured: boolean;
 }
 
 export const PROJECTS: Project[] = [
   {
-    id: "itaja",
-    tags: [
-      { name: "TypeScript", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" },
-      { name: "REST APIs" },
-      { name: "Fintech" },
-    ],
-    demo: "https://getitaja.com",
-    preview: "itaja",
+    id: "makisend",
+    stack: ["Cloudflare Workers", "Workflows", "D1", "Queues", "TypeScript"],
+    repo: "https://github.com/lixalistudio-oss/makisend",
+    site: "https://makisend.lixalistudio.tech",
+    featured: true,
   },
   {
-    id: "auction",
-    tags: [
-      { name: "Next JS", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg" },
-      { name: "Tailwind CSS", icon: "https://cdn.simpleicons.org/tailwindcss" },
-         { name: "TypeScript", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" },
-    ],
-    github: "https://github.com/alpha1207vj/CHECKERCONTRASTOWCAG",
-    demo: "https://codja.vercel.app",
-    preview: "auction",
+    id: "linkedin-scheduler",
+    stack: ["Python", "LinkedIn API", "cron", "Node.js", "HTML"],
+    repo: "https://github.com/cjdotdev/linkedin-scheduler",
+    site: "https://linkedin-scheduler.makisend-poc.workers.dev",
+    featured: true,
   },
   {
-  id: "arduino",
-  tags: [
-    { name: "Next.js", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg" },
-    { name: "TypeScript", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" },
-    { name: "Tailwind CSS", icon: "https://cdn.simpleicons.org/tailwindcss" },
-  ],
-  github: "https://github.com/alpha1207vj/MYPORTFOLIO",
- 
-  preview: "arduino",
-},
+    id: "contrasto",
+    stack: ["Next.js", "TypeScript"],
+    repo: "https://github.com/alpha1207vj/CHECKERCONTRASTOWCAG",
+    site: "https://codja.vercel.app",
+    featured: false,
+  },
 ];
 
 export interface Experience {
-  id: string;
+  id: "lixali";
   company: string;
-  site?: string;
+  site: string;
+  /** ISO month, formatted per locale. */
   start: string;
   end?: string;
-  current?: boolean;
 }
 
 export const EXPERIENCE: Experience[] = [
-  {
-    id: "lixali",
-    company: "Lixali Studio",
-    site: "https://lixalistudio.tech",
-    start: "Apr 2026",
-    current: true,
-  },
+  { id: "lixali", company: "Lixali Studio", site: "https://lixalistudio.tech", start: "2026-04" },
 ];
-
-export interface Post {
-  title: string;
-  tag: string;
-  date: string;
-  href: string;
-}
-
-export const POSTS: Post[] = [];

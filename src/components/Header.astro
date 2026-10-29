@@ -1,0 +1,431 @@
+---
+import Mark from "./Mark.astro";
+import { localePath, type Dict, type Locale } from "../i18n";
+import { PERSONAL } from "../data";
+
+interface Props {
+  t: Dict;
+  locale: Locale;
+  current: "home" | "work" | "writing";
+  switchHref: string;
+}
+
+const { t, locale, current, switchHref } = Astro.props;
+const home = localePath(locale, "/");
+const links = [
+  { id: "work", label: t.nav.work, href: localePath(locale, "/projects/") },
+  { id: "writing", label: t.nav.writing, href: localePath(locale, "/blog/") },
+  { id: "contact", label: t.nav.contact, href: `${home}#contact` },
+];
+const otherLocale = locale === "fr" ? "en" : "fr";
+const otherName = locale === "fr" ? "English" : "Français";
+---
+
+<!--
+  Built like makisend.lixalistudio.tech's header (Arc site-header): a 64px sticky bar that takes the
+  page background and a hairline once the page scrolls; under 760px the links fold into a sheet that
+  drops from the bar, with a scrim behind it and the language and theme as two actions at its foot.
+-->
+<header class="header" data-header>
+  <div class="bar container">
+    <a class="brand" href={home} aria-label={t.nav.home} aria-current={current === "home" ? "page" : undefined}>
+      <Mark size={26} class="mark" />
+      <span class:list={["brand-name", { "on-home": current === "home" }]}>{PERSONAL.name}</span>
+    </a>
+
+    <nav class="nav" aria-label={t.nav.label}>
+      <ul role="list">
+        {
+          links.map((link) => (
+            <li>
+              <a href={link.href} aria-current={link.id === current ? "page" : undefined}>
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="actions">
+      <a class="pill wide" href={switchHref} hreflang={otherLocale} lang={otherLocale} aria-label={t.nav.switchTo}>
+        {t.nav.switchShort}
+      </a>
+      <button type="button" class="pill icon wide" data-theme-toggle aria-label={t.theme.toDark} data-to-dark={t.theme.toDark} data-to-light={t.theme.toLight}>
+        <svg class="sun" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+          <circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.75"></circle>
+          <path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"></path>
+        </svg>
+        <svg class="moon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+          <path d="M20.3 14.6A8.5 8.5 0 0 1 9.4 3.7a8.5 8.5 0 1 0 10.9 10.9Z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"></path>
+        </svg>
+      </button>
+      <button type="button" class="menu" data-menu-button aria-expanded="false" aria-controls="site-sheet" aria-label={t.nav.menu}>
+        <span class="burger" aria-hidden="true"><span></span><span></span></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="scrim" data-menu-scrim hidden></div>
+  <div class="sheet" id="site-sheet" data-menu-sheet hidden>
+    <div class="sheet-inner">
+      <ul role="list">
+        {
+          links.map((link) => (
+            <li>
+              <a class="row" href={link.href} aria-current={link.id === current ? "page" : undefined}>
+                {link.label}
+                {link.id === current && <span class="row-dot" aria-hidden="true" />}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <div class="sheet-actions">
+        <a class="action" href={switchHref} hreflang={otherLocale} lang={otherLocale}>{otherName}</a>
+        <button type="button" class="action" data-theme-toggle aria-label={t.theme.toDark} data-to-dark={t.theme.toDark} data-to-light={t.theme.toLight}>
+          <span class="when-light">{t.theme.darkShort}</span>
+          <span class="when-dark">{t.theme.lightShort}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<script>
+  import { resolveTheme, readTheme, setTheme } from "../lib/theme";
+
+  const header = document.querySelector<HTMLElement>("[data-header]");
+
+  // Theme: every toggle shows where it would switch to; switching saves the choice.
+  const toggles = document.querySelectorAll<HTMLButtonElement>("[data-theme-toggle]");
+  const syncToggles = () => {
+    const dark = document.documentElement.dataset.theme === "dark";
+    toggles.forEach((button) => {
+      button.setAttribute("aria-label", (dark ? button.dataset.toLight : button.dataset.toDark) ?? "");
+      button.setAttribute("aria-pressed", String(dark));
+    });
+  };
+  syncToggles();
+  toggles.forEach((button) =>
+    button.addEventListener("click", () => {
+      setTheme(resolveTheme(readTheme()) === "dark" ? "light" : "dark");
+      syncToggles();
+    }),
+  );
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", syncToggles);
+
+  // Scrolled: the bar takes the page background and a hairline, as on makisend.lixalistudio.tech.
+  const onScroll = () => header?.toggleAttribute("data-scrolled", window.scrollY > 8);
+  onScroll();
+  window.addEventListener("scroll", onScroll, { passive: true });
+
+  // Mobile sheet: opens under the bar, closes on the scrim, Escape, a link, or a wider screen.
+  const button = header?.querySelector<HTMLButtonElement>("[data-menu-button]");
+  const sheet = header?.querySelector<HTMLElement>("[data-menu-sheet]");
+  const scrim = header?.querySelector<HTMLElement>("[data-menu-scrim]");
+  if (header && button && sheet && scrim) {
+    const setOpen = (open: boolean, restoreFocus = false) => {
+      button.setAttribute("aria-expanded", String(open));
+      sheet.hidden = !open;
+      scrim.hidden = !open;
+      header.toggleAttribute("data-open", open);
+      document.documentElement.style.overflow = open ? "hidden" : "";
+      if (open) sheet.querySelector<HTMLElement>("a, button")?.focus();
+      else if (restoreFocus) button.focus();
+    };
+    button.addEventListener("click", () => setOpen(button.getAttribute("aria-expanded") !== "true"));
+    scrim.addEventListener("click", () => setOpen(false));
+    sheet.querySelectorAll("a").forEach((link) => link.addEventListener("click", () => setOpen(false)));
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !sheet.hidden) setOpen(false, true);
+    });
+    window.matchMedia("(min-width: 47.5rem)").addEventListener("change", (event) => event.matches && setOpen(false));
+  }
+</script>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    border-bottom: 1px solid transparent;
+    background: transparent;
+    transition:
+      background-color var(--duration-standard) var(--ease-standard),
+      border-color var(--duration-standard) var(--ease-standard);
+  }
+  .header[data-scrolled],
+  .header[data-open] {
+    border-bottom-color: var(--border);
+    background: var(--background);
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    height: 4rem;
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 2.75rem;
+    font-size: var(--text-base);
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .brand :global(.mark) {
+    flex: none;
+    transition: rotate var(--duration-considered) var(--ease-spring);
+  }
+  .brand:hover :global(.mark) {
+    rotate: -12deg;
+  }
+
+  .nav {
+    margin-left: auto;
+  }
+  .nav ul {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+  .nav a {
+    display: inline-flex;
+    align-items: center;
+    height: 2.25rem;
+    padding: 0 var(--space-3);
+    border-radius: 12px;
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    text-decoration: none;
+    transition:
+      color var(--duration-fast) var(--ease-standard),
+      background-color var(--duration-fast) var(--ease-standard);
+  }
+  .nav a:hover {
+    background: var(--surface-muted);
+    color: var(--foreground);
+  }
+  .nav a[aria-current="page"] {
+    background: var(--accent-subtle);
+    color: var(--accent-strong);
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-left: var(--space-2);
+  }
+  .pill {
+    display: inline-grid;
+    place-items: center;
+    min-width: 2.25rem;
+    height: 2.25rem;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      color var(--duration-fast) var(--ease-standard),
+      border-color var(--duration-fast) var(--ease-standard);
+  }
+  .pill:hover {
+    border-color: var(--border-strong);
+    color: var(--foreground);
+  }
+  .icon {
+    padding: 0;
+  }
+  .icon svg {
+    grid-area: 1 / 1;
+    transition:
+      opacity var(--duration-standard) var(--ease-standard),
+      rotate var(--duration-considered) var(--ease-enter);
+  }
+  /* The icon shows where the switch goes: the moon in light mode, the sun in dark mode. */
+  .sun {
+    opacity: 0;
+    rotate: -90deg;
+  }
+  :global(:root[data-theme="dark"]) .sun {
+    opacity: 1;
+    rotate: 0deg;
+  }
+  :global(:root[data-theme="dark"]) .moon {
+    opacity: 0;
+    rotate: 90deg;
+  }
+
+  /* Menu button: two lines that cross into an X. */
+  .menu {
+    display: none;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-right: calc(var(--space-2) * -1);
+    border: 0;
+    border-radius: 12px;
+    background: none;
+    color: var(--foreground);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .menu:active {
+    background: var(--surface-muted);
+  }
+  .burger {
+    position: relative;
+    width: 18px;
+    height: 10px;
+  }
+  .burger span {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 1.5px;
+    border-radius: 2px;
+    background: currentColor;
+    transition:
+      top var(--duration-standard) var(--ease-standard),
+      rotate var(--duration-standard) var(--ease-standard);
+  }
+  .burger span:first-child {
+    top: 0;
+  }
+  .burger span:last-child {
+    top: calc(100% - 1.5px);
+  }
+  [aria-expanded="true"] .burger span {
+    top: calc(50% - 0.75px);
+  }
+  [aria-expanded="true"] .burger span:first-child {
+    rotate: 45deg;
+  }
+  [aria-expanded="true"] .burger span:last-child {
+    rotate: -45deg;
+  }
+
+  /* Sheet: drops from the bar and pushes nothing; the scrim closes it. */
+  .scrim {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    left: 0;
+    height: 100dvh;
+    background: rgb(0 0 0 / 0.16);
+  }
+  .sheet {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    left: 0;
+    border-bottom: 1px solid var(--border);
+    background: var(--background);
+  }
+  .sheet-inner {
+    max-height: calc(100dvh - 4rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: var(--space-2) var(--gutter) var(--space-5);
+  }
+  .sheet li {
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 3.25rem;
+    padding: 0 var(--space-1);
+    font-size: var(--text-base);
+    font-weight: 500;
+    text-decoration: none;
+  }
+  .row-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: var(--radius-pill);
+    background: var(--accent);
+  }
+  .sheet-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2);
+    margin-top: var(--space-5);
+  }
+  .action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--control-height-md);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-control);
+    background: none;
+    color: var(--foreground);
+    font: inherit;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .when-dark,
+  :global(:root[data-theme="dark"]) .when-light {
+    display: none;
+  }
+  :global(:root[data-theme="dark"]) .when-dark {
+    display: inline;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .sheet:not([hidden]) {
+      animation: drop var(--duration-standard) var(--ease-enter);
+    }
+    .scrim:not([hidden]) {
+      animation: fade var(--duration-standard) var(--ease-standard);
+    }
+  }
+  @keyframes drop {
+    from {
+      opacity: 0;
+      translate: 0 -8px;
+    }
+  }
+  @keyframes fade {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @media (max-width: 47.49rem) {
+    .nav,
+    .wide {
+      display: none;
+    }
+    .menu {
+      display: grid;
+    }
+    .actions {
+      margin-left: auto;
+    }
+    /* On the home page the hero's name lockup says "Joel Codja" right below: the mark is enough. */
+    .on-home {
+      display: none;
+    }
+  }
+  @media (min-width: 47.5rem) {
+    .sheet,
+    .scrim {
+      display: none;
+    }
+  }
+</style>

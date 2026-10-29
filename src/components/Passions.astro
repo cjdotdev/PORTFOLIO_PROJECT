@@ -1,0 +1,723 @@
+---
+import { GAMES, MATCHES, ROSTER, SONGS, WRESTLERS, wrestlerPhoto } from "../data/passions";
+import type { Dict } from "../i18n";
+
+interface Props {
+  t: Dict;
+}
+
+const { t } = Astro.props;
+const p = t.passions;
+const w = p.wrestling;
+const kojima = WRESTLERS.kojima;
+const credited = Object.values(WRESTLERS);
+const roster = ROSTER.map((id) => WRESTLERS[id]);
+---
+
+<section class="passions" id="off-the-clock" aria-labelledby="passions-title">
+  <div class="container head reveal">
+    <h2 id="passions-title" class="display">{p.title}</h2>
+    <p class="lede">{p.lede}</p>
+  </div>
+
+  <!-- The ring: a night band that carries the wrestling, like Itaja's "How it works". -->
+  <div class="ring">
+    <div class="container">
+      <div class="story">
+        <div class="story-text">
+          <h3 class="ring-title">{w.title}</h3>
+          <p class="ring-lede">{w.body}</p>
+          <p class="kojima-line">{w.kojima}</p>
+        </div>
+        <figure class="kojima">
+          <img src={wrestlerPhoto(kojima.id)} alt={kojima.name} width="720" height="900" loading="lazy" decoding="async" />
+          <figcaption><span class="dot" aria-hidden="true"></span>{w.kojimaCaption}</figcaption>
+        </figure>
+      </div>
+
+      <!-- G1 Climax: the year counter and the match list stay pinned while the face-offs scroll by. -->
+      <div class="g1" data-g1>
+        <div class="rail">
+          <p class="label">{w.g1}</p>
+          <p class="year" aria-hidden="true"><span data-year>{MATCHES[0].year}</span></p>
+          <p class="label sub">{w.matchesLabel}</p>
+          <ol class="steps" role="list">
+            {
+              MATCHES.map((match, index) => (
+                <li data-step-index={index} aria-current={index === 0 ? "step" : undefined}>
+                  <span class="step-n">{String(index + 1).padStart(2, "0")}</span>
+                  <span class="step-name">
+                    {WRESTLERS[match.left].name.split(" ").at(-1)} {w.vs} {WRESTLERS[match.right].name.split(" ").at(-1)}
+                  </span>
+                  <span class="step-year">{match.year}</span>
+                </li>
+              ))
+            }
+          </ol>
+        </div>
+
+        <ol class="bouts" role="list">
+          {
+            MATCHES.map((match, index) => {
+              const left = WRESTLERS[match.left];
+              const right = WRESTLERS[match.right];
+              return (
+                <li class="bout" data-bout={index} data-year={match.year}>
+                  <p class="bout-meta">
+                    {match.edition}
+                    {match.final && <> · {w.final}</>} · {match.year}
+                  </p>
+                  <h4 class="bout-title">
+                    {left.name} <span class="vs">{w.vs}</span> {right.name}
+                  </h4>
+                  <div class="faceoff">
+                    <img src={wrestlerPhoto(left.id)} alt={left.name} width="480" height="600" loading="lazy" decoding="async" />
+                    <span class="faceoff-vs" aria-hidden="true">VS</span>
+                    <img src={wrestlerPhoto(right.id)} alt={right.name} width="480" height="600" loading="lazy" decoding="async" />
+                  </div>
+                  <p class="bout-note">{w.notes[match.note]}</p>
+                </li>
+              );
+            })
+          }
+        </ol>
+      </div>
+    </div>
+
+    <!-- Roster: 25 names on a strip that keeps moving; it stops under the pointer or keyboard focus. -->
+    <div class="roster">
+      <h3 class="ring-sub container">{w.roster}</h3>
+      <div class="marquee">
+        <div class="track">
+          {
+            [0, 1].map((copy) => (
+              <ul role="list" class="lineup" aria-hidden={copy === 1 ? "true" : undefined}>
+                {roster.map((wrestler) => (
+                  <li>
+                    <img src={wrestlerPhoto(wrestler.id)} alt="" width="400" height="500" loading="lazy" decoding="async" />
+                    <span>{wrestler.name}</span>
+                  </li>
+                ))}
+              </ul>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="games">
+        <h3 class="ring-sub">{p.games.title}</h3>
+        <ul role="list">
+          {
+            GAMES.map((game) => (
+              <li class:list={["game", `game-${game.id}`]}>
+                <a href={game.url} target="_blank" rel="noopener noreferrer">
+                  <span class="game-art" aria-hidden="true">
+                    {game.id === "fpww" ? (
+                      <>
+                        <img class="game-bg" src="/img/games/fpww-ring-v1.webp" alt="" width="1100" height="355" loading="lazy" decoding="async" />
+                        <img class="game-logo" src="/img/games/fpww-logo-v1.webp" alt="" width="560" height="417" loading="lazy" decoding="async" />
+                      </>
+                    ) : (
+                      <img class="game-flyer" src="/img/games/sfa3-flyer-v1.webp" alt="" width="278" height="357" loading="lazy" decoding="async" />
+                    )}
+                  </span>
+                  <span class="game-text">
+                    <span class="game-name">{game.name}</span>
+                    <span class="game-note">{p.games.notes[game.id]}</span>
+                  </span>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="container music reveal">
+    <div class="music-head">
+      <h3 class="display">{p.music.title}</h3>
+      <p class="lede">{p.music.body}</p>
+    </div>
+    <ol class="songs" role="list">
+      {
+        SONGS.map((song) => (
+          <li>
+            <a href={song.url} target="_blank" rel="noopener noreferrer">
+              <img src={song.cover} alt="" width="400" height="400" loading="lazy" decoding="async" />
+              <span class="song-title">{song.title}</span>
+              <span class="song-meta">
+                {song.artist} · {song.album} · {song.year}
+              </span>
+              <span class="song-listen">
+                {p.music.listen}
+                <span class="sr-only">: {song.title}</span>
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+
+    <details class="credits">
+      <summary>{p.credits}</summary>
+      <p>{p.creditsNote}</p>
+      <ul role="list">
+        {
+          credited.map((wrestler) => (
+            <li>
+              <a href={wrestler.credit.source} target="_blank" rel="noopener noreferrer">{wrestler.name}</a>: {wrestler.credit.author},{" "}
+              <a href={wrestler.credit.licenseUrl} target="_blank" rel="noopener noreferrer">{wrestler.credit.license}</a>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="rights">{p.rightsNote}</p>
+    </details>
+  </div>
+</section>
+
+<script>
+  // The pinned rail follows the face-off in the middle of the screen: its year counts to the match's
+  // year and its row lights up. Without JavaScript the rail simply shows the first match.
+  document.querySelectorAll<HTMLElement>("[data-g1]").forEach((root) => {
+    const yearOut = root.querySelector<HTMLElement>("[data-year]")!;
+    const steps = [...root.querySelectorAll<HTMLElement>("[data-step-index]")];
+    const bouts = [...root.querySelectorAll<HTMLElement>("[data-bout]")];
+    const calm = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let shown = Number(yearOut.textContent);
+    let frame = 0;
+
+    function countTo(target: number) {
+      cancelAnimationFrame(frame);
+      if (calm.matches || target === shown) {
+        shown = target;
+        yearOut.textContent = String(target);
+        return;
+      }
+      const from = shown;
+      const start = performance.now();
+      const step = (now: number) => {
+        const k = Math.min(1, (now - start) / 650);
+        const eased = 1 - Math.pow(1 - k, 4);
+        shown = Math.round(from + (target - from) * eased);
+        yearOut.textContent = String(shown);
+        if (k < 1) frame = requestAnimationFrame(step);
+      };
+      frame = requestAnimationFrame(step);
+    }
+
+    function activate(index: number) {
+      steps.forEach((step, i) => (i === index ? step.setAttribute("aria-current", "step") : step.removeAttribute("aria-current")));
+      bouts.forEach((bout, i) => bout.toggleAttribute("data-active", i === index));
+      countTo(Number(bouts[index].dataset.year));
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const hit = entries.filter((entry) => entry.isIntersecting).at(-1);
+        if (hit) activate(Number((hit.target as HTMLElement).dataset.bout));
+      },
+      { rootMargin: "-45% 0px -45% 0px" },
+    );
+    bouts.forEach((bout) => observer.observe(bout));
+    activate(0);
+  });
+</script>
+
+<style>
+  .passions {
+    padding-top: calc(var(--section) * 0.6);
+  }
+  .head {
+    display: grid;
+    gap: var(--space-4);
+    margin-bottom: var(--space-12);
+  }
+
+  /* ─── The ring: a night band, the same in both themes ─── */
+  .ring {
+    --ring-bg: #0f0f0f;
+    --ring-ink: #f3f3f3;
+    --ring-muted: #a3a3a3;
+    --ring-line: #2a2a2a;
+    --ring-accent: #e8916f;
+    padding-block: clamp(4rem, 3rem + 5vw, 7.5rem);
+    background: var(--ring-bg);
+    color: var(--ring-ink);
+  }
+  :global(:root[data-theme="dark"]) .ring {
+    --ring-bg: #111111;
+    border-block: 1px solid var(--ring-line);
+  }
+  .ring-title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 1.3rem + 2.8vw, 3.5rem);
+    font-weight: 500;
+    letter-spacing: var(--tracking-display);
+    line-height: 1.02;
+    text-wrap: balance;
+  }
+  .ring-lede {
+    max-width: 34rem;
+    color: var(--ring-muted);
+    font-size: var(--text-lg);
+    text-wrap: pretty;
+  }
+  .ring-sub {
+    margin-bottom: var(--space-6);
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 1.3rem + 0.6vw, 1.75rem);
+    font-weight: 500;
+    letter-spacing: var(--tracking-display);
+  }
+
+  /* Kojima: the only photo in colour, because the orange is the point. */
+  .story {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
+    gap: var(--space-8) clamp(2rem, 1rem + 5vw, 6rem);
+    align-items: center;
+  }
+  .story-text {
+    display: grid;
+    gap: var(--space-5);
+  }
+  .kojima-line {
+    max-width: 34rem;
+    padding-left: var(--space-4);
+    border-left: 1px solid var(--ring-accent);
+    font-size: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+    line-height: 1.35;
+    text-wrap: pretty;
+  }
+  .kojima {
+    display: grid;
+    gap: var(--space-3);
+  }
+  .kojima img {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-surface);
+  }
+  .kojima figcaption {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--ring-muted);
+    font-size: var(--text-sm);
+  }
+  .dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: var(--radius-pill);
+    background: var(--ring-accent);
+  }
+
+  /* ─── G1 Climax: pinned rail + scrolling face-offs ─── */
+  .g1 {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: var(--space-8) clamp(2rem, 1rem + 5vw, 6rem);
+    margin-top: clamp(5rem, 4rem + 5vw, 9rem);
+  }
+  .rail {
+    position: sticky;
+    top: 6rem;
+    align-self: start;
+    display: grid;
+    gap: var(--space-3);
+  }
+  .label {
+    color: var(--ring-accent);
+    font-size: var(--text-sm);
+    font-weight: 500;
+  }
+  .label.sub {
+    margin-top: var(--space-6);
+    color: var(--ring-muted);
+  }
+  .year {
+    font-family: var(--font-display);
+    font-size: clamp(5rem, 3rem + 7vw, 9.5rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 0.9;
+    font-variant-numeric: tabular-nums;
+  }
+  .steps {
+    border-top: 1px solid var(--ring-line);
+  }
+  .steps li {
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: var(--space-3);
+    padding-block: var(--space-3);
+    border-bottom: 1px solid var(--ring-line);
+    color: var(--ring-muted);
+    font-size: var(--text-sm);
+    transition: color var(--duration-standard) var(--ease-standard);
+  }
+  .steps li[aria-current] {
+    color: var(--ring-ink);
+  }
+  .steps li[aria-current] .step-n {
+    color: var(--ring-accent);
+  }
+  .step-n,
+  .step-year {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .step-name {
+    font-weight: 500;
+  }
+  .bouts {
+    display: grid;
+  }
+  .bout {
+    display: grid;
+    align-content: center;
+    gap: var(--space-4);
+    min-height: 78vh;
+    padding-block: var(--space-12);
+    opacity: 0.35;
+    transition: opacity var(--duration-considered) var(--ease-standard);
+  }
+  .bout[data-active] {
+    opacity: 1;
+  }
+  .bout-meta {
+    color: var(--ring-accent);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+  }
+  .bout-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 1.2rem + 1.8vw, 2.5rem);
+    font-weight: 500;
+    letter-spacing: var(--tracking-display);
+    line-height: 1.05;
+    text-wrap: balance;
+  }
+  .vs {
+    color: var(--ring-muted);
+    font-weight: 400;
+  }
+  .faceoff {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+  }
+  .faceoff img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    border-radius: var(--radius-panel);
+    filter: grayscale(1) contrast(1.05);
+    transition: filter var(--duration-considered) var(--ease-standard);
+  }
+  .bout[data-active] .faceoff img {
+    filter: grayscale(0.15);
+  }
+  .faceoff-vs {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    translate: -50% -50%;
+    border: 4px solid var(--ring-bg);
+    border-radius: var(--radius-pill);
+    background: var(--ring-accent);
+    color: #1b0d07;
+    font-family: var(--font-display);
+    font-size: var(--text-base);
+    font-weight: 600;
+  }
+  .bout-note {
+    max-width: 30rem;
+    color: var(--ring-muted);
+    font-size: var(--text-lg);
+  }
+
+  /* ─── Roster marquee ─── */
+  .roster {
+    margin-top: clamp(4rem, 3rem + 4vw, 7rem);
+  }
+  .marquee {
+    overflow: hidden;
+    mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  }
+  .track {
+    display: flex;
+    width: max-content;
+  }
+  .lineup {
+    display: flex;
+    gap: var(--space-3);
+    padding-right: var(--space-3);
+  }
+  .lineup li {
+    display: grid;
+    gap: var(--space-2);
+    width: clamp(8.5rem, 7rem + 4vw, 11rem);
+    font-size: var(--text-sm);
+    font-weight: 500;
+  }
+  .lineup img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    border-radius: 18px;
+    filter: grayscale(1);
+    transition:
+      filter var(--duration-considered) var(--ease-standard),
+      translate var(--duration-standard) var(--ease-enter);
+  }
+  /* Kojima opens the strip, and he stays in colour there too. */
+  .lineup li:first-child img {
+    filter: none;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .lineup li:hover img {
+      filter: grayscale(0);
+      translate: 0 -4px;
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .track {
+      animation: roll 80s linear infinite;
+    }
+    .marquee:hover .track,
+    .marquee:focus-within .track {
+      animation-play-state: paused;
+    }
+  }
+  @keyframes roll {
+    to {
+      translate: -50% 0;
+    }
+  }
+  /* Without motion the strip becomes a list you scroll yourself, and the copy disappears. */
+  @media (prefers-reduced-motion: reduce) {
+    .marquee {
+      overflow-x: auto;
+      mask-image: none;
+      padding-inline: var(--gutter);
+      scroll-snap-type: x mandatory;
+    }
+    .lineup li {
+      scroll-snap-align: start;
+    }
+    .lineup[aria-hidden] {
+      display: none;
+    }
+  }
+
+  /* ─── Games ─── */
+  .games {
+    margin-top: clamp(4rem, 3rem + 4vw, 7rem);
+  }
+  .games ul {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+  .game a {
+    display: grid;
+    height: 100%;
+    overflow: hidden;
+    border: 1px solid var(--ring-line);
+    border-radius: var(--radius-surface);
+    color: inherit;
+    text-decoration: none;
+    transition: border-color var(--duration-standard) var(--ease-standard);
+  }
+  .game a:hover {
+    border-color: #4a4a4a;
+  }
+  .game-art {
+    position: relative;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: #060606;
+  }
+  .game-art > * {
+    grid-area: 1 / 1;
+  }
+  .game-bg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.85;
+  }
+  .game-logo {
+    position: relative;
+    width: min(70%, 22rem);
+    height: auto;
+    filter: drop-shadow(0 8px 20px rgb(0 0 0 / 0.5));
+    transition: scale var(--duration-considered) var(--ease-enter);
+  }
+  .game-flyer {
+    height: 88%;
+    width: auto;
+    border-radius: 6px;
+    box-shadow: 0 12px 30px rgb(0 0 0 / 0.6);
+    rotate: -3deg;
+    transition: rotate var(--duration-considered) var(--ease-enter);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .game a:hover .game-logo {
+      scale: 1.04;
+    }
+    .game a:hover .game-flyer {
+      rotate: 0deg;
+    }
+  }
+  .game-text {
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-5) var(--space-6) var(--space-6);
+  }
+  .game-name {
+    font-family: var(--font-display);
+    font-size: clamp(1.375rem, 1.1rem + 1vw, 1.75rem);
+    font-weight: 500;
+    letter-spacing: var(--tracking-display);
+  }
+  .game-note {
+    color: var(--ring-accent);
+    font-size: var(--text-lg);
+  }
+
+  /* ─── Music, back on the page ground ─── */
+  .music {
+    display: grid;
+    gap: var(--space-8);
+    padding-top: clamp(4rem, 3rem + 4vw, 7rem);
+  }
+  .music-head {
+    display: grid;
+    gap: var(--space-4);
+  }
+  .songs {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+  .songs a {
+    display: grid;
+    gap: var(--space-1);
+    color: inherit;
+    text-decoration: none;
+  }
+  .songs img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    margin-bottom: var(--space-3);
+    border-radius: var(--radius-panel);
+    background: var(--surface-muted);
+    transition: translate var(--duration-standard) var(--ease-enter);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .songs a:hover img {
+      translate: 0 -4px;
+    }
+    .songs a:hover .song-listen {
+      text-decoration-color: currentColor;
+    }
+  }
+  .song-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
+    font-weight: 500;
+    letter-spacing: var(--tracking-display);
+  }
+  .song-meta {
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+  }
+  .song-listen {
+    margin-top: var(--space-2);
+    color: var(--accent);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent);
+    text-underline-offset: 0.22em;
+  }
+  .credits {
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+  }
+  .credits summary {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    cursor: pointer;
+  }
+  .credits ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+    gap: var(--space-1) var(--space-6);
+    margin-block: var(--space-2) var(--space-4);
+  }
+  .credits p {
+    max-width: 52rem;
+    margin-bottom: var(--space-2);
+  }
+  .credits a {
+    color: inherit;
+    text-underline-offset: 0.2em;
+  }
+
+  /* ─── Smaller screens ─── */
+  @media (max-width: 55rem) {
+    .story,
+    .g1 {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .kojima {
+      max-width: 22rem;
+    }
+    /* No pinned rail on a phone: each face-off carries its own year, the counter would only repeat it. */
+    .rail {
+      position: static;
+    }
+    .rail .year,
+    .rail .sub,
+    .rail .steps {
+      display: none;
+    }
+    .bout {
+      min-height: 0;
+      padding-block: var(--space-8);
+      opacity: 1;
+    }
+    .bout .faceoff img {
+      filter: grayscale(0.15);
+    }
+    .songs {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 40rem) {
+    .games ul {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

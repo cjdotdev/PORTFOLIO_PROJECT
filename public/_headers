@@ -1,0 +1,6 @@
+# Cloudflare Pages: fingerprinted and versioned assets never change at the same URL, so browsers and
+# the edge keep them for a year. Bump the -v1 suffix in src/lib/hero-image.ts when an image changes.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+/img/*
+  Cache-Control: public, max-age=31536000, immutable

@@ -1,0 +1,121 @@
+---
+import { PERSONAL } from "../data";
+
+interface Props {
+  /** Rises in on load (hero only). */
+  rise?: boolean;
+  /** The pronunciation sits at the top-right of the letters. */
+  say?: string;
+  /** Decorative repeat (footer): hidden from assistive tech, which already heard the name. */
+  decorative?: boolean;
+}
+
+const { rise = false, say, decorative = false } = Astro.props;
+---
+
+<div class:list={["monument", { rise }]} aria-hidden={decorative ? "true" : undefined}>
+  <p class="word">
+    {PERSONAL.surname.split("").map((letter, index) => <span style={`--i:${index}`}>{letter}</span>)}
+  </p>
+  {
+    say && (
+      <p class="say">
+        <span class="first">{PERSONAL.name.split(" ")[0]}</span>
+        <span class="ipa">{PERSONAL.pronunciation}</span>
+        <span>{say}</span>
+      </p>
+    )
+  }
+</div>
+
+<style>
+  /* The surname spans the container exactly: the font size is a fixed share of the container's
+     inline size (measured for Geist 500 at this tracking), so it never wraps or overflows. */
+  .monument {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    container-type: inline-size;
+  }
+  .word {
+    display: flex;
+    font-family: var(--font-display);
+    font-size: calc(100cqi * 0.32);
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    line-height: 0.74;
+    text-transform: uppercase;
+    white-space: nowrap;
+    /* Optical alignment: Geist's C sits a hair right of the box. */
+    margin-left: -0.035em;
+  }
+  /* The pronunciation annotates the letters from under the baseline, right-aligned on the A, so it
+     never reads as one more line of the portrait caption above. */
+  .say {
+    display: flex;
+    justify-content: end;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+  }
+  .say .ipa {
+    color: var(--foreground);
+    font-weight: 500;
+  }
+  .first {
+    display: none;
+  }
+
+  /* Phone: the name becomes a lockup at the top of the hero. "Joel" and the pronunciation sit on
+     one line above the surname, which runs edge to edge (a 6px margin from the screen), as large as
+     one line allows, so it reads as a name and not as stray letters. */
+  @media (max-width: 47.99rem) {
+    .monument {
+      margin-inline: calc(var(--gutter) * -1 + 0.375rem);
+    }
+    .say {
+      order: -1;
+      align-items: baseline;
+      margin: 0 0 var(--space-2);
+      padding-inline: calc(var(--gutter) - 0.375rem);
+    }
+    .first {
+      display: inline;
+      margin-right: auto;
+      color: var(--foreground);
+      font-family: var(--font-display);
+      font-size: var(--text-xl);
+      font-weight: 500;
+      letter-spacing: -0.02em;
+    }
+  }
+
+  /* One authored moment: the letters rise out of the baseline in sequence. Visible by default;
+     the animation only runs when motion is welcome. */
+  .word span {
+    display: inline-block;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .word {
+      overflow: clip;
+      overflow-clip-margin: 0.08em;
+    }
+    .rise .word span {
+      animation: rise 1s var(--ease-enter) both;
+      animation-delay: calc(80ms + var(--i) * 70ms);
+    }
+    /* When the opening title plays, the letters rise as its curtains part. */
+    :global(html[data-intro="on"]) .rise .word span {
+      animation-delay: calc(2.85s + var(--i) * 70ms);
+    }
+  }
+  @keyframes rise {
+    from {
+      translate: 0 92%;
+    }
+    to {
+      translate: 0 0;
+    }
+  }
+</style>

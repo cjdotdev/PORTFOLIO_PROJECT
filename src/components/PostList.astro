@@ -1,0 +1,125 @@
+---
+import { PERSONAL } from "../data";
+import type { BlogPost } from "../lib/hashnode";
+import type { Dict, Locale } from "../i18n";
+
+interface Props {
+  posts: BlogPost[];
+  t: Dict;
+  locale: Locale;
+  /** h3 under a section heading on the home page, h2 on /blog. */
+  level?: 2 | 3;
+}
+
+const { posts, t, locale, level = 3 } = Astro.props;
+const format = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+  timeZone: "UTC",
+});
+---
+
+{
+  posts.length > 0 ? (
+    <ol class="posts" role="list">
+      {posts.map((post) => (
+        <li>
+          <time datetime={post.date}>{format.format(new Date(post.date))}</time>
+          <div class="body" lang="en">
+            {/* Literal h2/h3: Astro's scoped styles do not reach a dynamic tag. */}
+            {level === 2 ? (
+              <h2 class="title">
+                <a href={post.url} target="_blank" rel="noopener noreferrer">
+                  {post.title}
+                </a>
+              </h2>
+            ) : (
+              <h3 class="title">
+                <a href={post.url} target="_blank" rel="noopener noreferrer">
+                  {post.title}
+                </a>
+              </h3>
+            )}
+            <p>{post.brief}</p>
+          </div>
+        </li>
+      ))}
+    </ol>
+  ) : (
+    <p class="empty">
+      {t.writing.empty}{" "}
+      <a class="link" href={PERSONAL.hashnode} target="_blank" rel="noopener noreferrer">
+        Hashnode
+      </a>
+    </p>
+  )
+}
+
+<style>
+  .posts {
+    border-top: 1px solid var(--border);
+  }
+  li {
+    position: relative;
+    display: grid;
+    grid-template-columns: 9rem minmax(0, 1fr);
+    gap: var(--space-2) var(--space-8);
+    padding-block: var(--space-6);
+    border-bottom: 1px solid var(--border);
+  }
+  time {
+    padding-top: 0.35em;
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    font-variant-numeric: tabular-nums;
+  }
+  .body {
+    display: grid;
+    gap: var(--space-2);
+    max-width: 44rem;
+  }
+  .title {
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.375rem);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+  /* The whole row is the link's target; the title stays the only link in the tab order. */
+  .title a {
+    text-decoration: none;
+  }
+  .title a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+  li:hover .title a {
+    color: var(--accent);
+  }
+  .title a:focus-visible {
+    outline: none;
+  }
+  li:has(.title a:focus-visible) {
+    outline: 2px solid var(--focus-outline);
+    outline-offset: 4px;
+    border-radius: 6px;
+  }
+  .body p {
+    color: var(--text-secondary);
+    text-wrap: pretty;
+  }
+  .empty {
+    color: var(--text-secondary);
+  }
+  @media (max-width: 40rem) {
+    li {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    time {
+      padding-top: 0;
+    }
+  }
+</style>

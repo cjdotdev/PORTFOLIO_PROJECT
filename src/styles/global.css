@@ -1,324 +1,284 @@
+/*
+ * Arc's foundation first, then the tokens from MakiSend's DESIGN.md, with Joel's terracotta as the
+ * accent instead of MakiSend green. Components read these variables; nothing hardcodes a colour.
+ */
+@import "@fontsource-variable/geist-mono";
+@import "../components/arc/foundation.css";
+
+/* Clash Grotesk (display) and Cabinet Grotesk (text), Indian Type Foundry via Fontshare, ITF Free
+   Font License. Self-hosted in public/fonts so no third-party connection holds up the first paint;
+   Layout.astro preloads the two the first screen needs. */
+@font-face {
+  font-family: "Clash Grotesk";
+  src: url("/fonts/clash-grotesk-500.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Clash Grotesk";
+  src: url("/fonts/clash-grotesk-600.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Cabinet Grotesk";
+  src: url("/fonts/cabinet-grotesk-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Cabinet Grotesk";
+  src: url("/fonts/cabinet-grotesk-500.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Terracotta: white on accent 5.5:1, accent on surface-muted 5.0:1. Muted text passes 4.5:1. */
 :root {
-  --font-geist: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-dm-serif: "DM Serif Display", ui-serif, Georgia, serif;
-  --font-dm-mono: "DM Mono", ui-monospace, SFMono-Regular, monospace;
-
-  /* ── Theme tokens (RGB triplets so Tailwind alpha modifiers work) ── */
-  color-scheme: light;
-  --color-bg: 245 243 238; /* #F5F3EE */
-  --color-surface: 255 255 255; /* #FFFFFF */
-  --color-ink: 26 26 25; /* #1a1a19 */
-  --color-accent: 217 119 87; /* #D97757 */
-  --color-line: 0 0 0; /* neutral border/hairline base */
-  --color-github: 36 41 46; /* #24292e */
-  --track: #f5f3ee;
-  --thumb: #d9d5cc;
-  --heat-empty: #161b22;
+  --text-secondary: #5e5e5e;
+  --text-muted: #6e6e6e;
+  --border: #ebebeb;
+  --border-subtle: #f4f4f4;
+  --border-strong: #c7c7c7;
+  --accent: #ae4b2b;
+  --accent-strong: #8a3a1f;
+  --accent-subtle: #f8ebe5;
+  --accent-foreground: #ffffff;
+  --control-on: #151515;
+  --primary: #151515;
+  --primary-foreground: #ffffff;
+  --success: #0f7a3f;
+  --danger: #c4282e;
+  --font-mono: "Geist Mono Variable", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --font-display: "Clash Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Cabinet Grotesk", ui-sans-serif, system-ui, sans-serif;
+  /* Clash is drawn tight and Cabinet has a small x-height: looser display tracking than Geist's
+     -0.03em, neutral body tracking, and a 17px body. */
+  --tracking-display: -0.012em;
+  --tracking-body: 0;
+  --focus-outline: var(--accent);
+  --page-max: 75rem;
+  --gutter: clamp(1rem, 0.6rem + 1.6vw, 2rem);
+  --section: clamp(4rem, 2.5rem + 6vw, 7.5rem);
+}
+:root[data-theme="dark"] {
+  --background: #1b1b1b;
+  --surface: #222222;
+  --surface-muted: #2c2c2c;
+  --foreground: #f3f3f3;
+  --text-secondary: #b9b9b9;
+  --text-muted: #a3a3a3;
+  --border: #333333;
+  --border-subtle: #2a2a2a;
+  --border-strong: #4a4a4a;
+  --accent: #e8916f;
+  --accent-strong: #f4b79c;
+  --accent-subtle: rgb(232 145 111 / 0.14);
+  --accent-foreground: #2a1309;
+  --control-on: #f3f3f3;
+  --primary: #f3f3f3;
+  --primary-foreground: #1b1b1b;
 }
 
-[data-theme="dark"] {
-  color-scheme: dark;
-  --color-bg: 22 27 34; /* #161b22 */
-  --color-surface: 36 41 46; /* #24292e */
-  --color-ink: 245 243 238; /* #F5F3EE */
-  --color-accent: 217 119 87; /* #D97757 */
-  --color-line: 245 243 238;
-  --color-github: 22 27 34; /* #161b22 — darker than surface card */
-  --track: #161b22;
-  --thumb: #24292e;
-  --heat-empty: #24292e;
-}
-
-body {
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-/* ── Dot grid backdrop (follows theme: surface bg + accent dots) ── */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  opacity: 0.4;
-  background-color: rgb(var(--color-surface));
-  background-image:
-    radial-gradient(rgb(var(--color-accent)) 1.5px, transparent 1.5px),
-    radial-gradient(rgb(var(--color-accent)) 1.5px, rgb(var(--color-surface)) 1.5px);
-  background-size: 20px 20px;
-  background-position: 0 0, 10px 10px;
-}
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-/* Add this — prevents any child from causing horizontal scroll */
 html {
-  overflow-x: hidden;
- 
-}
-/* ── Loader ───────────────────────────────────────── */
-.loadingspinner {
-  --square: 26px;
-  --offset: 30px;
-  --duration: 2.4s;
-  --delay: 0.2s;
-  --timing-function: ease-in-out;
-  --in-duration: 0.4s;
-  --in-delay: 0.1s;
-  --in-timing-function: ease-out;
-  width: calc(3 * var(--offset) + var(--square));
-  height: calc(2 * var(--offset) + var(--square));
-  margin: auto;
-  position: relative;
-}
-
-.loadingspinner div {
-  display: inline-block;
-  background: #D97757;
-  border-radius: 2px;
-  width: var(--square);
-  height: var(--square);
-  position: absolute;
-}
-
-.loadingspinner #square1 {
-  left: calc(0 * var(--offset));
-  top: calc(0 * var(--offset));
-  animation: square1 var(--duration) var(--delay) var(--timing-function) infinite,
-             squarefadein var(--in-duration) calc(1 * var(--in-delay)) var(--in-timing-function) both;
-}
-.loadingspinner #square2 {
-  left: calc(0 * var(--offset));
-  top: calc(1 * var(--offset));
-  animation: square2 var(--duration) var(--delay) var(--timing-function) infinite,
-             squarefadein var(--in-duration) calc(1 * var(--in-delay)) var(--in-timing-function) both;
-}
-.loadingspinner #square3 {
-  left: calc(1 * var(--offset));
-  top: calc(1 * var(--offset));
-  animation: square3 var(--duration) var(--delay) var(--timing-function) infinite,
-             squarefadein var(--in-duration) calc(2 * var(--in-delay)) var(--in-timing-function) both;
-}
-.loadingspinner #square4 {
-  left: calc(2 * var(--offset));
-  top: calc(1 * var(--offset));
-  animation: square4 var(--duration) var(--delay) var(--timing-function) infinite,
-             squarefadein var(--in-duration) calc(3 * var(--in-delay)) var(--in-timing-function) both;
-}
-.loadingspinner #square5 {
-  left: calc(3 * var(--offset));
-  top: calc(1 * var(--offset));
-  animation: square5 var(--duration) var(--delay) var(--timing-function) infinite,
-             squarefadein var(--in-duration) calc(4 * var(--in-delay)) var(--in-timing-function) both;
-}
-
-@keyframes square1 {
-  0% { left: calc(0 * var(--offset)); top: calc(0 * var(--offset)); }
-  8.333% { left: calc(0 * var(--offset)); top: calc(1 * var(--offset)); }
-  100% { left: calc(0 * var(--offset)); top: calc(1 * var(--offset)); }
-}
-@keyframes square2 {
-  0% { left: calc(0 * var(--offset)); top: calc(1 * var(--offset)); }
-  8.333% { left: calc(0 * var(--offset)); top: calc(2 * var(--offset)); }
-  16.67% { left: calc(1 * var(--offset)); top: calc(2 * var(--offset)); }
-  25% { left: calc(1 * var(--offset)); top: calc(1 * var(--offset)); }
-  83.33% { left: calc(1 * var(--offset)); top: calc(1 * var(--offset)); }
-  91.67% { left: calc(1 * var(--offset)); top: calc(0 * var(--offset)); }
-  100% { left: calc(0 * var(--offset)); top: calc(0 * var(--offset)); }
-}
-@keyframes square3 {
-  0%, 100% { left: calc(1 * var(--offset)); top: calc(1 * var(--offset)); }
-  16.67% { left: calc(1 * var(--offset)); top: calc(1 * var(--offset)); }
-  25% { left: calc(1 * var(--offset)); top: calc(0 * var(--offset)); }
-  33.33% { left: calc(2 * var(--offset)); top: calc(0 * var(--offset)); }
-  41.67% { left: calc(2 * var(--offset)); top: calc(1 * var(--offset)); }
-  66.67% { left: calc(2 * var(--offset)); top: calc(1 * var(--offset)); }
-  75% { left: calc(2 * var(--offset)); top: calc(2 * var(--offset)); }
-  83.33% { left: calc(1 * var(--offset)); top: calc(2 * var(--offset)); }
-  91.67% { left: calc(1 * var(--offset)); top: calc(1 * var(--offset)); }
-}
-@keyframes square4 {
-  0% { left: calc(2 * var(--offset)); top: calc(1 * var(--offset)); }
-  33.33% { left: calc(2 * var(--offset)); top: calc(1 * var(--offset)); }
-  41.67% { left: calc(2 * var(--offset)); top: calc(2 * var(--offset)); }
-  50% { left: calc(3 * var(--offset)); top: calc(2 * var(--offset)); }
-  58.33% { left: calc(3 * var(--offset)); top: calc(1 * var(--offset)); }
-  100% { left: calc(3 * var(--offset)); top: calc(1 * var(--offset)); }
-}
-@keyframes square5 {
-  0% { left: calc(3 * var(--offset)); top: calc(1 * var(--offset)); }
-  50% { left: calc(3 * var(--offset)); top: calc(1 * var(--offset)); }
-  58.33% { left: calc(3 * var(--offset)); top: calc(0 * var(--offset)); }
-  66.67% { left: calc(2 * var(--offset)); top: calc(0 * var(--offset)); }
-  75% { left: calc(2 * var(--offset)); top: calc(1 * var(--offset)); }
-  100% { left: calc(2 * var(--offset)); top: calc(1 * var(--offset)); }
-}
-@keyframes squarefadein {
-  0% { transform: scale(0.75); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
-}
-@keyframes tooltipIn {
-  from { opacity: 0; transform: translateX(-50%) translateY(4px); }
-  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
-}
-
-/* ── SVG stroke loader (CJ) ───────────────────────── */
-.loader {
-  display: flex;
-  align-items: center;
-  position: relative;
-  margin: 0.25em 0;
-}
-
-.loader svg {
-  margin: 0 10px; /* Enhanced spacing to accommodate the bolder lines */
-  width: 64px;
-  height: 64px;
-}
-
-/* Stroke Dash Animations */
-.dash {
-  stroke: #D97757;
-  animation:
-    dashArray 2s ease-in-out infinite,
-    dashOffset 2s linear infinite;
-}
-
-@keyframes dashArray {
-  0% {
-    stroke-dasharray: 0 1 359 0;
-  }
-  50% {
-    stroke-dasharray: 0 359 1 0;
-  }
-  100% {
-    stroke-dasharray: 359 1 0 0;
-  }
-}
-
-@keyframes dashOffset {
-  0% {
-    stroke-dashoffset: 365;
-  }
-  100% {
-    stroke-dashoffset: 5;
-  }
-}
-
-/* ── Scroll behaviour ─────────────────────────────── */
-html {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+  font-size: 100%;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
   scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
 }
-/* ── Custom scrollbar — only for elements with .custom-scroll ── */
-.custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
-.custom-scroll::-webkit-scrollbar-track { background: var(--track); }
-.custom-scroll::-webkit-scrollbar-thumb { background: var(--thumb); border-radius: 3px; }
-/* ── Custom scrollbar ─────────────────────────────── */
-@media (min-width: 769px) {
-  ::-webkit-scrollbar { width: 5px; }
-  ::-webkit-scrollbar-track { background: var(--track); }
-  ::-webkit-scrollbar-thumb { background: var(--thumb); border-radius: 3px; }
+body {
+  margin: 0;
+  font-size: 1.0625rem;
+  min-height: 100dvh;
+  overflow-x: clip;
+}
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+h1,
+h2,
+h3,
+p,
+ul,
+ol,
+dl,
+dd,
+figure {
+  margin: 0;
+}
+ul[role="list"],
+ol[role="list"] {
+  padding: 0;
+  list-style: none;
+}
+a {
+  color: inherit;
 }
 
-@media (max-width: 768px) {
+@media (prefers-reduced-motion: reduce) {
   html {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-  html::-webkit-scrollbar {
-    display: none;
+    scroll-behavior: auto;
   }
 }
-/* ── Text selection ───────────────────────────────── */
-::selection { background: rgba(217, 119, 87, 0.25); }
 
-/* ── Scroll-reveal utility ────────────────────────── */
-.reveal {
-  opacity: 0;
-  transform: translateY(22px);
-  transition: opacity 0.65s ease, transform 0.65s ease;
+/* The parts no component draws still carry the palette. */
+::selection {
+  background: var(--accent);
+  color: var(--accent-foreground);
 }
-.reveal.visible {
-  opacity: 1;
-  transform: none;
+:focus-visible {
+  outline: 2px solid var(--focus-outline);
+  outline-offset: 3px;
+  border-radius: 6px;
 }
-
-/* ── Tech-pill icon size ──────────────────────────── */
-.tech-pill-icon {
-  width: 14px;
-  height: 14px;
-  object-fit: contain;
-  flex-shrink: 0;
+:root {
+  accent-color: var(--accent);
+  caret-color: var(--accent);
+  scrollbar-color: var(--border-strong) transparent;
 }
 
-/* ── Contribution heatmap cells ───────────────────── */
-.cc {
-  width: 10px;
-  height: 10px;
-  border-radius: 2px;
-  background: var(--thumb);
-  flex-shrink: 0;
-}
-.cc.l1 { background: #7c3312; }
-.cc.l2 { background: #c2501a; }
-.cc.l3 { background: #f07030; }
-.cc.l4 { background: #D97757; }
+/* ─── Shared building blocks ─────────────────────────────────────── */
 
-/* ── Bottom nav active state ──────────────────────── */
-.bottom-nav-link { color: #9090a8; transition: color 0.2s; }
-.bottom-nav-link:hover,
-.bottom-nav-link.active { color: #D97757; }
-
-/* ── Post item hover ──────────────────────────────── */
-/* ── Project card hover ───────────────────────────── */
-.project-card {
-  transition: border-color 0.2s, transform 0.2s;
+.container {
+  width: 100%;
+  max-width: var(--page-max);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+  box-sizing: border-box;
 }
-.project-card:hover {
-  border-color: rgba(217, 119, 87, 0.22);
-  transform: translateY(-2px);
+/* Two neighbouring sections add their paddings: each carries 0.6 so the gap between them is 1.2. */
+.section {
+  padding-block: calc(var(--section) * 0.6);
 }
 
-/* ── Modal backdrop ───────────────────────────────── */
-.modal-backdrop {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(4px);
+/* DESIGN.md display-md / display-lg, Geist 500. */
+.display {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 1.2rem + 1.8vw, 2.25rem);
+  font-weight: 500;
+  letter-spacing: var(--tracking-display);
+  line-height: var(--leading-display);
+  text-wrap: balance;
+}
+.display-lg {
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 1.4rem + 2.6vw, 3.25rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  text-wrap: balance;
+}
+.lede {
+  max-width: 38rem;
+  color: var(--text-secondary);
+  font-size: var(--text-lg);
+  line-height: var(--leading-body);
+  text-wrap: pretty;
+}
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  letter-spacing: 0;
+  line-height: 1.6;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Links: terracotta, underlined on a soft offset. */
+.link {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+  transition: text-decoration-color var(--duration-fast) var(--ease-standard);
+}
+.link:hover {
+  text-decoration-color: currentColor;
+}
+
+/* Buttons: one near-black primary per surface, the rest bordered. 44px, 18px corners. */
+.btn {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--control-height-md);
+  padding: 0 var(--space-5);
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard),
+    transform var(--duration-instant) var(--ease-standard);
 }
-.modal-backdrop.open {
-  display: flex;
+.btn:active {
+  transform: scale(0.98);
+}
+.btn-primary {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+.btn-primary:hover {
+  background: color-mix(in srgb, var(--primary) 86%, var(--background));
+}
+.btn-secondary {
+  border-color: var(--border-strong);
+  background: var(--surface);
+  color: var(--foreground);
+}
+.btn-secondary:hover {
+  border-color: var(--foreground);
+}
+.btn[disabled] {
+  cursor: default;
+  opacity: 0.6;
 }
 
-/* Bottom nav must not overlap an open project modal */
-body:has(.project-modal) .bottom-nav {
-  display: none;
-}
-
-/* ── Hero glow blobs ──────────────────────────────── */
-.hero-blob {
+.sr-only {
   position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  pointer-events: none;
-  opacity: 0.18;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
-/* ── Cursor blink in SVG ──────────────────────────── */
-@keyframes svgBlink {
-  0%, 100% { opacity: 0.9; }
-  50% { opacity: 0; }
+/* Sections rise in as they enter, only where the browser can drive it from scroll. Content is
+   visible by default: without support, or with reduced motion, nothing is hidden. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 45%;
+    }
+  }
 }
-.svg-cursor { animation: svgBlink 1.2s ease infinite; }
-
-/* ── LED pulse in Arduino SVG ─────────────────────── */
-@keyframes ledPulse {
-  0%, 100% { opacity: 0.9; }
-  50% { opacity: 0.3; }
+@keyframes reveal {
+  from {
+    opacity: 0;
+    translate: 0 28px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
 }
-.svg-led { animation: ledPulse 0.8s ease infinite; }

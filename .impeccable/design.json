@@ -1,0 +1,499 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-29T00:00:00Z",
+  "title": "Design System: Joel Codja",
+  "extensions": {
+    "colorMeta": {
+      "terracotta": {
+        "role": "primary",
+        "displayName": "Terracotta",
+        "tonalRamp": [
+          "oklch(25% 0.06 40)",
+          "oklch(35% 0.09 40)",
+          "oklch(45% 0.12 40)",
+          "#ae4b2b",
+          "oklch(65% 0.12 40)",
+          "#e8916f",
+          "oklch(85% 0.06 40)",
+          "oklch(95% 0.02 40)"
+        ]
+      },
+      "terracotta-strong": {
+        "role": "primary",
+        "displayName": "Fired Terracotta",
+        "tonalRamp": [
+          "oklch(25% 0.06 40)",
+          "oklch(35% 0.09 40)",
+          "oklch(45% 0.12 40)",
+          "#ae4b2b",
+          "oklch(65% 0.12 40)",
+          "#e8916f",
+          "oklch(85% 0.06 40)",
+          "oklch(95% 0.02 40)"
+        ]
+      },
+      "terracotta-subtle": {
+        "role": "primary",
+        "displayName": "Terracotta Wash",
+        "tonalRamp": [
+          "oklch(25% 0.06 40)",
+          "oklch(35% 0.09 40)",
+          "oklch(45% 0.12 40)",
+          "#ae4b2b",
+          "oklch(65% 0.12 40)",
+          "#e8916f",
+          "oklch(85% 0.06 40)",
+          "oklch(95% 0.02 40)"
+        ]
+      },
+      "terracotta-dark": {
+        "role": "primary",
+        "displayName": "Terracotta (dark mode)",
+        "tonalRamp": [
+          "oklch(25% 0.06 40)",
+          "oklch(35% 0.09 40)",
+          "oklch(45% 0.12 40)",
+          "#ae4b2b",
+          "oklch(65% 0.12 40)",
+          "#e8916f",
+          "oklch(85% 0.06 40)",
+          "oklch(95% 0.02 40)"
+        ]
+      },
+      "terracotta-dark-strong": {
+        "role": "primary",
+        "displayName": "Fired Terracotta (dark mode)",
+        "tonalRamp": [
+          "oklch(25% 0.06 40)",
+          "oklch(35% 0.09 40)",
+          "oklch(45% 0.12 40)",
+          "#ae4b2b",
+          "oklch(65% 0.12 40)",
+          "#e8916f",
+          "oklch(85% 0.06 40)",
+          "oklch(95% 0.02 40)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(23% 0 0)",
+          "oklch(34% 0 0)",
+          "oklch(46% 0 0)",
+          "oklch(59% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(84% 0 0)",
+          "oklch(97.8% 0 0)"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(23% 0 0)",
+          "oklch(34% 0 0)",
+          "oklch(46% 0 0)",
+          "oklch(59% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(84% 0 0)",
+          "oklch(97.8% 0 0)"
+        ]
+      },
+      "paper-muted": {
+        "role": "neutral",
+        "displayName": "Paper Muted",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(23% 0 0)",
+          "oklch(34% 0 0)",
+          "oklch(46% 0 0)",
+          "oklch(59% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(84% 0 0)",
+          "oklch(97.8% 0 0)"
+        ]
+      },
+      "text-secondary": {
+        "role": "neutral",
+        "displayName": "Secondary Grey",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(23% 0 0)",
+          "oklch(34% 0 0)",
+          "oklch(46% 0 0)",
+          "oklch(59% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(84% 0 0)",
+          "oklch(97.8% 0 0)"
+        ]
+      },
+      "text-muted": {
+        "role": "neutral",
+        "displayName": "Muted Grey",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(23% 0 0)",
+          "oklch(34% 0 0)",
+          "oklch(46% 0 0)",
+          "oklch(59% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(84% 0 0)",
+          "oklch(97.8% 0 0)"
+        ]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(23% 0 0)",
+          "oklch(34% 0 0)",
+          "oklch(46% 0 0)",
+          "oklch(59% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(84% 0 0)",
+          "oklch(97.8% 0 0)"
+        ]
+      },
+      "border-subtle": {
+        "role": "neutral",
+        "displayName": "Hairline Subtle",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(23% 0 0)",
+          "oklch(34% 0 0)",
+          "oklch(46% 0 0)",
+          "oklch(59% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(84% 0 0)",
+          "oklch(97.8% 0 0)"
+        ]
+      },
+      "border-strong": {
+        "role": "neutral",
+        "displayName": "Hairline Strong",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(23% 0 0)",
+          "oklch(34% 0 0)",
+          "oklch(46% 0 0)",
+          "oklch(59% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(84% 0 0)",
+          "oklch(97.8% 0 0)"
+        ]
+      },
+      "night-background": {
+        "role": "neutral",
+        "displayName": "Night Page",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(23% 0 0)",
+          "oklch(34% 0 0)",
+          "oklch(46% 0 0)",
+          "oklch(59% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(84% 0 0)",
+          "oklch(97.8% 0 0)"
+        ]
+      },
+      "night-surface": {
+        "role": "neutral",
+        "displayName": "Night Surface",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(23% 0 0)",
+          "oklch(34% 0 0)",
+          "oklch(46% 0 0)",
+          "oklch(59% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(84% 0 0)",
+          "oklch(97.8% 0 0)"
+        ]
+      },
+      "night-surface-muted": {
+        "role": "neutral",
+        "displayName": "Night Muted",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(23% 0 0)",
+          "oklch(34% 0 0)",
+          "oklch(46% 0 0)",
+          "oklch(59% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(84% 0 0)",
+          "oklch(97.8% 0 0)"
+        ]
+      },
+      "night-foreground": {
+        "role": "neutral",
+        "displayName": "Night Ink",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(23% 0 0)",
+          "oklch(34% 0 0)",
+          "oklch(46% 0 0)",
+          "oklch(59% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(84% 0 0)",
+          "oklch(97.8% 0 0)"
+        ]
+      },
+      "night-border": {
+        "role": "neutral",
+        "displayName": "Night Hairline",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(23% 0 0)",
+          "oklch(34% 0 0)",
+          "oklch(46% 0 0)",
+          "oklch(59% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(84% 0 0)",
+          "oklch(97.8% 0 0)"
+        ]
+      },
+      "success": {
+        "role": "status",
+        "displayName": "Sent Green",
+        "tonalRamp": []
+      },
+      "danger": {
+        "role": "status",
+        "displayName": "Error Red",
+        "tonalRamp": []
+      }
+    },
+    "typographyMeta": {
+      "monument": {
+        "displayName": "Monument",
+        "purpose": "The surname CODJA only, full content width."
+      },
+      "display-lg": {
+        "displayName": "Display Large",
+        "purpose": "Hero headline."
+      },
+      "display": {
+        "displayName": "Display",
+        "purpose": "Section headings."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Work item names."
+      },
+      "lede": {
+        "displayName": "Lede",
+        "purpose": "Intro paragraphs."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Reading text."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Nav, buttons, labels, captions."
+      },
+      "mono": {
+        "displayName": "Mono",
+        "purpose": "Request lines and JSON."
+      }
+    },
+    "shadows": [
+      {
+        "name": "map-pin",
+        "value": "0 2px 8px rgb(0 0 0 / 0.25)",
+        "purpose": "Lifts the location pin off the map tiles; the only shadow on the site."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-standard",
+        "value": "cubic-bezier(.22,1,.36,1)",
+        "purpose": "State transitions."
+      },
+      {
+        "name": "ease-enter",
+        "value": "cubic-bezier(.16,1,.3,1)",
+        "purpose": "Entrances: monument rise, JSON lines, footer icon lift."
+      },
+      {
+        "name": "ease-spring",
+        "value": "linear(...) Arc spring",
+        "purpose": "Mark rotation on header hover."
+      },
+      {
+        "name": "duration-instant",
+        "value": "120ms",
+        "purpose": "Button press."
+      },
+      {
+        "name": "duration-fast",
+        "value": "160ms",
+        "purpose": "Colour and border changes."
+      },
+      {
+        "name": "duration-standard",
+        "value": "240ms",
+        "purpose": "Icon swaps, lifts."
+      },
+      {
+        "name": "duration-considered",
+        "value": "480ms",
+        "purpose": "Mark and theme icon rotation."
+      },
+      {
+        "name": "reveal",
+        "value": "view() timeline, entry 0% to 45%, 28px rise",
+        "purpose": "Sections rise in on scroll where supported."
+      },
+      {
+        "name": "ping",
+        "value": "2.4s ease-standard infinite",
+        "purpose": "Live dot and map pin pulse."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "nav-compact",
+        "value": "34rem"
+      },
+      {
+        "name": "form-stack",
+        "value": "40rem"
+      },
+      {
+        "name": "hero-split",
+        "value": "48rem"
+      },
+      {
+        "name": "work-stack",
+        "value": "55rem"
+      },
+      {
+        "name": "board-stack",
+        "value": "60rem"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ink fill, one per surface.",
+      "html": "<button class=\"ds-btn ds-btn-primary\">Get in touch</button>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;min-height:44px;padding:0 20px;border:1px solid transparent;border-radius:var(--radius-control,18px);font:500 0.875rem 'Inter Variable',sans-serif;cursor:pointer;transition:background-color 160ms cubic-bezier(.22,1,.36,1),border-color 160ms,transform 120ms}.ds-btn:active{transform:scale(.98)}.ds-btn:focus-visible{outline:2px solid var(--accent,#ae4b2b);outline-offset:3px}.ds-btn-primary{background:var(--primary,#151515);color:var(--primary-foreground,#fff)}.ds-btn-primary:hover{background:color-mix(in srgb,var(--primary,#151515) 86%,var(--background,#fff))}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Bordered, for every other action.",
+      "html": "<button class=\"ds-btn2\">See the work</button>",
+      "css": ".ds-btn2{display:inline-flex;align-items:center;min-height:44px;padding:0 20px;border:1px solid var(--border-strong,#c7c7c7);border-radius:var(--radius-control,18px);background:var(--surface,#fff);color:var(--foreground,#151515);font:500 0.875rem 'Inter Variable',sans-serif;cursor:pointer;transition:border-color 160ms}.ds-btn2:hover{border-color:var(--foreground,#151515)}.ds-btn2:active{transform:scale(.98)}.ds-btn2:focus-visible{outline:2px solid var(--accent,#ae4b2b);outline-offset:3px}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "44px, 18px corners, terracotta on focus.",
+      "html": "<label class=\"ds-field\"><span>Email</span><input placeholder=\"you@example.com\"></label>",
+      "css": ".ds-field{display:grid;gap:8px;font:500 0.875rem 'Inter Variable',sans-serif}.ds-field input{min-height:44px;padding:12px 16px;border:1px solid var(--border-strong,#c7c7c7);border-radius:18px;background:var(--surface,#fff);color:var(--foreground,#151515);font:400 1rem 'Inter Variable',sans-serif;transition:border-color 160ms}.ds-field input:hover{border-color:var(--text-muted,#6e6e6e)}.ds-field input:focus-visible{border-color:var(--accent,#ae4b2b);outline:2px solid color-mix(in srgb,var(--accent,#ae4b2b) 30%,transparent);outline-offset:0}"
+    },
+    {
+      "name": "Header Navigation",
+      "kind": "nav",
+      "refersTo": "nav-link-current",
+      "description": "Secondary grey links, current page in terracotta wash, bordered pill toggle.",
+      "html": "<nav class=\"ds-nav\"><a href=\"#\" aria-current=\"page\">Home</a><a href=\"#\">Projects</a><a href=\"#\">Blog</a><button class=\"ds-pill\">FR</button></nav>",
+      "css": ".ds-nav{display:flex;align-items:center;gap:4px;font:500 0.875rem 'Inter Variable',sans-serif}.ds-nav a{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;border-radius:18px;color:var(--text-secondary,#5e5e5e);text-decoration:none;transition:color 160ms,background-color 160ms}.ds-nav a:hover{color:var(--foreground,#151515)}.ds-nav a[aria-current=page]{background:var(--accent-subtle,#f8ebe5);color:var(--accent-strong,#8a3a1f)}.ds-pill{min-width:44px;min-height:44px;padding:0 12px;border:1px solid var(--border,#ebebeb);border-radius:9999px;background:transparent;color:var(--text-secondary,#5e5e5e);font:inherit;cursor:pointer}.ds-pill:hover{border-color:var(--border-strong,#c7c7c7);color:var(--foreground,#151515)}"
+    },
+    {
+      "name": "Text Link",
+      "kind": "custom",
+      "description": "Terracotta with soft underline.",
+      "html": "<a class=\"ds-link\" href=\"#\">Read the post</a>",
+      "css": ".ds-link{color:var(--accent,#ae4b2b);text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--accent,#ae4b2b) 35%,transparent);text-decoration-thickness:1px;text-underline-offset:.22em;transition:text-decoration-color 160ms}.ds-link:hover{text-decoration-color:currentColor}"
+    },
+    {
+      "name": "Bordered Surface",
+      "kind": "card",
+      "refersTo": "card-surface",
+      "description": "Flat card: 1px border, 34px corners, no shadow.",
+      "html": "<div class=\"ds-card\"><p class=\"ds-card-t\">Request</p><code>GET /where</code></div>",
+      "css": ".ds-card{padding:24px;border:1px solid var(--border,#ebebeb);border-radius:34px;background:var(--surface,#fff);display:grid;gap:12px}.ds-card-t{margin:0;color:var(--text-secondary,#5e5e5e);font:500 .875rem 'Inter Variable',sans-serif}.ds-card code{font:400 .8125rem/1.6 'Geist Mono Variable',monospace}"
+    },
+    {
+      "name": "Live Dot",
+      "kind": "custom",
+      "description": "Terracotta dot with a slow ring, marks live data.",
+      "html": "<span class=\"ds-live\"></span>",
+      "css": ".ds-live{position:relative;display:inline-block;width:8px;height:8px;border-radius:9999px;background:var(--accent,#ae4b2b)}.ds-live::after{content:'';position:absolute;inset:0;border-radius:inherit;background:inherit;animation:ds-ping 2.4s cubic-bezier(.22,1,.36,1) infinite}@keyframes ds-ping{to{scale:3;opacity:0}}@media (prefers-reduced-motion:reduce){.ds-live::after{animation:none}}"
+    },
+    {
+      "name": "Footer Band",
+      "kind": "custom",
+      "refersTo": "footer-band",
+      "description": "Inverted ink band carrying the name and legal line.",
+      "html": "<footer class=\"ds-band\"><p class=\"ds-band-name\">CODJA</p><p class=\"ds-band-legal\">2026 Joel Codja</p></footer>",
+      "css": ".ds-band{padding:48px 24px 32px;background:var(--primary,#151515);color:var(--primary-foreground,#fff);overflow:clip}.ds-band-name{margin:0;font:500 5rem/.74 'Geist Variable',sans-serif;letter-spacing:-.06em}.ds-band-legal{margin:24px 0 0;color:color-mix(in srgb,var(--primary-foreground,#fff) 72%,var(--primary,#151515));font:400 .875rem 'Inter Variable',sans-serif}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Engineer's Letterhead",
+    "overview": "The site runs on MakiSend's system, pinned by the owner: Arc UI's neutral foundation, Geist for headings, Inter for reading, Geist Mono for data, weights 400 and 500 only, 18/26/34px corners, bordered surfaces without shadow, sentence case. Joel's terracotta replaces MakiSend green as the single accent. Everything is drawn from CSS custom properties; light and dark are two value sets on the same names, switched by `data-theme` on the root.\n\nOn top of that borrowed grammar the site adds a personal layer: the surname set as a full-width monument, the c/J monogram, an ink engraving portrait that sits on the page instead of in a frame, a live location board that shows the backend at work, a once-per-session cinematic title, and an inverted footer band. These additions carry identity; the system around them stays quiet so they read.",
+    "keyCharacteristics": [
+      "Neutral grey paper and ink, one terracotta accent used for links, live dots, focus and current state.",
+      "Geist 500 headings with tight negative tracking, Inter 400 body, no other weights.",
+      "Flat bordered surfaces at 18/26/34px; depth comes from borders and muted fills, not shadows.",
+      "Identity carried by a few authored objects: monument, mark, engraving, location board.",
+      "Motion is purposeful and gated on `prefers-reduced-motion`; content is visible by default."
+    ],
+    "rules": [
+      {
+        "name": "The One Ember Rule",
+        "body": "Terracotta is the only hue. It marks what is live, linked, focused or current; it is never a fill for large surfaces.",
+        "section": "colors"
+      },
+      {
+        "name": "The Token-Only Rule",
+        "body": "Components read custom properties; light and dark differ only in values on `:root[data-theme=\"dark\"]`.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two Weights Rule",
+        "body": "400 and 500 only. Emphasis comes from size and colour, never bold.",
+        "section": "typography"
+      },
+      {
+        "name": "The Sentence Case Rule",
+        "body": "Headings, buttons and labels are sentence case. The monument is the single uppercase setting, because it is a name set as an object.",
+        "section": "typography"
+      },
+      {
+        "name": "The Border Not Shadow Rule",
+        "body": "A container gets a 1px `--border` and a radius. Arc's shadow tokens exist in the foundation but are not used on surfaces.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** take every colour, radius, space and duration from the custom properties in `global.css` and `arc/foundation.css`.",
+      "**Do** keep terracotta (#ae4b2b / #e8916f) to links, live dots, focus and current state.",
+      "**Do** set headings in Geist 500 with negative tracking and body in Inter 400.",
+      "**Do** use 1px borders and 18/26/34px corners for containers.",
+      "**Do** gate every animation on `prefers-reduced-motion: no-preference` and leave content visible without it.",
+      "**Do** keep touch targets at 44px."
+    ],
+    "donts": [
+      "**Don't** use weights other than 400 and 500.",
+      "**Don't** add shadows to cards or panels.",
+      "**Don't** add eyebrows or kicker labels above headings.",
+      "**Don't** use em dashes in copy.",
+      "**Don't** set headings, buttons or labels in all caps; the monument is the only uppercase.",
+      "**Don't** introduce a second accent hue."
+    ]
+  }
+}
