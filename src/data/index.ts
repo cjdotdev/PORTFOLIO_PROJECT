@@ -33,10 +33,13 @@ export const LOCATION = {
 };
 
 export interface Project {
-  id: "makisend" | "linkedin-scheduler" | "contrasto";
+  id: "makisend" | "linkedin-scheduler" | "contrasto" | "zeroknowledge" | "pulse";
   stack: TechId[];
-  /** Month the project shipped, "YYYY-MM". */
+  /** Month the project shipped, "YYYY-MM"; while it has a status, the month it is planned for. */
   delivered: string;
+  /** Not shipped yet: "building" (work under way) or "planned" (next up). Such a project shows a
+      construction face on its card and is left out of /projects until it ships. */
+  status?: "building" | "planned";
   repo?: string;
   site?: string;
   /** The project's own symbol, square (public/projects). */
@@ -86,6 +89,22 @@ export const PROJECTS: Project[] = [
     delivered: "2026-04",
     repo: "https://github.com/cjdotdev/CHECKERCONTRASTOWCAG",
     site: "https://codja.vercel.app",
+  },
+  {
+    id: "zeroknowledge",
+    logo: "/projects/zeroknowledge.svg",
+    stack: ["workers", "hono", "typescript", "webcrypto", "d1", "durable-objects", "r2", "vitest"],
+    status: "building",
+    // TODO(Joel): planned month is a placeholder.
+    delivered: "2027-01",
+  },
+  {
+    // TODO(Joel): a made-up project to fill the deck; replace it with a real one.
+    id: "pulse",
+    logo: "/projects/pulse.svg",
+    stack: ["workers", "hono", "typescript", "d1", "cron", "astro"],
+    status: "planned",
+    delivered: "2027-04",
   },
 ];
 

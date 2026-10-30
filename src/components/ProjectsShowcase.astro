@@ -97,7 +97,7 @@ const index = (i: number) => String(i + 1).padStart(2, "0");
                     <dd class="role">{copy.role}</dd>
                   </div>
                 </dl>
-                <TechList stack={project.stack} label={t.work.stack} />
+                <TechList stack={project.stack} label={t.work.stack} more={t.work.more} less={t.work.less} />
                 <p class="actions">
                   {project.site && (
                     <a class="btn btn-primary" href={project.site} target="_blank" rel="noopener noreferrer">

@@ -17,7 +17,7 @@ const { t } = Astro.props;
 
 <div class="list container">
   {
-    PROJECTS.map((project) => (
+    PROJECTS.filter((project) => !project.status).map((project) => (
       <div class="reveal">
         <WorkItem project={project} t={t} level={2} />
       </div>

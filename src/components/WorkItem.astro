@@ -21,12 +21,13 @@ const copy = t.work.items[project.id];
 const headingId = `work-${project.id}`;
 
 // One shot per theme where the product has both (MakiSend's dashboard), chosen by data-theme.
-const SHOTS: Record<Project["id"], { light: ImageMetadata; dark?: ImageMetadata }> = {
+// Only shipped projects are listed with a screenshot; the ones still under way have none yet.
+const SHOTS: Partial<Record<Project["id"], { light: ImageMetadata; dark?: ImageMetadata }>> = {
   makisend: { light: makisendLight, dark: makisendDark },
   "linkedin-scheduler": { light: scheduler },
   contrasto: { light: contrasto },
 };
-const shot = SHOTS[project.id];
+const shot = SHOTS[project.id]!;
 const sizes = "(min-width: 64rem) 42rem, 100vw";
 ---
 
@@ -58,7 +59,7 @@ const sizes = "(min-width: 64rem) 42rem, 100vw";
       )
     }
     <div class="stack">
-      <TechList stack={project.stack} label={t.work.stack} />
+      <TechList stack={project.stack} label={t.work.stack} more={t.work.more} less={t.work.less} />
     </div>
     <p class="links">
       {

@@ -5,31 +5,66 @@ interface Props {
   stack: TechId[];
   /** Read before the list by screen readers ("Stack"). */
   label: string;
+  /** Phone: the button that shows the rest of a long list, and the one that folds it again. */
+  more: string;
+  less: string;
 }
 
-const { stack, label } = Astro.props;
+const { stack, label, more, less } = Astro.props;
+/** On a phone a longer list shows this many, then "See more". */
+const FIRST = 6;
+const rest = stack.length - FIRST;
 ---
 
-<ul class="tech" role="list" aria-label={label}>
+<div class="tech-list" data-tech-list>
+  <ul class="tech" role="list" aria-label={label}>
+    {
+      stack.map((id, index) => {
+        const tech = TECH[id];
+        return (
+          <li class:list={{ extra: index >= FIRST }}>
+            <svg viewBox={tech.viewBox} fill="currentColor" aria-hidden="true" set:html={tech.body} />
+            <span>{tech.name}</span>
+          </li>
+        );
+      })
+    }
+  </ul>
   {
-    stack.map((id) => {
-      const tech = TECH[id];
-      return (
-        <li>
-          <svg viewBox={tech.viewBox} fill="currentColor" aria-hidden="true" set:html={tech.body} />
-          <span>{tech.name}</span>
-        </li>
-      );
-    })
+    rest > 0 && (
+      <button type="button" class="toggle" aria-expanded="false" data-tech-toggle>
+        <span class="when-closed">
+          {more} (+{rest})
+        </span>
+        <span class="when-open">{less}</span>
+      </button>
+    )
   }
-</ul>
+</div>
+
+<script>
+  // One listener for every list on the page: the button opens and folds its own list.
+  document.addEventListener("click", (event) => {
+    const button = (event.target as Element).closest<HTMLButtonElement>("[data-tech-toggle]");
+    if (!button) return;
+    const open = button.getAttribute("aria-expanded") !== "true";
+    button.setAttribute("aria-expanded", String(open));
+    button.closest("[data-tech-list]")!.toggleAttribute("data-open", open);
+  });
+</script>
 
 <style>
+  .tech-list {
+    display: grid;
+    gap: var(--space-3);
+    justify-items: start;
+  }
   /* Logo and name side by side, in as many columns as the box allows. */
   .tech {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
     gap: var(--space-3) var(--space-4);
+    width: 100%;
   }
   li {
     display: flex;
@@ -48,5 +83,37 @@ const { stack, label } = Astro.props;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+  /* The button only exists for phones; wider screens always show the whole list. */
+  .toggle {
+    display: none;
+  }
+
+  /* Phone: a long list shows its first six, then a button for the rest. */
+  @media (max-width: 39.99rem) {
+    .tech-list:not([data-open]) .extra {
+      display: none;
+    }
+    .toggle {
+      display: inline-flex;
+      align-items: center;
+      min-height: 2.75rem;
+      padding: 0 var(--space-4);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-pill);
+      background: none;
+      color: var(--foreground);
+      font: inherit;
+      font-size: var(--text-sm);
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .when-open,
+    [data-open] .when-closed {
+      display: none;
+    }
+    [data-open] .when-open {
+      display: inline;
+    }
   }
 </style>

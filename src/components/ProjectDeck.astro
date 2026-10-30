@@ -14,7 +14,18 @@ interface Props {
 
 const { t, locale } = Astro.props;
 /** Plain backs under the projects, so the deck has the thickness of a real one. */
-const SPARE = 4;
+const SPARE = 2;
+// Lucide icons (ISC), the set Arc uses, drawn at Arc's 1.75 stroke: a barrier for work under way, a
+// calendar with a clock for what comes next, and the arrow of the "all projects" link.
+const STATUS_ICON = {
+  building:
+    '<rect x="2" y="6" width="20" height="8" rx="1"/><path d="M17 14v7"/><path d="M7 14v7"/><path d="M17 3v3"/><path d="M7 3v3"/><path d="M10 14 2.3 6.3"/><path d="m14 6 7.7 7.7"/><path d="m8 6 8 8"/>',
+  planned:
+    '<path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h5"/><path d="M17.5 17.5 16 16.3V14"/><circle cx="16" cy="16" r="6"/>',
+};
+const ARROW = '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>';
+/** The finished projects whose logos fan out in the "all projects" link. */
+const shipped = PROJECTS.filter((project) => !project.status).slice(0, 3);
 const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
   month: "short",
   year: "numeric",
@@ -26,14 +37,28 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
   <div class="pin">
     <div class="head">
       <h2 id="work-title" class="display">{t.work.title}</h2>
-      <a class="link more" href={localePath(locale, "/projects/")}>{t.work.all}</a>
+      {/* The way to every project: the finished ones' logos overlap in a row, each over the next, and
+          stay put; pointed at, the circle turns terracotta and its arrow runs through. */}
+      <a class="all" href={localePath(locale, "/projects/")}>
+        <span class="all-fan" aria-hidden="true">
+          {shipped.map((project, i) => <img src={project.logo} alt="" width="22" height="22" style={`--i:${i}`} />)}
+        </span>
+        <span class="all-label">{t.work.all}</span>
+        <span class="all-arrow" aria-hidden="true">
+          <svg viewBox="0 0 24 24" set:html={ARROW} />
+          <svg viewBox="0 0 24 24" set:html={ARROW} />
+        </span>
+      </a>
     </div>
 
     <div class="board">
-      {/* A deck lying on a table, seen from above at an angle, so each card reads as a parallelogram.
-          Only the cards move it. The top card lies face up; pressing it brings an engraved hand in, of
-          the same family as the opening title's, that takes it and holds it up, and the next card turns
-          face up. Pressing the drawn card slips it back under the deck. */}
+      {/* Tablet and desktop: a deck lying on a table, seen from above at an angle, so each card reads
+          as a parallelogram. Only the cards move it. The top card lies face up; pressing it brings an
+          engraved hand in, of the same family as the opening title's, that takes it and holds it up,
+          and the next card turns face up. Pressing the drawn card slips it back under the deck.
+          Phone: the same cards stand as a pile under the thumb. A swipe sends the top card round to
+          the back (turning over on the way), the other way brings the last one back to the top, and a
+          tap plays the top card's demo. The panel always shows the top card. */}
       <div class="table" data-table>
         <div class="deck" role="group" aria-label={t.work.deck} data-deck>
           {
@@ -55,8 +80,14 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
                   aria-controls={`panel-${project.id}`}
                   aria-label={`${t.work.draw}: ${name}`}
                 >
-                  <span class="face">
-                    {project.video ? (
+                  <span class:list={["face", { "is-wip": project.status }]}>
+                    {project.status ? (
+                      // Not built yet: a construction face, all CSS, with the project's own icon.
+                      <span class="wip">
+                        <img class="wip-icon" src={project.logo} alt="" width="64" height="64" draggable="false" />
+                        <span class="wip-name">{name}</span>
+                      </span>
+                    ) : project.video ? (
                       <video muted loop playsinline preload="none" poster={project.video.poster} aria-hidden="true">
                         <source src={project.video.src} type="video/webm" />
                       </video>
@@ -70,12 +101,20 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
                         quality={80}
                         loading="lazy"
                         decoding="async"
+                        draggable="false"
                       />
                     )}
                     <span class="label">
-                      <img src={project.logo} alt="" width="20" height="20" />
+                      <img src={project.logo} alt="" width="20" height="20" draggable="false" />
                       {name}
                     </span>
+                    {project.video && <span class="play" aria-hidden="true" />}
+                    {project.status && (
+                      <span class="badge">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" set:html={STATUS_ICON[project.status]} />
+                        {t.work[project.status]}
+                      </span>
+                    )}
                   </span>
                   <CardBack />
                 </button>
@@ -83,11 +122,15 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
             })
           }
         </div>
-        <img class="hand" src="/img/hand-take.webp" alt="" width="1100" height="814" data-hand />
+        {/* Loaded on the first draw only: phones never use it. */}
+        <img class="hand" data-src="/img/hand-take.webp" alt="" width="1100" height="814" data-hand />
       </div>
 
       <div class="side">
-        <p class="hint">{t.work.hint}</p>
+        <p class="hint">
+          <span class="hint-deck">{t.work.hint}</span>
+          <span class="hint-phone">{t.work.hintSwipe}</span>
+        </p>
         <div class="panels" data-panels>
           {
             PROJECTS.map((project) => {
@@ -97,11 +140,17 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
                   <h3 class="name">
                     <img src={project.logo} alt="" width="36" height="36" />
                     {copy.name}
+                    {project.status && (
+                      <span class="badge">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" set:html={STATUS_ICON[project.status]} />
+                        {t.work[project.status]}
+                      </span>
+                    )}
                   </h3>
                   <p class="line">{copy.line}</p>
                   <dl class="meta">
                     <div>
-                      <dt>{t.work.delivered}</dt>
+                      <dt>{project.status ? t.work.due : t.work.delivered}</dt>
                       <dd>
                         <time datetime={project.delivered}>{month.format(new Date(`${project.delivered}-01`))}</time>
                       </dd>
@@ -111,7 +160,7 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
                       <dd class="role">{copy.role}</dd>
                     </div>
                   </dl>
-                  <TechList stack={project.stack} label={t.work.stack} />
+                  <TechList stack={project.stack} label={t.work.stack} more={t.work.more} less={t.work.less} />
                   <p class="actions">
                     {project.site && (
                       <a class="btn btn-primary" href={project.site} target="_blank" rel="noopener noreferrer">
@@ -154,6 +203,7 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
 
   function setup(section: HTMLElement) {
     const table = section.querySelector<HTMLElement>("[data-table]")!;
+    const heading = section.querySelector<HTMLElement>("h2")!;
     const deck = section.querySelector<HTMLElement>("[data-deck]")!;
     const hand = section.querySelector<HTMLImageElement>("[data-hand]")!;
     const cards = [...section.querySelectorAll<HTMLButtonElement>("[data-card]")];
@@ -161,12 +211,16 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
     const panelBox = section.querySelector<HTMLElement>("[data-panels]")!;
     const spares = section.querySelectorAll(".spare").length;
     const still = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const phone = window.matchMedia("(max-width: 39.99rem)");
+    const spareCards = [...section.querySelectorAll<HTMLElement>(".spare")];
 
     /** The deck from the top down; the drawn card is out of it. */
-    let order = [...cards];
+    const order = [...cards];
     let drawn: HTMLButtonElement | null = null;
     let queue: Promise<void> = Promise.resolve();
     let pending = 0;
+    /** Phone: the top card's demo is playing (a tap starts and stops it). */
+    let tapPlaying = false;
 
     const width = () => cards[0].offsetWidth;
     const zOf = (index: number) => (spares + order.length - 1 - index) * GAP;
@@ -223,35 +277,110 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
       return queue;
     }
 
+    // ─── Phone: a pile standing under the thumb ───
+    const flat = ({ x = 0, y = 0, r = 0, f = 0, s = 1 }) =>
+      `translate3d(${x}px, ${y}px, 0px) rotate(${r}deg) rotateY(${f}deg) scale(${s})`;
+    /** Each card deeper in the pile rests a step lower and a little smaller, so its edge shows. */
+    const slotOf = (depth: number) => ({ y: Math.min(depth, 3) * 10, s: 1 - Math.min(depth, 3) * 0.045 });
+
+    function stack(duration = 0) {
+      spareCards.forEach((spare) => {
+        spare.style.zIndex = "1";
+        spare.style.transform = flat(slotOf(3));
+      });
+      showPanel(order[0].dataset.card!);
+      return Promise.all(
+        order.map((card, depth) => {
+          card.disabled = false;
+          card.tabIndex = depth === 0 ? 0 : -1;
+          card.style.zIndex = String(100 - depth);
+          const target = flat({ ...slotOf(depth), f: depth === 0 ? 0 : 180 });
+          return run(card, [card.style.transform || target, target], duration);
+        }),
+      );
+    }
+
+    // Swiped either way: the top card flies off on that side turning over, so its back shows, and
+    // slips in at the back of the pile; the next one turns face up.
+    async function sendBack(side: -1 | 1) {
+      if (order.length < 2) return;
+      const card = order[0];
+      const away = { x: side * width() * 1.05, y: -6, r: side * 10 };
+      // It turns towards the side it flies to; -180 and 180 look the same, so it is then written as 180,
+      // the side every card in the pile rests on, and never spins round again on the way in.
+      await run(card, [card.style.transform, flat({ ...away, f: -side * 180 })], ms(460));
+      card.style.transform = flat({ ...away, f: 180 });
+      order.push(order.shift()!);
+      await stack(ms(560));
+    }
+
+    // The top card follows the finger sideways; the page keeps its vertical scroll (touch-action).
+    let drag: { id: number; x: number; t: number; dx: number } | null = null;
+    let dragged = false;
+    deck.addEventListener("pointerdown", (event) => {
+      if (!phone.matches || pending || !order[0].contains(event.target as Node)) return;
+      drag = { id: event.pointerId, x: event.clientX, t: event.timeStamp, dx: 0 };
+      dragged = false;
+    });
+    deck.addEventListener("pointermove", (event) => {
+      if (!drag || event.pointerId !== drag.id) return;
+      drag.dx = event.clientX - drag.x;
+      if (Math.abs(drag.dx) > 8 && !dragged) {
+        dragged = true;
+        order[0].setPointerCapture(event.pointerId);
+      }
+      if (dragged) order[0].style.transform = flat({ x: drag.dx, r: drag.dx * 0.05 });
+    });
+    function release(event: PointerEvent, cancelled: boolean) {
+      if (!drag || event.pointerId !== drag.id) return;
+      const { dx, t } = drag;
+      drag = null;
+      if (!dragged) return;
+      const fast = Math.abs(dx) / Math.max(1, event.timeStamp - t) > 0.5 && Math.abs(dx) > 30;
+      if (!cancelled && (Math.abs(dx) > width() * 0.22 || fast)) {
+        tapPlaying = false;
+        playing(null);
+        enqueue(() => sendBack(dx < 0 ? -1 : 1));
+      } else {
+        run(order[0], [order[0].style.transform, flat({})], 280);
+      }
+    }
+    deck.addEventListener("pointerup", (event) => release(event, false));
+    deck.addEventListener("pointercancel", (event) => release(event, true));
+
     // Where a drawn card stands: upright, in front of the deck and above it, almost as wide as the table.
     function shown(): Pose {
       const tableBox = table.getBoundingClientRect();
-      const deckBox = deck.getBoundingClientRect();
       const perspective = parseFloat(getComputedStyle(table).perspective) || 1600;
       const z = 140;
       const grow = perspective / (perspective - z);
       const s = Math.min((tableBox.width * 0.96) / width(), (tableBox.height * 0.6) / (width() * 0.5625)) / grow;
-      const x = tableBox.left + tableBox.width / 2 - (deckBox.left + deckBox.width / 2);
-      // Its top edge sits just inside the table, clear of the section heading above it. The perspective
-      // (centred on the table) pushes anything nearer the reader away from that centre, so the target
-      // is pulled back towards it by the same factor.
+      // Its top edge sits a clear 40px under the section heading, whatever the layout puts between
+      // them (on a tablet the hint above the table is hidden by then). The perspective (centred on the
+      // table) pushes anything nearer the reader away from that centre, so the target is pulled back
+      // towards it by the same factor.
+      // The deck's centre is the table's centre (.deck is placed at 50% / 50%), which is also where the
+      // perspective looks from; its on-screen box is skewed by the tilt, so it is not measured.
       const height = width() * 0.5625 * s * grow;
+      const top = Math.max(tableBox.top, heading.getBoundingClientRect().bottom + 40);
       const origin = tableBox.top + tableBox.height / 2;
-      const centre = origin + (tableBox.top + 32 + height / 2 - origin) / grow;
-      const y = centre - (deckBox.top + deckBox.height / 2);
-      return { a: -TILT_Z, b: -TILT_X, x, y, z, f: 0, s };
+      const y = (top + height / 2 - origin) / grow;
+      return { a: -TILT_Z, b: -TILT_X, x: 0, y, z, f: 0, s };
     }
 
+    // On a phone the panel always follows the top card and the hint stays above it.
     function showPanel(id: string | null) {
       panels.forEach((panel) => panel.classList.toggle("is-active", panel.dataset.panel === id));
-      if (id) panelBox.dataset.picked = "";
+      if (id && !phone.matches) panelBox.dataset.picked = "";
     }
 
     function playing(card: HTMLElement | null) {
       for (const other of cards) {
         const video = other.querySelector("video");
+        const on = other === card && !!video && !still.matches;
+        other.classList.toggle("is-playing", on);
         if (!video) continue;
-        if (other === card && !still.matches) video.play().catch(() => {});
+        if (on) video.play().catch(() => {});
         else video.pause();
       }
     }
@@ -329,6 +458,10 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
       const up = pose(shown());
 
       if (!still.matches) {
+        if (!hand.src) {
+          hand.src = hand.dataset.src!;
+          await hand.decode().catch(() => {});
+        }
         card.append(hand);
         hand.classList.add("is-on");
         await hand.animate(
@@ -364,6 +497,14 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
     // way to the hint.
     for (const card of cards) {
       card.addEventListener("click", () => {
+        if (phone.matches) {
+          // A tap (not the end of a swipe) starts or stops the top card's demo.
+          if (dragged) return void (dragged = false);
+          if (card !== order[0] || pending) return;
+          tapPlaying = !tapPlaying;
+          playing(tapPlaying ? card : null);
+          return;
+        }
         if (card === drawn) {
           enqueue(async () => {
             await putBack();
@@ -375,14 +516,47 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
     }
     // Keeps a drawn card in place when the table changes size.
     window.addEventListener("resize", () => {
-      if (drawn) drawn.style.transform = pose(shown());
+      if (drawn && !phone.matches) drawn.style.transform = pose(shown());
     });
 
-    // Only the drawn card's video plays, and only while the section is on screen.
-    new IntersectionObserver(([entry]) => playing(entry.isIntersecting ? drawn : null)).observe(table);
+    // Crossing the phone width: a drawn card goes straight back, every card drops its pose and takes
+    // its place in the other arrangement.
+    function mode() {
+      const name = phone.matches ? "phone" : "deck";
+      if (section.dataset.mode === name) return;
+      section.dataset.mode = name;
+      if (drawn) {
+        drawn.classList.remove("is-drawn");
+        order.push(drawn);
+        drawn = null;
+      }
+      hand.classList.remove("is-on");
+      table.append(hand);
+      tapPlaying = false;
+      playing(null);
+      for (const card of [...cards, ...spareCards]) {
+        card.getAnimations().forEach((animation) => animation.cancel());
+        card.style.transform = "";
+        card.style.zIndex = "";
+      }
+      if (phone.matches) {
+        stack();
+      } else {
+        showPanel(null);
+        delete panelBox.dataset.picked;
+        settle();
+      }
+    }
+    phone.addEventListener("change", mode);
+
+    // Only the drawn card's video (or, on a phone, the tapped one) plays, and only while it is on screen.
+    new IntersectionObserver(([entry]) => {
+      const card = phone.matches ? (tapPlaying ? order[0] : null) : drawn;
+      playing(entry.isIntersecting ? card : null);
+    }).observe(table);
 
     section.dataset.ready = "";
-    settle();
+    mode();
   }
 
   document.querySelectorAll<HTMLElement>("[data-deck-section]").forEach(setup);
@@ -396,12 +570,101 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
     justify-content: space-between;
     gap: var(--space-4) var(--space-8);
   }
-  .more {
+  /* ─── "All projects" ─── */
+  .all {
+    position: relative;
     display: inline-flex;
     align-items: center;
+    gap: var(--space-3);
     min-height: 2.75rem;
-    font-size: var(--text-sm);
+    padding: 0 var(--space-1) 0 var(--space-2);
+    overflow: hidden;
+    isolation: isolate;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-pill);
+    color: var(--foreground);
+    font-size: var(--text-base);
     font-weight: 500;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: scale var(--duration-instant) var(--ease-standard);
+  }
+  .all-fan {
+    display: flex;
+    align-items: center;
+  }
+  .all-fan img {
+    position: relative;
+    z-index: calc(3 - var(--i));
+    width: 1.375rem;
+    height: 1.375rem;
+    border-radius: 0.4rem;
+    /* A solid tile under each logo: the ones drawn on a transparent ground (linkedin-scheduler's)
+       would otherwise show the logo behind them. */
+    background: var(--surface-muted);
+    box-shadow: 0 0 0 2px var(--background);
+  }
+  .all-fan img + img {
+    margin-left: -0.5rem;
+  }
+  .all-arrow {
+    display: grid;
+    place-items: center;
+    width: 2.125rem;
+    height: 2.125rem;
+    overflow: hidden;
+    border-radius: var(--radius-pill);
+    background: var(--foreground);
+    color: var(--background);
+    transition: background-color var(--duration-fast) var(--ease-standard);
+  }
+  .all-arrow svg {
+    grid-area: 1 / 1;
+    width: 1rem;
+    height: 1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: translate 420ms var(--ease-enter);
+  }
+  .all-arrow svg + svg {
+    translate: -160% 0;
+  }
+  /* Pointed at (or focused): the circle turns terracotta, and one arrow leaves on the right while the
+     next comes in from the left. The logos do not move. */
+  @media (hover: hover) {
+    .all:hover .all-arrow {
+      background: var(--accent);
+    }
+    .all:hover .all-arrow svg:first-child {
+      translate: 160% 0;
+    }
+    .all:hover .all-arrow svg + svg {
+      translate: 0 0;
+    }
+  }
+  .all:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+  .all:active {
+    scale: 0.97;
+  }
+  .all:focus-visible .all-arrow {
+    background: var(--accent);
+  }
+  .all:focus-visible .all-arrow svg:first-child {
+    translate: 160% 0;
+  }
+  .all:focus-visible .all-arrow svg + svg {
+    translate: 0 0;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .all-arrow svg {
+      transition: none;
+    }
   }
   .pin {
     display: grid;
@@ -468,6 +731,14 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
   .spare :global(.back) {
     transform: none;
   }
+  /* The pictures on a card never take the pointer: a press always reaches the card, so a swipe is
+     never mistaken for dragging the image out or a long press on it. */
+  .card :is(img, video) {
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    -webkit-touch-callout: none;
+  }
   .face > :is(video, img) {
     position: absolute;
     inset: 0;
@@ -502,6 +773,73 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
     outline: 2px solid var(--accent);
     outline-offset: 4px;
   }
+  /* A project not built yet: diagonal terracotta hatching, its icon large, its name under it. */
+  .face.is-wip {
+    background:
+      repeating-linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--accent) 9%, transparent) 0 0.9rem,
+        transparent 0.9rem 1.8rem
+      ),
+      var(--surface);
+  }
+  .wip {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 2.4cqw;
+  }
+  .wip-icon {
+    width: 16cqw;
+    height: 16cqw;
+    border-radius: 3.5cqw;
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent);
+  }
+  .wip-name {
+    font-family: var(--font-display);
+    font-size: 5.2cqw;
+    font-weight: 500;
+    letter-spacing: var(--tracking-display);
+    line-height: 1;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: var(--space-1) var(--space-3) var(--space-1) var(--space-2);
+    border: 1px solid color-mix(in srgb, var(--accent) 60%, transparent);
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--accent) 14%, var(--background));
+    color: var(--accent);
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    letter-spacing: 0;
+    white-space: nowrap;
+  }
+  .badge svg {
+    flex: none;
+    width: 0.9375rem;
+    height: 0.9375rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .face .badge {
+    position: absolute;
+    top: 4%;
+    right: 3%;
+    z-index: 1;
+  }
+
+  /* Phone only: the play mark on a demo card, gone while it plays. */
+  .play {
+    display: none;
+  }
 
   /* The taking hand (Goltzius's drawing-book plate, c. 1610, Rijksmuseum, CC0, mirrored): its
      fingertips, about 8% across and 85% down the picture, rest on the card a little right of centre,
@@ -529,12 +867,16 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
     align-content: start;
   }
   .hint {
-    max-width: 30rem;
+    max-width: 34rem;
     color: var(--text-secondary);
-    font-size: var(--text-lg);
+    font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.5rem);
+    line-height: 1.35;
     text-wrap: pretty;
   }
   .side:has(.panels[data-picked]) .hint {
+    display: none;
+  }
+  .hint-phone {
     display: none;
   }
   .panel {
@@ -604,6 +946,16 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
     }
   }
 
+  /* ─── Tablet: the deck with the panel under it, and the hint above the deck so it is read first ─── */
+  @media (min-width: 40rem) and (max-width: 63.99rem) {
+    .deck-section[data-mode="deck"] .side {
+      display: contents;
+    }
+    .deck-section[data-mode="deck"] .hint {
+      order: -1;
+    }
+  }
+
   /* ─── Desktop: the table on the left, the panel on the right ─── */
   @media (min-width: 64rem) {
     .board {
@@ -616,4 +968,61 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
     }
   }
 
+
+  /* ─── Phone: the cards stand as a pile under the thumb ─── */
+  .deck-section[data-mode="phone"] {
+    .table {
+      height: auto;
+      padding-bottom: 2.25rem;
+      container-type: inline-size;
+      perspective: none;
+    }
+    /* Flat, so the pile is ordered by z-index and a card turning over never cuts through the others;
+       the perspective here still gives that turn its depth. */
+    .deck {
+      position: relative;
+      top: auto;
+      left: auto;
+      width: 100%;
+      transform: none;
+      transform-style: flat;
+      perspective: 1200px;
+    }
+    .card {
+      transform: none;
+      transform-origin: 50% 100%;
+      touch-action: pan-y;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .hand {
+      display: none;
+    }
+    .hint-deck {
+      display: none;
+    }
+    .hint-phone {
+      display: inline;
+    }
+    .play {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      width: 3.5rem;
+      height: 3.5rem;
+      margin: auto;
+      border-radius: var(--radius-pill);
+      background: color-mix(in srgb, var(--background) 72%, transparent);
+    }
+    .play::before {
+      content: "";
+      margin-left: 0.25rem;
+      border-block: 0.65rem solid transparent;
+      border-left: 1.1rem solid var(--foreground);
+    }
+    .card.is-playing .play {
+      display: none;
+    }
+  }
 </style>
