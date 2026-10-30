@@ -1,6 +1,8 @@
 // ─── Portfolio data ────────────────────────────────────────────────
 // Facts only. Copy that changes with the language lives in src/i18n.
 
+import type { TechId } from "./tech";
+
 /** The site's public address. Change it here once the final domain is bought. */
 export const SITE_URL = "https://joelcodja.pages.dev";
 
@@ -32,34 +34,58 @@ export const LOCATION = {
 
 export interface Project {
   id: "makisend" | "linkedin-scheduler" | "contrasto";
-  stack: string[];
+  stack: TechId[];
+  /** Month the project shipped, "YYYY-MM". */
+  delivered: string;
   repo?: string;
   site?: string;
-  /** Shown on the home page as a case study; the rest only on /projects. */
-  featured: boolean;
+  /** The project's own symbol, square (public/projects). */
+  logo: string;
+  /** Muted loop on the home page's project cards (public/video, WebM). Without one the card shows the screenshot. */
+  video?: { src: string; poster: string };
 }
 
+// TODO(Joel): the delivered dates are placeholders from git history, replace them with the real ones.
 export const PROJECTS: Project[] = [
   {
     id: "makisend",
-    stack: ["Cloudflare Workers", "Workflows", "D1", "Queues", "TypeScript"],
+    logo: "/projects/makisend.svg",
+    stack: [
+      "workers",
+      "d1",
+      "queues",
+      "workflows",
+      "typescript",
+      "hono",
+      "drizzle",
+      "better-auth",
+      "zod",
+      "astro",
+      "react",
+      "tailwind",
+      "vitest",
+    ],
+    delivered: "2026-10",
     repo: "https://github.com/lixalistudio-oss/makisend",
     site: "https://makisend.lixalistudio.tech",
-    featured: true,
+    video: { src: "/video/makisend.webm", poster: "/video/makisend-poster.webp" },
   },
   {
     id: "linkedin-scheduler",
-    stack: ["Python", "LinkedIn API", "cron", "Node.js", "HTML"],
+    logo: "/projects/linkedin-scheduler.svg",
+    stack: ["python", "linkedin", "cron", "node", "playwright", "shiki", "markdown"],
+    delivered: "2026-10",
     repo: "https://github.com/cjdotdev/linkedin-scheduler",
     site: "https://linkedin-scheduler.makisend-poc.workers.dev",
-    featured: true,
+    video: { src: "/video/linkedin-scheduler.webm", poster: "/video/linkedin-scheduler-poster.webp" },
   },
   {
     id: "contrasto",
-    stack: ["Next.js", "TypeScript"],
-    repo: "https://github.com/alpha1207vj/CHECKERCONTRASTOWCAG",
+    logo: "/projects/contrasto.svg",
+    stack: ["nextjs", "react", "typescript", "tailwind", "next-intl"],
+    delivered: "2026-04",
+    repo: "https://github.com/cjdotdev/CHECKERCONTRASTOWCAG",
     site: "https://codja.vercel.app",
-    featured: false,
   },
 ];
 

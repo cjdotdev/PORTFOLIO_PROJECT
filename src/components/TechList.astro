@@ -1,0 +1,52 @@
+---
+import { TECH, type TechId } from "../data/tech";
+
+interface Props {
+  stack: TechId[];
+  /** Read before the list by screen readers ("Stack"). */
+  label: string;
+}
+
+const { stack, label } = Astro.props;
+---
+
+<ul class="tech" role="list" aria-label={label}>
+  {
+    stack.map((id) => {
+      const tech = TECH[id];
+      return (
+        <li>
+          <svg viewBox={tech.viewBox} fill="currentColor" aria-hidden="true" set:html={tech.body} />
+          <span>{tech.name}</span>
+        </li>
+      );
+    })
+  }
+</ul>
+
+<style>
+  /* Logo and name side by side, in as many columns as the box allows. */
+  .tech {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+    gap: var(--space-3) var(--space-4);
+  }
+  li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-width: 0;
+    color: var(--foreground);
+    font-size: var(--text-sm);
+  }
+  svg {
+    flex: none;
+    width: 1.375rem;
+    height: 1.375rem;
+  }
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+</style>

@@ -23,7 +23,8 @@ const from = LOCATION.from;
 
 // The map is a 4x3 block of 256px OpenStreetMap tiles at zoom 12, laid so the city centre sits in
 // the middle of the frame. No key needed; the attribution is shown on the map. CSS turns the tiles
-// grey in light mode and inverts them for a night map in dark mode.
+// grey in light mode and inverts them for a night map in dark mode. This first frame is LOCATION; the
+// script lays the same block again around whatever coordinates the API answers.
 const ZOOM = 12;
 const n = 2 ** ZOOM;
 const latRad = (LOCATION.lat * Math.PI) / 180;
@@ -43,9 +44,16 @@ const tile = (x: number, y: number) => `https://tile.openstreetmap.org/${ZOOM}/$
     <p class="lede">{t.where.lede}</p>
   </div>
 
-  <div class="board" data-where-console data-endpoint={endpoint} data-fallback={t.where.fallback} data-codes={JSON.stringify(t.where.codes)}>
-    <figure class="map" role="img" aria-label={t.where.mapAlt}>
-      <div class="tiles" style={`--ox:${offsetX}px; --oy:${offsetY}px`}>
+  <div
+    class="board"
+    data-where-console
+    data-endpoint={endpoint}
+    data-fallback={t.where.fallback}
+    data-fallback-json={JSON.stringify(fallback)}
+    data-codes={JSON.stringify(t.where.codes)}
+  >
+    <figure class="map" role="img" aria-label={t.where.mapAlt} data-city={LOCATION.city}>
+      <div class="tiles" style={`--ox:${offsetX}px; --oy:${offsetY}px`} data-zoom={ZOOM}>
         {tiles.map(({ x, y }) => (
           <img src={tile(x, y)} alt="" width="256" height="256" loading="lazy" decoding="async" />
         ))}
@@ -91,7 +99,8 @@ const tile = (x: number, y: number) => `https://tile.openstreetmap.org/${ZOOM}/$
           {t.where.response}
           <span class="status mono" data-status aria-live="polite"></span>
         </p>
-        <pre class="mono json" data-json>{JSON.stringify(fallback, null, 2)}</pre>
+        <p class="waiting" data-waiting>{t.where.waiting}</p>
+        <pre class="mono json" data-json hidden></pre>
         <p class="note" data-note hidden></p>
       </div>
     </div>
@@ -159,22 +168,53 @@ const tile = (x: number, y: number) => `https://tile.openstreetmap.org/${ZOOM}/$
     }
   }
 
+  // Lays the 4x3 tile block around new coordinates, with the same maths as the build-time frame, so the
+  // map follows the API when the place changes. The pin stays in the middle; the tiles move under it.
+  function moveMap(map: HTMLElement, lat: number, lon: number, city?: string) {
+    const tiles = map.querySelector<HTMLElement>(".tiles")!;
+    const zoom = Number(tiles.dataset.zoom);
+    const n = 2 ** zoom;
+    const latRad = (lat * Math.PI) / 180;
+    const fx = ((lon + 180) / 360) * n;
+    const fy = ((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2) * n;
+    const x0 = Math.floor(fx) - 1;
+    const y0 = Math.floor(fy) - 1;
+    tiles.querySelectorAll("img").forEach((img, index) => {
+      const src = `https://tile.openstreetmap.org/${zoom}/${x0 + (index % 4)}/${y0 + Math.floor(index / 4)}.png`;
+      if (img.src !== src) img.src = src;
+    });
+    tiles.style.setProperty("--ox", `${Math.round((fx - x0) * 256)}px`);
+    tiles.style.setProperty("--oy", `${Math.round((fy - y0) * 256)}px`);
+    if (city && map.dataset.city && city !== map.dataset.city) {
+      map.setAttribute("aria-label", map.getAttribute("aria-label")!.replace(map.dataset.city, city));
+      map.dataset.city = city;
+    }
+  }
+
   function setup(root: HTMLElement) {
     const button = root.querySelector<HTMLButtonElement>("[data-send]")!;
     const label = root.querySelector<HTMLElement>("[data-send-label]")!;
     const status = root.querySelector<HTMLElement>("[data-status]")!;
+    const waiting = root.querySelector<HTMLElement>("[data-waiting]")!;
     const pre = root.querySelector<HTMLElement>("[data-json]")!;
     const note = root.querySelector<HTMLElement>("[data-note]")!;
+    const map = root.querySelector<HTMLElement>(".map")!;
     const weatherOut = root.querySelector<HTMLElement>("[data-weather]")!;
     const codes = JSON.parse(root.dataset.codes ?? "{}") as Record<string, string>;
     const endpoint = root.dataset.endpoint!;
-    const fallbackText = pre.textContent ?? "";
-    const fallback = JSON.parse(fallbackText) as Place;
-    pre.innerHTML = fallbackText.split("\n").map(highlight).join("\n");
+    // The last known place, shown only when the API does not answer. Before the first call the pane
+    // says it is waiting, so the JSON that lands is visibly the answer.
+    const fallback = JSON.parse(root.dataset.fallbackJson ?? "{}") as Place;
 
     function showWeather(weather: Weather | undefined) {
       if (!weather) return;
       weatherOut.textContent = `${weather.temperature_c}°C · ${codes[weatherKey(weather.weather_code)] ?? ""}`;
+    }
+
+    function show(text: string) {
+      waiting.hidden = true;
+      pre.hidden = false;
+      return render(pre, text);
     }
 
     async function send() {
@@ -191,7 +231,8 @@ const tile = (x: number, y: number) => `https://tile.openstreetmap.org/${ZOOM}/$
         note.hidden = true;
         root.dataset.state = "ok";
         showWeather(place.weather);
-        await render(pre, JSON.stringify(place, null, 2));
+        if (place.coordinates) moveMap(map, place.coordinates.lat, place.coordinates.lon, place.city);
+        await show(JSON.stringify(place, null, 2));
         if (place.city && place.country) {
           document.querySelectorAll("[data-where='place']").forEach((element) => {
             element.textContent = `${place.city}, ${place.country}`;
@@ -205,20 +246,23 @@ const tile = (x: number, y: number) => `https://tile.openstreetmap.org/${ZOOM}/$
         const { lat, lon } = fallback.coordinates!;
         const weather = await weatherDirect(lat, lon);
         showWeather(weather);
-        await render(pre, JSON.stringify({ ...fallback, weather }, null, 2));
+        await show(JSON.stringify({ ...fallback, weather }, null, 2));
       } finally {
         button.disabled = false;
         label.textContent = label.dataset.idle!;
       }
     }
 
+    // The console only answers when the visitor sends the request. The weather readout does not wait
+    // for that: it comes straight from Open-Meteo when the block comes into view.
     button.addEventListener("click", send);
-    // The first call happens on its own when the block comes into view.
     const observer = new IntersectionObserver(
-      (entries) => {
+      async (entries) => {
         if (!entries.some((entry) => entry.isIntersecting)) return;
         observer.disconnect();
-        send();
+        const { lat, lon } = fallback.coordinates!;
+        const weather = await weatherDirect(lat, lon);
+        if (!root.dataset.state) showWeather(weather);
       },
       { threshold: 0.25 },
     );
@@ -415,6 +459,20 @@ const tile = (x: number, y: number) => `https://tile.openstreetmap.org/${ZOOM}/$
   }
   .response {
     background: var(--surface-muted);
+  }
+  /* Same footprint as the JSON it stands in for, so the card does not jump when the answer lands. */
+  .waiting {
+    display: grid;
+    place-items: center;
+    min-height: 15em;
+    margin: 0;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+  }
+  .waiting[hidden],
+  .json[hidden] {
+    display: none;
   }
   .json {
     margin: 0;

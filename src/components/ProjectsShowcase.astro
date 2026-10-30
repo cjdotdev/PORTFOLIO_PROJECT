@@ -1,0 +1,464 @@
+---
+import { Image } from "astro:assets";
+import { siGithub } from "simple-icons";
+import contrastoShot from "../assets/work/contrasto.webp";
+import TechList from "./TechList.astro";
+import { PROJECTS } from "../data";
+import { localePath, type Dict, type Locale } from "../i18n";
+
+interface Props {
+  t: Dict;
+  locale: Locale;
+}
+
+const { t, locale } = Astro.props;
+const count = PROJECTS.length;
+const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
+  month: "short",
+  year: "numeric",
+  timeZone: "UTC",
+});
+const index = (i: number) => String(i + 1).padStart(2, "0");
+---
+
+<section class="showcase section container" id="work" aria-labelledby="work-title" data-showcase style={`--count:${count}`}>
+  <div class="pin">
+    <div class="head">
+      <h2 id="work-title" class="display">{t.work.title}</h2>
+      <a class="link more" href={localePath(locale, "/projects/")}>{t.work.all}</a>
+    </div>
+
+    <div class="board">
+      {/* The cards land one by one on a diagonal as the section scrolls (desktop); hovering or focusing
+          one picks it and the panel beside it shows that project. */}
+      <div class="stage">
+        {
+          PROJECTS.map((project, i) => (
+            <button
+              type="button"
+              class="card"
+              style={`--i:${i}; order:${i * 2}`}
+              data-card={project.id}
+              aria-controls={`panel-${project.id}`}
+              aria-pressed="false"
+            >
+              <span class="media">
+                {project.video ? (
+                  <video muted loop playsinline preload="none" poster={project.video.poster} aria-hidden="true">
+                    <source src={project.video.src} type="video/webm" />
+                  </video>
+                ) : (
+                  <Image
+                    src={contrastoShot}
+                    alt=""
+                    widths={[480, 800, 1200]}
+                    sizes="(min-width: 64rem) 30rem, 100vw"
+                    format="webp"
+                    quality={80}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                )}
+              </span>
+              {/* Top left: the videos carry their own captions along the bottom. */}
+              <span class="card-label">
+                <span class="card-index mono" aria-hidden="true">
+                  {index(i)}
+                </span>
+                <img class="card-logo" src={project.logo} alt="" width="20" height="20" />
+                {t.work.items[project.id].name}
+              </span>
+            </button>
+          ))
+        }
+      </div>
+
+      <div class="panels" data-panels>
+        <p class="hint">{t.work.hint}</p>
+        {
+          PROJECTS.map((project, i) => {
+            const copy = t.work.items[project.id];
+            return (
+              <div class="panel" id={`panel-${project.id}`} data-panel={project.id} style={`order:${i * 2 + 1}`}>
+                <h3 class="name">
+                  <img src={project.logo} alt="" width="36" height="36" />
+                  {copy.name}
+                </h3>
+                <p class="line">{copy.line}</p>
+                <dl class="meta">
+                  <div>
+                    <dt>{t.work.delivered}</dt>
+                    <dd>
+                      <time datetime={project.delivered}>{month.format(new Date(`${project.delivered}-01`))}</time>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt class="sr-only">{copy.name}</dt>
+                    <dd class="role">{copy.role}</dd>
+                  </div>
+                </dl>
+                <TechList stack={project.stack} label={t.work.stack} />
+                <p class="actions">
+                  {project.site && (
+                    <a class="btn btn-primary" href={project.site} target="_blank" rel="noopener noreferrer">
+                      {t.work.site}
+                      <span class="sr-only">: {copy.name}</span>
+                    </a>
+                  )}
+                  {project.repo && (
+                    <a class="btn btn-secondary" href={project.repo} target="_blank" rel="noopener noreferrer">
+                      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d={siGithub.path} />
+                      </svg>
+                      GitHub
+                      <span class="sr-only">: {copy.name}</span>
+                    </a>
+                  )}
+                </p>
+              </div>
+            );
+          })
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Desktop with motion: the section is a tall track, the board is pinned, and each card lands once the
+  // scroll has gone far enough through the track (and leaves again on the way back up), as on lenis.dev.
+  const PINNED = "(min-width: 64rem) and (prefers-reduced-motion: no-preference)";
+
+  function setup(root: HTMLElement) {
+    const cards = [...root.querySelectorAll<HTMLButtonElement>("[data-card]")];
+    const panels = [...root.querySelectorAll<HTMLElement>("[data-panel]")];
+    const panelBox = root.querySelector<HTMLElement>("[data-panels]")!;
+    const pinned = window.matchMedia(PINNED);
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const onScreen = new Set<HTMLButtonElement>();
+
+    // The panel appears with the first pick and then only swaps its content: it never closes.
+    function pick(card: HTMLButtonElement) {
+      const id = card.dataset.card;
+      cards.forEach((other) => other.setAttribute("aria-pressed", String(other === card)));
+      panels.forEach((panel) => panel.classList.toggle("is-active", panel.dataset.panel === id));
+      panelBox.dataset.picked = "";
+    }
+
+    // Videos play only while their card is landed and on screen, never when motion is unwelcome.
+    function syncVideos() {
+      for (const card of cards) {
+        const video = card.querySelector("video");
+        if (!video) continue;
+        if (!still.matches && onScreen.has(card) && card.classList.contains("is-in")) {
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+      }
+    }
+
+    function land() {
+      if (!pinned.matches) {
+        cards.forEach((card) => card.classList.add("is-in"));
+        syncVideos();
+        return;
+      }
+      const box = root.getBoundingClientRect();
+      const travel = Math.max(1, box.height - window.innerHeight);
+      const progress = Math.min(1, Math.max(0, -box.top / travel));
+      // The cards land over the first two thirds of the track; the last third is for reading.
+      cards.forEach((card, i) => card.classList.toggle("is-in", progress >= (i / cards.length) * 0.66 + 0.02));
+      syncVideos();
+    }
+
+    let frame = 0;
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(() => ((frame = 0), land()));
+    };
+
+    function mode() {
+      root.toggleAttribute("data-pinned", pinned.matches);
+      land();
+    }
+
+    for (const card of cards) {
+      card.addEventListener("pointerenter", (event) => {
+        if (event.pointerType === "mouse" && card.classList.contains("is-in")) pick(card);
+      });
+      card.addEventListener("click", () => pick(card));
+      // A keyboard user reaching a card that has not landed yet still sees it.
+      card.addEventListener("focus", () => {
+        card.classList.add("is-in");
+        pick(card);
+        syncVideos();
+      });
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        const card = entry.target as HTMLButtonElement;
+        if (entry.isIntersecting) onScreen.add(card);
+        else onScreen.delete(card);
+      }
+      syncVideos();
+    });
+    cards.forEach((card) => observer.observe(card));
+
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    pinned.addEventListener("change", mode);
+    still.addEventListener("change", syncVideos);
+    mode();
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-showcase]").forEach(setup);
+</script>
+
+<style>
+  .head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: space-between;
+    gap: var(--space-4) var(--space-8);
+  }
+  .more {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    font-size: var(--text-sm);
+    font-weight: 500;
+  }
+
+  /* ─── Phone and tablet: each card with its panel under it ─── */
+  .pin {
+    display: grid;
+    gap: var(--space-12);
+  }
+  .board {
+    display: grid;
+    gap: var(--space-6);
+  }
+  .stage,
+  .panels {
+    display: contents;
+  }
+  .hint {
+    display: none;
+  }
+  .panel {
+    margin-bottom: var(--space-8);
+  }
+
+  /* ─── Card ─── */
+  .card {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-panel);
+    background: var(--surface-muted);
+    color: var(--foreground);
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+  }
+  .media,
+  .media :is(video, img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .card-label {
+    position: absolute;
+    top: var(--space-3);
+    left: var(--space-3);
+    z-index: 1;
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--background) 82%, transparent);
+    backdrop-filter: blur(6px);
+    font-family: var(--font-display);
+    font-size: var(--text-base);
+    font-weight: 500;
+    letter-spacing: var(--tracking-display);
+  }
+  .card-logo {
+    align-self: center;
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+  .card-index {
+    color: var(--text-secondary);
+    font-size: var(--text-xs);
+    letter-spacing: 0;
+  }
+
+  /* ─── Panel ─── */
+  .panel {
+    display: grid;
+    gap: var(--space-5);
+    align-content: start;
+  }
+  .name {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 1.3rem + 0.6vw, 1.75rem);
+    font-weight: 500;
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-display);
+  }
+  .name img {
+    flex: none;
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+  .line {
+    font-size: var(--text-lg);
+    text-wrap: pretty;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-6);
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+  }
+  .meta div {
+    display: flex;
+    gap: var(--space-2);
+  }
+  .meta dd {
+    margin: 0;
+  }
+  .meta time {
+    color: var(--foreground);
+    font-variant-numeric: tabular-nums;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+  .actions svg {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+
+  /* ─── Desktop: the staircase on the left, the panel on the right ─── */
+  @media (min-width: 64rem) {
+    .board {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      gap: clamp(2rem, 1rem + 3vw, 4rem);
+      min-height: 0;
+    }
+    .stage {
+      position: relative;
+      display: block;
+      height: 34rem;
+      container-type: size;
+    }
+    /* Each card sits one step further right and down; the steps share whatever room is left. */
+    .card {
+      --card: min(62cqw, 110cqh);
+      position: absolute;
+      top: calc((100cqh - var(--card) * 9 / 16) * var(--i) / (var(--count) - 1));
+      left: calc((100cqw - var(--card)) * var(--i) / (var(--count) - 1));
+      /* Earlier cards lie on top of later ones: 01 over 02 over 03. */
+      z-index: calc(var(--count) - var(--i));
+      width: var(--card);
+      margin: 0;
+      transition:
+        opacity 1200ms var(--ease-enter),
+        translate 1200ms var(--ease-enter),
+        transform 400ms var(--ease-enter),
+        border-color 400ms var(--ease-enter),
+        filter 400ms var(--ease-enter);
+    }
+    .card[aria-pressed="true"] {
+      z-index: 10;
+      border-color: var(--foreground);
+      transform: translateY(-0.5rem);
+    }
+    .stage:has([aria-pressed="true"]) .card:not([aria-pressed="true"]) {
+      filter: brightness(0.5) saturate(0.6);
+    }
+
+    .panels {
+      position: relative;
+      display: block;
+      min-height: 0;
+    }
+    .hint {
+      display: block;
+      color: var(--text-muted);
+      font-size: var(--text-sm);
+    }
+    .panels[data-picked] .hint {
+      display: none;
+    }
+    /* Every panel sits in the same place; only the picked one shows, swapped in a quick fade. */
+    .panel {
+      position: absolute;
+      inset: 0 0 auto;
+      max-height: 100%;
+      margin: 0;
+      overflow-y: auto;
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity 150ms var(--ease-standard),
+        visibility 0s 150ms;
+    }
+    .panel.is-active {
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 150ms var(--ease-standard);
+    }
+  }
+
+  @media (min-width: 64rem) and (prefers-reduced-motion: no-preference) {
+    .panels[data-picked] {
+      animation: panel-in 500ms var(--ease-enter);
+    }
+    /* Pinned: the section becomes a track three screens tall and the board holds still inside it. */
+    .showcase[data-pinned] {
+      height: 300svh;
+    }
+    .showcase[data-pinned] .pin {
+      position: sticky;
+      top: 4rem;
+      grid-template-rows: auto minmax(0, 1fr);
+      box-sizing: border-box;
+      height: calc(100svh - 4rem);
+      padding-block: var(--space-8);
+      gap: var(--space-8);
+    }
+    .showcase[data-pinned] .stage {
+      height: auto;
+    }
+    .showcase[data-pinned] .card:not(.is-in) {
+      opacity: 0;
+      translate: 0 40%;
+      pointer-events: none;
+    }
+  }
+  @keyframes panel-in {
+    from {
+      opacity: 0;
+      translate: 1rem 0;
+    }
+  }
+</style>

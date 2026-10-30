@@ -57,6 +57,7 @@ export const fr: Dict = {
     fallback: "Pas de réponse de l'API. Voici le dernier lieu connu.",
     request: "Requête",
     response: "Réponse",
+    waiting: "En attente d'une requête.",
     now: "En ce moment à",
     localTime: "Heure locale",
     weather: "Météo",
@@ -80,6 +81,8 @@ export const fr: Dict = {
     stack: "Stack",
     repo: "Code source",
     site: "Voir le site",
+    delivered: "Livré",
+    hint: "Survolez un projet pour voir ce qu'il fait.",
     items: {
       makisend: {
         name: "MakiSend",

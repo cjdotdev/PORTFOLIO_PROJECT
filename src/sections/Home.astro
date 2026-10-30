@@ -1,11 +1,11 @@
 ---
 import Hero from "../components/Hero.astro";
 import WhereAmI from "../components/WhereAmI.astro";
-import WorkItem from "../components/WorkItem.astro";
+import ProjectsShowcase from "../components/ProjectsShowcase.astro";
 import PostList from "../components/PostList.astro";
 import Contact from "../components/Contact.astro";
 import Passions from "../components/Passions.astro";
-import { EXPERIENCE, PROJECTS } from "../data";
+import { EXPERIENCE } from "../data";
 import { getBlogPosts } from "../lib/hashnode";
 import { localePath, type Dict, type Locale } from "../i18n";
 
@@ -15,7 +15,6 @@ interface Props {
 }
 
 const { t, locale } = Astro.props;
-const featured = PROJECTS.filter((project) => project.featured);
 const posts = getBlogPosts().slice(0, 3);
 const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
   month: "short",
@@ -28,21 +27,7 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
 
 <WhereAmI t={t} locale={locale} />
 
-<section class="section container stack-lg" id="work" aria-labelledby="work-title">
-  <div class="head">
-    <h2 id="work-title" class="display">{t.work.title}</h2>
-    <a class="link more" href={localePath(locale, "/projects/")}>{t.work.all}</a>
-  </div>
-  <div class="items">
-    {
-      featured.map((project) => (
-        <div class="reveal">
-          <WorkItem project={project} t={t} />
-        </div>
-      ))
-    }
-  </div>
-</section>
+<ProjectsShowcase t={t} locale={locale} />
 
 <section class="section container about reveal" aria-labelledby="about-title">
   <h2 id="about-title" class="display">{t.about.title}</h2>
@@ -97,15 +82,6 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
 <Contact t={t} />
 
 <style>
-  /* The heading sits close to its first project; the projects keep the wide rest between them. */
-  .stack-lg {
-    display: grid;
-    gap: var(--space-12);
-  }
-  .items {
-    display: grid;
-    gap: clamp(4rem, 3rem + 4vw, 7rem);
-  }
   .stack-md {
     display: grid;
     gap: var(--space-8);

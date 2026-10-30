@@ -5,6 +5,7 @@ import makisendLight from "../assets/work/dashboard-logs-light.webp";
 import makisendDark from "../assets/work/dashboard-logs-dark.webp";
 import scheduler from "../assets/work/linkedin-scheduler.webp";
 import contrasto from "../assets/work/contrasto.webp";
+import TechList from "./TechList.astro";
 import type { Project } from "../data";
 import type { Dict } from "../i18n";
 
@@ -32,7 +33,19 @@ const sizes = "(min-width: 64rem) 42rem, 100vw";
 <article class="work" aria-labelledby={headingId}>
   <div class="text">
     {/* Literal h2/h3: Astro's scoped styles do not reach a dynamic tag. */}
-    {level === 2 ? <h2 id={headingId} class="name">{copy.name}</h2> : <h3 id={headingId} class="name">{copy.name}</h3>}
+    {
+      level === 2 ? (
+        <h2 id={headingId} class="name">
+          <img src={project.logo} alt="" width="36" height="36" />
+          {copy.name}
+        </h2>
+      ) : (
+        <h3 id={headingId} class="name">
+          <img src={project.logo} alt="" width="36" height="36" />
+          {copy.name}
+        </h3>
+      )
+    }
     <p class="lede">{copy.line}</p>
     <p class="role">{copy.role}</p>
     {
@@ -44,9 +57,9 @@ const sizes = "(min-width: 64rem) 42rem, 100vw";
         </ul>
       )
     }
-    <p class="stack">
-      <span class="sr-only">{t.work.stack}: </span>{project.stack.join(" · ")}
-    </p>
+    <div class="stack">
+      <TechList stack={project.stack} label={t.work.stack} />
+    </div>
     <p class="links">
       {
         project.site && (
@@ -110,12 +123,20 @@ const sizes = "(min-width: 64rem) 42rem, 100vw";
   }
   /* One step under the section heading (DESIGN.md 28px), Geist 500 like every heading. */
   .name {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
     font-family: var(--font-display);
     font-size: clamp(1.5rem, 1.3rem + 0.6vw, 1.75rem);
     font-weight: 500;
     letter-spacing: var(--tracking-display);
     line-height: var(--leading-display);
     overflow-wrap: anywhere;
+  }
+  .name img {
+    flex: none;
+    width: 2.25rem;
+    height: 2.25rem;
   }
   .role {
     color: var(--text-secondary);
@@ -134,8 +155,7 @@ const sizes = "(min-width: 64rem) 42rem, 100vw";
     text-wrap: pretty;
   }
   .stack {
-    color: var(--text-secondary);
-    font-size: var(--text-sm);
+    margin-top: var(--space-2);
   }
   .links {
     display: flex;

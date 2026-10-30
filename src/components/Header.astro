@@ -187,20 +187,46 @@ const links = [
     padding: 0 var(--space-3);
     border-radius: 12px;
     color: var(--text-secondary);
-    font-size: var(--text-sm);
+    font-size: 0.9375rem;
     font-weight: 500;
     text-decoration: none;
     transition:
       color var(--duration-fast) var(--ease-standard),
       background-color var(--duration-fast) var(--ease-standard);
   }
-  .nav a:hover {
-    background: var(--surface-muted);
+  /* Lenis-style underline: it draws in from the left on hover and leaves to the right. The current
+     page keeps it, in the accent. */
+  .nav a {
+    position: relative;
+  }
+  .nav a::after {
+    content: "";
+    position: absolute;
+    right: var(--space-3);
+    bottom: 0.4rem;
+    left: var(--space-3);
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+  }
+  .nav a:hover,
+  .nav a:focus-visible {
     color: var(--foreground);
   }
+  .nav a:hover::after,
+  .nav a:focus-visible::after,
+  .nav a[aria-current="page"]::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
   .nav a[aria-current="page"] {
-    background: var(--accent-subtle);
     color: var(--accent-strong);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .nav a::after {
+      transition: transform 600ms var(--ease-enter);
+    }
   }
 
   .actions {

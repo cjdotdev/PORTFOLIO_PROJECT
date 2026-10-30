@@ -56,6 +56,7 @@ export const en = {
     fallback: "No answer from the API. Showing the last known place.",
     request: "Request",
     response: "Response",
+    waiting: "Waiting for a request.",
     now: "Now in",
     localTime: "Local time",
     weather: "Weather",
@@ -79,6 +80,8 @@ export const en = {
     stack: "Stack",
     repo: "Source code",
     site: "Visit site",
+    delivered: "Shipped",
+    hint: "Hover a project to see what it does.",
     items: {
       makisend: {
         name: "MakiSend",
