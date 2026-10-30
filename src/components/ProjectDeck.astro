@@ -1,0 +1,619 @@
+---
+import { Image } from "astro:assets";
+import { siGithub } from "simple-icons";
+import contrastoShot from "../assets/work/contrasto.webp";
+import CardBack from "./CardBack.astro";
+import TechList from "./TechList.astro";
+import { PROJECTS } from "../data";
+import { localePath, type Dict, type Locale } from "../i18n";
+
+interface Props {
+  t: Dict;
+  locale: Locale;
+}
+
+const { t, locale } = Astro.props;
+/** Plain backs under the projects, so the deck has the thickness of a real one. */
+const SPARE = 4;
+const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
+  month: "short",
+  year: "numeric",
+  timeZone: "UTC",
+});
+---
+
+<section class="deck-section section container" id="work" aria-labelledby="work-title" data-deck-section>
+  <div class="pin">
+    <div class="head">
+      <h2 id="work-title" class="display">{t.work.title}</h2>
+      <a class="link more" href={localePath(locale, "/projects/")}>{t.work.all}</a>
+    </div>
+
+    <div class="board">
+      {/* A deck lying on a table, seen from above at an angle, so each card reads as a parallelogram.
+          Only the cards move it. The top card lies face up; pressing it brings an engraved hand in, of
+          the same family as the opening title's, that takes it and holds it up, and the next card turns
+          face up. Pressing the drawn card slips it back under the deck. */}
+      <div class="table" data-table>
+        <div class="deck" role="group" aria-label={t.work.deck} data-deck>
+          {
+            Array.from({ length: SPARE }, (_, i) => (
+              <div class="card spare" style={`--slot:${i}`}>
+                <CardBack />
+              </div>
+            ))
+          }
+          {
+            PROJECTS.map((project, i) => {
+              const name = t.work.items[project.id].name;
+              return (
+                <button
+                  type="button"
+                  class="card project"
+                  style={`--slot:${SPARE + PROJECTS.length - 1 - i}`}
+                  data-card={project.id}
+                  aria-controls={`panel-${project.id}`}
+                  aria-label={`${t.work.draw}: ${name}`}
+                >
+                  <span class="face">
+                    {project.video ? (
+                      <video muted loop playsinline preload="none" poster={project.video.poster} aria-hidden="true">
+                        <source src={project.video.src} type="video/webm" />
+                      </video>
+                    ) : (
+                      <Image
+                        src={contrastoShot}
+                        alt=""
+                        widths={[480, 800, 1200]}
+                        sizes="(min-width: 64rem) 40rem, 90vw"
+                        format="webp"
+                        quality={80}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    )}
+                    <span class="label">
+                      <img src={project.logo} alt="" width="20" height="20" />
+                      {name}
+                    </span>
+                  </span>
+                  <CardBack />
+                </button>
+              );
+            })
+          }
+        </div>
+        <img class="hand" src="/img/hand-take.webp" alt="" width="1100" height="814" data-hand />
+      </div>
+
+      <div class="side">
+        <p class="hint">{t.work.hint}</p>
+        <div class="panels" data-panels>
+          {
+            PROJECTS.map((project) => {
+              const copy = t.work.items[project.id];
+              return (
+                <div class="panel" id={`panel-${project.id}`} data-panel={project.id}>
+                  <h3 class="name">
+                    <img src={project.logo} alt="" width="36" height="36" />
+                    {copy.name}
+                  </h3>
+                  <p class="line">{copy.line}</p>
+                  <dl class="meta">
+                    <div>
+                      <dt>{t.work.delivered}</dt>
+                      <dd>
+                        <time datetime={project.delivered}>{month.format(new Date(`${project.delivered}-01`))}</time>
+                      </dd>
+                    </div>
+                    <div>
+                      <dt class="sr-only">{copy.name}</dt>
+                      <dd class="role">{copy.role}</dd>
+                    </div>
+                  </dl>
+                  <TechList stack={project.stack} label={t.work.stack} />
+                  <p class="actions">
+                    {project.site && (
+                      <a class="btn btn-primary" href={project.site} target="_blank" rel="noopener noreferrer">
+                        {t.work.site}
+                        <span class="sr-only">: {copy.name}</span>
+                      </a>
+                    )}
+                    {project.repo && (
+                      <a class="btn btn-secondary" href={project.repo} target="_blank" rel="noopener noreferrer">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                          <path d={siGithub.path} />
+                        </svg>
+                        GitHub
+                        <span class="sr-only">: {copy.name}</span>
+                      </a>
+                    )}
+                  </p>
+                </div>
+              );
+            })
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // The deck's tilt, the same numbers as .deck's transform in the CSS: a drawn card undoes it to stand
+  // upright and face the reader.
+  const TILT_X = 55;
+  const TILT_Z = -35;
+  /** Space between two cards in the pile, in px. */
+  const GAP = 3;
+
+  type Pose = { a?: number; b?: number; x?: number; y?: number; z?: number; f?: number; s?: number };
+  // Every keyframe uses the same list of functions so the browser interpolates each number on its own.
+  const pose = ({ a = 0, b = 0, x = 0, y = 0, z = 0, f = 0, s = 1 }: Pose) =>
+    `rotateZ(${a}deg) rotateX(${b}deg) translate3d(${x}px, ${y}px, ${z}px) rotateY(${f}deg) scale(${s})`;
+
+  function setup(section: HTMLElement) {
+    const table = section.querySelector<HTMLElement>("[data-table]")!;
+    const deck = section.querySelector<HTMLElement>("[data-deck]")!;
+    const hand = section.querySelector<HTMLImageElement>("[data-hand]")!;
+    const cards = [...section.querySelectorAll<HTMLButtonElement>("[data-card]")];
+    const panels = [...section.querySelectorAll<HTMLElement>("[data-panel]")];
+    const panelBox = section.querySelector<HTMLElement>("[data-panels]")!;
+    const spares = section.querySelectorAll(".spare").length;
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    /** The deck from the top down; the drawn card is out of it. */
+    let order = [...cards];
+    let drawn: HTMLButtonElement | null = null;
+    let queue: Promise<void> = Promise.resolve();
+    let pending = 0;
+
+    const width = () => cards[0].offsetWidth;
+    const zOf = (index: number) => (spares + order.length - 1 - index) * GAP;
+    // Shorter moves while several are waiting, so quick clicks never lag behind.
+    const ms = (base: number) => (still.matches ? 0 : base / Math.min(3, Math.max(1, pending)));
+
+    function run(card: HTMLElement, frames: string[], duration: number) {
+      if (!duration) {
+        card.style.transform = frames[frames.length - 1];
+        return Promise.resolve();
+      }
+      const animation = card.animate(
+        frames.map((transform) => ({ transform })),
+        { duration, easing: "cubic-bezier(.22,1,.36,1)", fill: "forwards" },
+      );
+      return animation.finished.then(() => {
+        card.style.transform = frames[frames.length - 1];
+        animation.cancel();
+      });
+    }
+
+    // Rest: every card in its slot, the top one face up and the only one you can press. A card that
+    // comes to the top face down turns over on the way.
+    function settle(duration = 0) {
+      return Promise.all(
+        order.map((card, index) => {
+          card.disabled = index !== 0;
+          card.tabIndex = index === 0 ? 0 : -1;
+          card.style.zIndex = String(100 - index);
+          const target = pose({ z: zOf(index), f: index === 0 ? 0 : 180 });
+          const from = card.style.transform || target;
+          const turnsUp = index === 0 && from.includes("rotateY(180deg)");
+          return run(card, turnsUp && duration ? turnOver(zOf(index)) : [from, target], duration);
+        }),
+      );
+    }
+
+    // Face down to face up, turning on its long axis. Half the card's width swings below its centre as
+    // it turns, so at every step it is lifted by that much (plus a little) and never cuts the deck.
+    function turnOver(z: number) {
+      const half = width() / 2;
+      return Array.from({ length: 9 }, (_, i) => {
+        const f = 180 - i * 22.5;
+        return pose({ z: z + Math.sin((f * Math.PI) / 180) * half * 1.08, f });
+      });
+    }
+
+    function enqueue(job: () => unknown) {
+      pending++;
+      queue = queue.then(async () => {
+        await job();
+        pending--;
+      });
+      return queue;
+    }
+
+    // Where a drawn card stands: upright, in front of the deck and above it, almost as wide as the table.
+    function shown(): Pose {
+      const tableBox = table.getBoundingClientRect();
+      const deckBox = deck.getBoundingClientRect();
+      const perspective = parseFloat(getComputedStyle(table).perspective) || 1600;
+      const z = 140;
+      const grow = perspective / (perspective - z);
+      const s = Math.min((tableBox.width * 0.96) / width(), (tableBox.height * 0.6) / (width() * 0.5625)) / grow;
+      const x = tableBox.left + tableBox.width / 2 - (deckBox.left + deckBox.width / 2);
+      // Its top edge sits just inside the table, clear of the section heading above it. The perspective
+      // (centred on the table) pushes anything nearer the reader away from that centre, so the target
+      // is pulled back towards it by the same factor.
+      const height = width() * 0.5625 * s * grow;
+      const origin = tableBox.top + tableBox.height / 2;
+      const centre = origin + (tableBox.top + 32 + height / 2 - origin) / grow;
+      const y = centre - (deckBox.top + deckBox.height / 2);
+      return { a: -TILT_Z, b: -TILT_X, x, y, z, f: 0, s };
+    }
+
+    function showPanel(id: string | null) {
+      panels.forEach((panel) => panel.classList.toggle("is-active", panel.dataset.panel === id));
+      if (id) panelBox.dataset.picked = "";
+    }
+
+    function playing(card: HTMLElement | null) {
+      for (const other of cards) {
+        const video = other.querySelector("video");
+        if (!video) continue;
+        if (other === card && !still.matches) video.play().catch(() => {});
+        else video.pause();
+      }
+    }
+
+    // A drawn card goes back under the deck: it first turns over where it stands, slowly, so its back
+    // (the CJ mark and the signature) faces the reader for a moment, then it is slipped in face down.
+    async function putBack() {
+      if (!drawn) return;
+      const card = drawn;
+      drawn = null;
+      card.classList.remove("is-drawn");
+      playing(null);
+      order.push(card);
+      const slot = zOf(order.length - 1);
+      const standing = shown();
+      await run(card, [pose(standing), pose({ ...standing, f: 180 })], ms(900));
+      if (still.matches) return settle();
+      await new Promise((resolve) => setTimeout(resolve, 450));
+
+      // One unbroken move: the card lies down as it comes beside the deck, clear of it and already at
+      // the height of its slot at the bottom, then slides in under the others, slowing as it goes,
+      // sinks a little past its place and comes back up to it. Meanwhile the cards above lift to let it
+      // in and settle back down on it.
+      const beside = -width() * 1.06;
+      const duration = 1600;
+      const lands = card.animate(
+        [
+          { transform: pose({ ...standing, f: 180 }), easing: "cubic-bezier(.45,0,.25,1)" },
+          { transform: pose({ x: beside, z: slot + 1, f: 180 }), offset: 0.48, easing: "cubic-bezier(.3,0,.2,1)" },
+          { transform: pose({ x: beside * 0.35, z: slot, f: 180 }), offset: 0.76, easing: "cubic-bezier(.2,.7,.2,1)" },
+          { transform: pose({ z: slot - 6, f: 180 }), offset: 0.92, easing: "ease-out" },
+          { transform: pose({ z: slot, f: 180 }) },
+        ],
+        { duration, fill: "forwards" },
+      );
+      const above = order.slice(0, -1);
+      const lifts = above.map((other, index) => {
+        const from = other.style.transform || pose({ z: zOf(index), f: index === 0 ? 0 : 180 });
+        const to = pose({ z: zOf(index), f: index === 0 ? 0 : 180 });
+        return other.animate(
+          [
+            { transform: from },
+            { transform: pose({ z: zOf(index) + 18 + (above.length - index) * 3, f: index === 0 ? 0 : 180 }), offset: 0.4 },
+            { transform: pose({ z: zOf(index) + 14, f: index === 0 ? 0 : 180 }), offset: 0.7 },
+            { transform: to },
+          ],
+          { duration: duration * 0.6, delay: duration * 0.4, easing: "cubic-bezier(.4,0,.2,1)", fill: "forwards" },
+        );
+      });
+      await Promise.all([lands.finished, ...lifts.map((lift) => lift.finished)]);
+      card.style.transform = pose({ z: slot, f: 180 });
+      lands.cancel();
+      above.forEach((other, index) => {
+        other.style.transform = pose({ z: zOf(index), f: index === 0 ? 0 : 180 });
+      });
+      lifts.forEach((lift) => lift.cancel());
+      await settle();
+    }
+
+    // The hand comes down from the upper right, lays its fingers on the top card, takes it out of the
+    // deck and lifts it up to face the reader, then lets go and leaves the way it came.
+    async function draw(card: HTMLButtonElement) {
+      if (card === drawn || order[0] !== card) return;
+      await putBack();
+      // The hint goes as soon as the hand comes, so the hand never covers it.
+      panelBox.dataset.picked = "";
+      order.shift();
+      drawn = card;
+      card.classList.add("is-drawn");
+      card.disabled = false;
+      card.tabIndex = -1;
+      card.style.zIndex = "200";
+      const zTop = zOf(-1);
+      const slid = pose({ x: width() * 0.55, z: zTop + 12 });
+      const up = pose(shown());
+
+      if (!still.matches) {
+        card.append(hand);
+        hand.classList.add("is-on");
+        await hand.animate(
+          [
+            { translate: "38% -42%", opacity: 0 },
+            { translate: "0 0", opacity: 1 },
+          ],
+          { duration: 420, easing: "cubic-bezier(.22,1,.36,1)", fill: "forwards" },
+        ).finished;
+        // A beat with the fingers on the card before it moves, as a real hand takes hold.
+        await new Promise((resolve) => setTimeout(resolve, 160));
+        await run(card, [pose({ z: zTop }), slid], 440);
+      }
+      await Promise.all([run(card, [still.matches ? up : slid, up], ms(820)), settle(ms(700))]);
+      if (!still.matches) {
+        await hand.animate(
+          [
+            { translate: "0 0", opacity: 1 },
+            { translate: "42% -46%", opacity: 0 },
+          ],
+          { duration: 380, easing: "cubic-bezier(.55,0,.75,.2)", fill: "forwards" },
+        ).finished;
+        hand.classList.remove("is-on");
+        hand.getAnimations().forEach((animation) => animation.cancel());
+        table.append(hand);
+      }
+      // The panel waits for the hand to be gone, so the hand never passes over the text.
+      showPanel(card.dataset.card!);
+      playing(card);
+    }
+
+    // The top card is drawn; the drawn card, pressed again, goes back to the deck and the panel gives
+    // way to the hint.
+    for (const card of cards) {
+      card.addEventListener("click", () => {
+        if (card === drawn) {
+          enqueue(async () => {
+            await putBack();
+            showPanel(null);
+            delete panelBox.dataset.picked;
+          });
+        } else if (order[0] === card) enqueue(() => draw(card));
+      });
+    }
+    // Keeps a drawn card in place when the table changes size.
+    window.addEventListener("resize", () => {
+      if (drawn) drawn.style.transform = pose(shown());
+    });
+
+    // Only the drawn card's video plays, and only while the section is on screen.
+    new IntersectionObserver(([entry]) => playing(entry.isIntersecting ? drawn : null)).observe(table);
+
+    section.dataset.ready = "";
+    settle();
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-deck-section]").forEach(setup);
+</script>
+
+<style>
+  .head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: space-between;
+    gap: var(--space-4) var(--space-8);
+  }
+  .more {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    font-size: var(--text-sm);
+    font-weight: 500;
+  }
+  .pin {
+    display: grid;
+    gap: var(--space-4);
+  }
+  .board {
+    display: grid;
+    gap: var(--space-8);
+  }
+
+  /* ─── The table and the deck ─── */
+  .table {
+    position: relative;
+    height: min(78vw, 30rem);
+    container-type: size;
+    perspective: 1600px;
+  }
+  /* The deck lies flat, turned on the table, seen from above at an angle. */
+  .deck {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: min(88cqw, 126cqh);
+    aspect-ratio: 16 / 9;
+    /* Centred first (outermost), so a drawn card that undoes the tilt is not thrown off by it. */
+    transform: translate(-50%, -50%) rotateX(55deg) rotateZ(-35deg);
+    transform-style: preserve-3d;
+  }
+  .card {
+    position: absolute;
+    inset: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 4cqw;
+    background: none;
+    color: var(--foreground);
+    font: inherit;
+    text-align: start;
+    transform: translate3d(0, 0, calc(var(--slot) * 3px));
+    transform-style: preserve-3d;
+  }
+  .card:not(:disabled) {
+    cursor: pointer;
+  }
+  .card.is-drawn {
+    cursor: default;
+  }
+  .face,
+  .card :global(.back) {
+    border: 1px solid var(--border-strong);
+    border-radius: inherit;
+    backface-visibility: hidden;
+    box-shadow: 0 1px 0 rgb(0 0 0 / 0.5);
+  }
+  .face {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background: var(--surface-muted);
+  }
+  .card :global(.back) {
+    transform: rotateY(180deg);
+  }
+  .spare :global(.back) {
+    transform: none;
+  }
+  .face > :is(video, img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .label {
+    position: absolute;
+    top: 4%;
+    left: 3%;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--background) 82%, transparent);
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    letter-spacing: var(--tracking-display);
+  }
+  .label img {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+  .card:not(:disabled):not(.is-drawn):hover .face {
+    border-color: var(--foreground);
+  }
+  .card:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+  }
+
+  /* The taking hand (Goltzius's drawing-book plate, c. 1610, Rijksmuseum, CC0, mirrored): its
+     fingertips, about 8% across and 85% down the picture, rest on the card a little right of centre,
+     and the thumb meets the card's right edge. Hidden until a draw brings it in. */
+  .hand {
+    position: absolute;
+    top: -57%;
+    left: 47%;
+    width: 100%;
+    height: auto;
+    max-width: none;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateZ(1px);
+  }
+  .hand.is-on {
+    visibility: visible;
+  }
+
+  /* ─── Beside the table: the hint, the controls and the panel ─── */
+  .side {
+    display: grid;
+    gap: var(--space-5);
+    align-content: start;
+  }
+  .hint {
+    max-width: 30rem;
+    color: var(--text-secondary);
+    font-size: var(--text-lg);
+    text-wrap: pretty;
+  }
+  .side:has(.panels[data-picked]) .hint {
+    display: none;
+  }
+  .panel {
+    display: none;
+    gap: var(--space-5);
+    align-content: start;
+  }
+  .panel.is-active {
+    display: grid;
+  }
+  .name {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 1.3rem + 0.6vw, 1.75rem);
+    font-weight: 500;
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-display);
+  }
+  .name img {
+    flex: none;
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+  .line {
+    font-size: var(--text-lg);
+    text-wrap: pretty;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-6);
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+  }
+  .meta div {
+    display: flex;
+    gap: var(--space-2);
+  }
+  .meta dd {
+    margin: 0;
+  }
+  .meta time {
+    color: var(--foreground);
+    font-variant-numeric: tabular-nums;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+  .actions svg {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .panel.is-active {
+      animation: panel-in 300ms var(--ease-enter);
+    }
+  }
+  @keyframes panel-in {
+    from {
+      opacity: 0;
+      translate: 0.75rem 0;
+    }
+  }
+
+  /* ─── Desktop: the table on the left, the panel on the right ─── */
+  @media (min-width: 64rem) {
+    .board {
+      grid-template-columns: minmax(0, 8fr) minmax(0, 5fr);
+      gap: clamp(2rem, 1rem + 3vw, 4rem);
+      align-items: start;
+    }
+    .table {
+      height: 38rem;
+    }
+  }
+
+</style>

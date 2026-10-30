@@ -1,7 +1,7 @@
 ---
 import Hero from "../components/Hero.astro";
 import WhereAmI from "../components/WhereAmI.astro";
-import ProjectsShowcase from "../components/ProjectsShowcase.astro";
+import ProjectDeck from "../components/ProjectDeck.astro";
 import PostList from "../components/PostList.astro";
 import Contact from "../components/Contact.astro";
 import Passions from "../components/Passions.astro";
@@ -27,7 +27,7 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
 
 <WhereAmI t={t} locale={locale} />
 
-<ProjectsShowcase t={t} locale={locale} />
+<ProjectDeck t={t} locale={locale} />
 
 <section class="section container about reveal" aria-labelledby="about-title">
   <h2 id="about-title" class="display">{t.about.title}</h2>

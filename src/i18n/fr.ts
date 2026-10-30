@@ -82,7 +82,9 @@ export const fr: Dict = {
     repo: "Code source",
     site: "Voir le site",
     delivered: "Livré",
-    hint: "Survolez un projet pour voir ce qu'il fait.",
+    hint: "Clique sur la carte du dessus pour la tirer, puis sur la carte tirée pour la remettre dans le paquet.",
+    draw: "Tirer la carte",
+    deck: "Paquet de projets",
     items: {
       makisend: {
         name: "MakiSend",

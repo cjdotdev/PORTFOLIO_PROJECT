@@ -81,7 +81,9 @@ export const en = {
     repo: "Source code",
     site: "Visit site",
     delivered: "Shipped",
-    hint: "Hover a project to see what it does.",
+    hint: "Click the top card to draw it. Click the drawn card to put it back.",
+    draw: "Draw the card",
+    deck: "Deck of projects",
     items: {
       makisend: {
         name: "MakiSend",
