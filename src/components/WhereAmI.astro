@@ -1,5 +1,6 @@
 ---
-import { LOCATION, SITE_URL } from "../data";
+import GabonMap from "./GabonMap.astro";
+import { LOCATION } from "../data";
 import type { Dict, Locale } from "../i18n";
 
 interface Props {
@@ -9,15 +10,6 @@ interface Props {
 
 const { t, locale } = Astro.props;
 const endpoint = "/api/where";
-const host = new URL(SITE_URL).host;
-// What the HTML shows before (or without) the live call. Same fields as functions/api/where.ts.
-const fallback = {
-  city: LOCATION.city,
-  country: LOCATION.country,
-  from: LOCATION.from,
-  timezone: LOCATION.timezone,
-  coordinates: { lat: LOCATION.lat, lon: LOCATION.lon },
-};
 const country = locale === "fr" && LOCATION.country === "Benin" ? "Bénin" : LOCATION.country;
 const from = LOCATION.from;
 
@@ -46,10 +38,10 @@ const tile = (x: number, y: number) => `https://tile.openstreetmap.org/${ZOOM}/$
 
   <div
     class="board"
-    data-where-console
+    data-where-board
     data-endpoint={endpoint}
-    data-fallback={t.where.fallback}
-    data-fallback-json={JSON.stringify(fallback)}
+    data-lat={LOCATION.lat}
+    data-lon={LOCATION.lon}
     data-codes={JSON.stringify(t.where.codes)}
   >
     <figure class="map" role="img" aria-label={t.where.mapAlt} data-city={LOCATION.city}>
@@ -86,23 +78,7 @@ const tile = (x: number, y: number) => `https://tile.openstreetmap.org/${ZOOM}/$
     </dl>
 
     <div class="console">
-      <div class="request">
-        <p class="label">{t.where.request}</p>
-        <p class="mono line"><span class="verb">GET</span> https://{host}{endpoint}</p>
-        <button type="button" class="btn btn-secondary send" data-send>
-          <span class="live" aria-hidden="true"></span>
-          <span data-send-label data-idle={t.where.send} data-busy={t.where.sending}>{t.where.send}</span>
-        </button>
-      </div>
-      <div class="response">
-        <p class="label">
-          {t.where.response}
-          <span class="status mono" data-status aria-live="polite"></span>
-        </p>
-        <p class="waiting" data-waiting>{t.where.waiting}</p>
-        <pre class="mono json" data-json hidden></pre>
-        <p class="note" data-note hidden></p>
-      </div>
+      <GabonMap t={t} locale={locale} />
     </div>
   </div>
 </section>
@@ -114,35 +90,7 @@ const tile = (x: number, y: number) => `https://tile.openstreetmap.org/${ZOOM}/$
     country?: string;
     coordinates?: { lat: number; lon: number };
     weather?: Weather;
-    [key: string]: unknown;
   };
-
-  const reduce = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  function escape(text: string) {
-    return text.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c] as string);
-  }
-
-  // Keys quiet, values in ink, so the eye reads the answer and not the syntax.
-  function highlight(line: string) {
-    return escape(line)
-      .replace(/^(\s*)"([^"]+)":/, '$1<span class="k">"$2"</span>:')
-      .replace(/: ("[^"]*"|-?[\d.]+|true|false|null)(,?)$/, ': <span class="v">$1</span>$2')
-      .replace(/^(\s*)"([^"]*)"(,?)$/, '$1<span class="v">"$2"</span>$3');
-  }
-
-  async function render(pre: HTMLElement, text: string) {
-    const lines = text.split("\n");
-    if (reduce()) {
-      pre.innerHTML = lines.map(highlight).join("\n");
-      return;
-    }
-    pre.innerHTML = "";
-    for (const [index, line] of lines.entries()) {
-      pre.insertAdjacentHTML("beforeend", (index ? "\n" : "") + `<span class="in">${highlight(line)}</span>`);
-      await new Promise((resolve) => setTimeout(resolve, 35));
-    }
-  }
 
   // WMO weather codes, grouped into the words the dictionary carries.
   function weatherKey(code: number) {
@@ -191,85 +139,47 @@ const tile = (x: number, y: number) => `https://tile.openstreetmap.org/${ZOOM}/$
     }
   }
 
+  // When the block comes into view, ask the site's API where Joel is; the place, the map and the
+  // weather follow its answer. Without an answer the page keeps LOCATION and fetches the weather itself.
   function setup(root: HTMLElement) {
-    const button = root.querySelector<HTMLButtonElement>("[data-send]")!;
-    const label = root.querySelector<HTMLElement>("[data-send-label]")!;
-    const status = root.querySelector<HTMLElement>("[data-status]")!;
-    const waiting = root.querySelector<HTMLElement>("[data-waiting]")!;
-    const pre = root.querySelector<HTMLElement>("[data-json]")!;
-    const note = root.querySelector<HTMLElement>("[data-note]")!;
     const map = root.querySelector<HTMLElement>(".map")!;
     const weatherOut = root.querySelector<HTMLElement>("[data-weather]")!;
     const codes = JSON.parse(root.dataset.codes ?? "{}") as Record<string, string>;
-    const endpoint = root.dataset.endpoint!;
-    // The last known place, shown only when the API does not answer. Before the first call the pane
-    // says it is waiting, so the JSON that lands is visibly the answer.
-    const fallback = JSON.parse(root.dataset.fallbackJson ?? "{}") as Place;
 
     function showWeather(weather: Weather | undefined) {
       if (!weather) return;
       weatherOut.textContent = `${weather.temperature_c}°C · ${codes[weatherKey(weather.weather_code)] ?? ""}`;
     }
 
-    function show(text: string) {
-      waiting.hidden = true;
-      pre.hidden = false;
-      return render(pre, text);
-    }
-
-    async function send() {
-      button.disabled = true;
-      label.textContent = label.dataset.busy!;
-      root.dataset.state = "busy";
-      const started = performance.now();
+    async function locate() {
       try {
-        const response = await fetch(endpoint, { headers: { accept: "application/json" }, cache: "no-store" });
+        const response = await fetch(root.dataset.endpoint!, { headers: { accept: "application/json" } });
         if (!response.ok || !response.headers.get("content-type")?.includes("json")) throw new Error(String(response.status));
         const place = (await response.json()) as Place;
-        const ms = Math.round(performance.now() - started);
-        status.textContent = `${response.status} OK · ${ms} ms`;
-        note.hidden = true;
-        root.dataset.state = "ok";
-        showWeather(place.weather);
         if (place.coordinates) moveMap(map, place.coordinates.lat, place.coordinates.lon, place.city);
-        await show(JSON.stringify(place, null, 2));
         if (place.city && place.country) {
           document.querySelectorAll("[data-where='place']").forEach((element) => {
             element.textContent = `${place.city}, ${place.country}`;
           });
         }
+        showWeather(place.weather ?? (place.coordinates && (await weatherDirect(place.coordinates.lat, place.coordinates.lon))));
       } catch {
-        status.textContent = "";
-        note.textContent = root.dataset.fallback ?? "";
-        note.hidden = false;
-        root.dataset.state = "fallback";
-        const { lat, lon } = fallback.coordinates!;
-        const weather = await weatherDirect(lat, lon);
-        showWeather(weather);
-        await show(JSON.stringify({ ...fallback, weather }, null, 2));
-      } finally {
-        button.disabled = false;
-        label.textContent = label.dataset.idle!;
+        showWeather(await weatherDirect(Number(root.dataset.lat), Number(root.dataset.lon)));
       }
     }
 
-    // The console only answers when the visitor sends the request. The weather readout does not wait
-    // for that: it comes straight from Open-Meteo when the block comes into view.
-    button.addEventListener("click", send);
     const observer = new IntersectionObserver(
-      async (entries) => {
+      (entries) => {
         if (!entries.some((entry) => entry.isIntersecting)) return;
         observer.disconnect();
-        const { lat, lon } = fallback.coordinates!;
-        const weather = await weatherDirect(lat, lon);
-        if (!root.dataset.state) showWeather(weather);
+        locate();
       },
       { threshold: 0.25 },
     );
     observer.observe(root);
   }
 
-  document.querySelectorAll<HTMLElement>("[data-where-console]").forEach(setup);
+  document.querySelectorAll<HTMLElement>("[data-where-board]").forEach(setup);
 </script>
 
 <script>
@@ -414,109 +324,10 @@ const tile = (x: number, y: number) => `https://tile.openstreetmap.org/${ZOOM}/$
     font-variant-numeric: tabular-nums;
   }
 
-  /* ─── Request / response ─── */
+  /* ─── Gabon ─── */
   .console {
     grid-area: console;
     display: grid;
-    grid-template-rows: auto 1fr;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-surface);
-    background: var(--surface);
-    overflow: hidden;
-  }
-  .request,
-  .response {
-    display: grid;
-    gap: var(--space-3);
-    align-content: start;
-    padding: var(--space-6);
-  }
-  .request {
-    border-bottom: 1px solid var(--border);
-  }
-  .label {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--space-3);
-    color: var(--text-secondary);
-    font-size: var(--text-sm);
-    font-weight: 500;
-  }
-  .line {
-    overflow-wrap: anywhere;
-  }
-  .verb {
-    color: var(--foreground);
-    font-weight: 500;
-  }
-  .status {
-    color: var(--foreground);
-  }
-  .send {
-    justify-self: start;
-    gap: var(--space-3);
-  }
-  .response {
-    background: var(--surface-muted);
-  }
-  /* Same footprint as the JSON it stands in for, so the card does not jump when the answer lands. */
-  .waiting {
-    display: grid;
-    place-items: center;
-    min-height: 15em;
-    margin: 0;
-    color: var(--text-muted);
-    font-family: var(--font-mono);
-    font-size: 0.8125rem;
-  }
-  .waiting[hidden],
-  .json[hidden] {
-    display: none;
-  }
-  .json {
-    margin: 0;
-    min-height: 15em;
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-    color: var(--foreground);
-    font-size: 0.8125rem;
-  }
-  .json :global(.k) {
-    color: var(--text-secondary);
-  }
-  .json :global(.v) {
-    color: var(--foreground);
-    font-weight: 500;
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    .json :global(.in) {
-      animation: line-in 0.32s var(--ease-enter) both;
-    }
-  }
-  @keyframes line-in {
-    from {
-      opacity: 0;
-      filter: blur(3px);
-    }
-  }
-  .note {
-    color: var(--text-secondary);
-    font-size: var(--text-sm);
-  }
-  .live {
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: var(--radius-pill);
-    background: var(--accent);
-  }
-  [data-state="busy"] .live {
-    animation: blink 0.8s steps(2, jump-none) infinite;
-  }
-  @keyframes blink {
-    50% {
-      opacity: 0.2;
-    }
   }
 
   @media (max-width: 60rem) {
@@ -532,10 +343,6 @@ const tile = (x: number, y: number) => `https://tile.openstreetmap.org/${ZOOM}/$
   @media (max-width: 40rem) {
     .readouts {
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      padding: var(--space-5);
-    }
-    .request,
-    .response {
       padding: var(--space-5);
     }
   }

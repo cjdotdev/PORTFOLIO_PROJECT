@@ -652,6 +652,26 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
   .all:active {
     scale: 0.97;
   }
+  /* Phone: the pill stays on the heading's line, at its right end, as logos and arrow only; the
+     label is still read out. */
+  @media (max-width: 39.99rem) {
+    .head {
+      flex-wrap: nowrap;
+      align-items: center;
+    }
+    .all {
+      flex: none;
+      gap: var(--space-2);
+    }
+    .all-label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+  }
   .all:focus-visible .all-arrow {
     background: var(--accent);
   }
