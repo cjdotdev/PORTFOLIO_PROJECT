@@ -1,7 +1,7 @@
 ---
 import Monument from "./Monument.astro";
-import { HERO_IMAGE } from "../lib/hero-image";
-import { LOCATION, PERSONAL } from "../data";
+import { HERO_IMAGE, HERO_PHOTO } from "../lib/hero-image";
+import { PERSONAL } from "../data";
 import { localePath, type Dict, type Locale } from "../i18n";
 
 interface Props {
@@ -10,16 +10,47 @@ interface Props {
 }
 
 const { t, locale } = Astro.props;
-const place = `${LOCATION.city}, ${locale === "fr" && LOCATION.country === "Benin" ? "Bénin" : LOCATION.country}`;
+// The line under the statement, with its three facts set apart: the role, the studio (a link) and the
+// country (with its flag). The template's {placeholders} mark where each one goes.
+const lineParts = t.hero.line.split(/(\{\w+\})/).filter(Boolean);
 ---
 
 <section class="hero container" aria-labelledby="hero-title">
   <div class="top">
     <div class="copy">
-      <h1 id="hero-title" class="display-lg">
-        <span class="sr-only">{PERSONAL.name}. </span>{t.hero.statement}
+      <h1 id="hero-title" class="display-lg" lang="en">
+        <span class="sr-only">{PERSONAL.name}. </span>
+        {
+          t.hero.statement
+            .split(/(\{great\})/)
+            .filter(Boolean)
+            .map((part) => (part === "{great}" ? <span class="great">{t.hero.great}</span> : part))
+        }
       </h1>
-      <p class="lede">{t.hero.line}</p>
+      <p class="lede">
+        {
+          lineParts.map((part) =>
+            part === "{role}" ? (
+              <strong class="fact">{t.hero.role}</strong>
+            ) : part === "{company}" ? (
+              <a class="fact studio" href="https://lixalistudio.tech" target="_blank" rel="noopener noreferrer">
+                Lixali Studio
+              </a>
+            ) : part === "{country}" ? (
+              <strong class="fact country">
+                <svg class="gabon" viewBox="0 0 3 3" width="14" height="14" aria-hidden="true">
+                  <rect width="3" height="1" fill="#009e60" />
+                  <rect y="1" width="3" height="1" fill="#fcd116" />
+                  <rect y="2" width="3" height="1" fill="#3a75c4" />
+                </svg>
+                Gabon
+              </strong>
+            ) : (
+              part
+            ),
+          )
+        }
+      </p>
       <div class="actions">
         <a class="btn btn-primary" href={`mailto:${PERSONAL.email}`}>{t.hero.primary}</a>
         <a class="btn btn-secondary" href={localePath(locale, "/projects/")}>{t.hero.secondary}</a>
@@ -27,8 +58,11 @@ const place = `${LOCATION.city}, ${locale === "fr" && LOCATION.country === "Beni
     </div>
 
     <figure class="portrait">
-      {/* Static, preloaded WebP with an inline placeholder: see src/lib/hero-image.ts. */}
+      {/* Static, preloaded WebP with an inline placeholder: see src/lib/hero-image.ts. The photo it was
+          drawn from lies under the same mask and shows through on hover, keyboard focus or a tap. */}
+      <button class="faces" type="button" data-faces aria-pressed="false">
       <img
+        class="engraving"
         src={HERO_IMAGE.src}
         srcset={HERO_IMAGE.srcset}
         sizes={HERO_IMAGE.sizes}
@@ -40,12 +74,19 @@ const place = `${LOCATION.city}, ${locale === "fr" && LOCATION.country === "Beni
         decoding="async"
         style={`background-image: url(${HERO_IMAGE.placeholder})`}
       />
-      <figcaption>
-        <span class="live" aria-hidden="true"></span>
-        <span data-where="place">{place}</span>
-        <span class="time mono" data-local-time data-tz={LOCATION.timezone}></span>
-        <span class="sr-only">{t.hero.localTime}</span>
-      </figcaption>
+      <img
+        class="photo"
+        src={HERO_PHOTO.src}
+        srcset={HERO_PHOTO.srcset}
+        sizes={HERO_IMAGE.sizes}
+        width={HERO_IMAGE.width}
+        height={HERO_IMAGE.height}
+        alt=""
+        loading="lazy"
+        decoding="async"
+      />
+      <span class="sr-only">{t.hero.portraitPhoto}</span>
+      </button>
     </figure>
   </div>
 
@@ -53,20 +94,78 @@ const place = `${LOCATION.city}, ${locale === "fr" && LOCATION.country === "Beni
 </section>
 
 <script>
-  // Joel's local time next to the city, refreshed each minute. Empty until the script runs.
-  function tick() {
-    document.querySelectorAll<HTMLElement>("[data-local-time]").forEach((element) => {
-      const tz = element.dataset.tz || "UTC";
-      element.textContent = new Intl.DateTimeFormat(document.documentElement.lang, {
-        hour: "2-digit",
-        minute: "2-digit",
-        hourCycle: "h23",
-        timeZone: tz,
-      }).format(new Date());
+  // The lens: a soft circle of the real photo that follows the mouse a little behind it, opening as
+  // the pointer comes in and closing as it leaves. A tap (or Enter) opens it over the whole picture
+  // until the next tap; keyboard focus does the same. With reduced motion it moves without easing.
+  const calm = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  document.querySelectorAll<HTMLButtonElement>("[data-faces]").forEach((button) => {
+    const photo = button.querySelector<HTMLElement>(".photo")!;
+    const LENS = 0.17; // radius as a share of the picture's width
+    const pos = { x: 0.6, y: 0.45, tx: 0.6, ty: 0.45 };
+    let r = 0;
+    let target = 0;
+    let hovering = false;
+    let frame = 0;
+    let last = 0;
+
+    function goal() {
+      const width = button.clientWidth;
+      const whole = Math.hypot(width, button.clientHeight);
+      const open = button.getAttribute("aria-pressed") === "true" || button.matches(":focus-visible");
+      target = open ? whole : hovering ? width * LENS : 0;
+    }
+
+    function step(now: number) {
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      // Slow on purpose: the circle trails the pointer and grows like ink washing off.
+      const follow = calm.matches ? 1 : 1 - Math.exp(-5 * dt);
+      const grow = calm.matches ? 1 : 1 - Math.exp(-(target > r ? 3.2 : 4.5) * dt);
+      pos.x += (pos.tx - pos.x) * follow;
+      pos.y += (pos.ty - pos.y) * follow;
+      r += (target - r) * grow;
+      photo.style.setProperty("--x", `${(pos.x * 100).toFixed(2)}%`);
+      photo.style.setProperty("--y", `${(pos.y * 100).toFixed(2)}%`);
+      photo.style.setProperty("--r", `${r.toFixed(1)}px`);
+      const settled = Math.abs(target - r) < 0.5 && Math.abs(pos.tx - pos.x) < 0.001 && Math.abs(pos.ty - pos.y) < 0.001;
+      frame = settled ? 0 : requestAnimationFrame(step);
+    }
+    function wake() {
+      goal();
+      if (frame) return;
+      last = performance.now();
+      frame = requestAnimationFrame(step);
+    }
+
+    button.addEventListener("pointerenter", (event) => {
+      if (event.pointerType !== "mouse") return;
+      const box = button.getBoundingClientRect();
+      // The circle starts where the pointer comes in, not from the middle.
+      pos.x = pos.tx = (event.clientX - box.left) / box.width;
+      pos.y = pos.ty = (event.clientY - box.top) / box.height;
+      hovering = true;
+      wake();
     });
-  }
-  tick();
-  setInterval(tick, 30_000);
+    button.addEventListener("pointermove", (event) => {
+      if (event.pointerType !== "mouse") return;
+      const box = button.getBoundingClientRect();
+      pos.tx = (event.clientX - box.left) / box.width;
+      pos.ty = (event.clientY - box.top) / box.height;
+      wake();
+    });
+    button.addEventListener("pointerleave", () => {
+      hovering = false;
+      wake();
+    });
+    button.addEventListener("click", (event) => {
+      if ((event as PointerEvent).pointerType === "mouse") return;
+      button.setAttribute("aria-pressed", String(button.getAttribute("aria-pressed") !== "true"));
+      wake();
+    });
+    button.addEventListener("focus", wake);
+    button.addEventListener("blur", wake);
+  });
 </script>
 
 <style>
@@ -88,6 +187,36 @@ const place = `${LOCATION.city}, ${locale === "fr" && LOCATION.country === "Beni
     max-width: 34rem;
     padding-bottom: var(--space-8);
   }
+  /* The nickname takes the terracotta, as ONE does at the end of the intro. */
+  .great {
+    color: var(--accent);
+  }
+  /* The three facts of the line stand out of the grey: the role, the studio and the country. */
+  .fact {
+    color: var(--foreground);
+    font-weight: 500;
+  }
+  .studio {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+    transition: text-decoration-color var(--duration-fast) var(--ease-standard);
+  }
+  .studio:hover {
+    text-decoration-color: currentColor;
+  }
+  .country {
+    white-space: nowrap;
+  }
+  .gabon {
+    display: inline-block;
+    margin-right: 0.3em;
+    vertical-align: -0.1em;
+    border-radius: 50%;
+    outline: 1px solid var(--border-strong);
+  }
   .copy .lede {
     max-width: 30rem;
   }
@@ -106,7 +235,27 @@ const place = `${LOCATION.city}, ${locale === "fr" && LOCATION.country === "Beni
     gap: var(--space-3);
     justify-self: end;
   }
-  .portrait img {
+  /* The button is only the hit area: no chrome of its own. */
+  .faces {
+    position: relative;
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-surface);
+    background: none;
+    color: inherit;
+    cursor: default;
+  }
+  .faces:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+  }
+  .engraving,
+  .photo {
+    display: block;
+  }
+  .engraving {
     width: 100%;
     height: auto;
     /* The inline placeholder, stretched under the image until the sharp file paints over it. */
@@ -115,57 +264,43 @@ const place = `${LOCATION.city}, ${locale === "fr" && LOCATION.country === "Beni
     mix-blend-mode: multiply;
     mask-image: radial-gradient(ellipse 62% 66% at 60% 50%, #000 52%, transparent 100%);
   }
-  :global(:root[data-theme="dark"]) .portrait img {
+  :global(:root[data-theme="dark"]) .engraving {
     filter: invert(1) contrast(0.92);
     mix-blend-mode: screen;
   }
-  figcaption {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    padding-inline: var(--space-2);
-    font-size: var(--text-sm);
-    font-weight: 500;
+  /* The photo sits exactly on the drawing. Two masks meet: the drawing's soft-edged oval, and a soft
+     circle the script moves with the pointer (--x, --y) and grows or shrinks (--r). Only where both
+     are open does the real photo show through the ink. A tap or keyboard focus opens the circle over
+     the whole picture. Without the script the circle stays shut and the drawing stays. */
+  .photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+    --lens: radial-gradient(circle max(var(--r, 0px), 1px) at var(--x, 50%) var(--y, 50%), #000 35%, transparent 100%);
+    --oval: radial-gradient(ellipse 62% 66% at 60% 50%, #000 52%, transparent 100%);
+    -webkit-mask-image: var(--lens), var(--oval);
+    -webkit-mask-composite: source-in;
+    mask-image: var(--lens), var(--oval);
+    mask-composite: intersect;
   }
-  .time {
-    margin-left: auto;
-    color: var(--text-secondary);
-  }
-  /* Live marker: a terracotta dot with a slow ring, the same dot as the API block. */
-  .live {
-    position: relative;
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: var(--radius-pill);
-    background: var(--accent);
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    .live::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      background: var(--accent);
-      animation: ping 2.4s var(--ease-standard) infinite;
-    }
-  }
-  @keyframes ping {
-    to {
-      scale: 3;
-      opacity: 0;
-    }
+  /* On the dark page the photo's white sky would glare: it comes down a step, the face stays true. */
+  :global(:root[data-theme="dark"]) .photo {
+    filter: brightness(0.82) contrast(1.05);
   }
 
   /* The surname must close a laptop's first screen. It keeps the full width, so the engraving gives
-     way: its width follows what the viewport height leaves once the bar, the gaps, the caption and
-     the letters (0.234 of the container's width tall) are counted, at the drawing's 1.62 ratio. */
+     way: its width follows what the viewport height leaves once the bar, the gaps and the letters (0.225 of the container's width tall) are counted, at the drawing's 1.62 ratio. */
   @media (min-width: 48rem) {
     .hero {
-      --monument-h: calc(min(100vw - 2 * var(--gutter), var(--page-max) - 2 * var(--gutter)) * 0.237);
+      --monument-h: calc(min(100vw - 2 * var(--gutter), var(--page-max) - 2 * var(--gutter)) * 0.225);
     }
     .portrait {
-      width: clamp(18rem, calc((100svh - 15rem - var(--monument-h)) * 1.62), 44rem);
-      max-width: min(58vw, calc(100vw - 30rem));
+      width: clamp(21rem, calc((100svh - 11.5rem - var(--monument-h)) * 1.62), 54rem);
+      /* The statement keeps at least 27rem beside it, so it stays on two lines. */
+      max-width: min(66vw, calc(100vw - 2 * var(--gutter) - 27rem), calc(var(--page-max) - 2 * var(--gutter) - 27rem));
     }
   }
 
@@ -185,9 +320,6 @@ const place = `${LOCATION.city}, ${locale === "fr" && LOCATION.country === "Beni
       grid-row: 1;
       justify-self: stretch;
       margin-inline: calc(var(--gutter) * -1);
-    }
-    figcaption {
-      padding-inline: var(--gutter);
     }
     .copy {
       padding-bottom: 0;

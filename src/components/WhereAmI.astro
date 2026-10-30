@@ -228,6 +228,23 @@ const tile = (x: number, y: number) => `https://tile.openstreetmap.org/${ZOOM}/$
   document.querySelectorAll<HTMLElement>("[data-where-console]").forEach(setup);
 </script>
 
+<script>
+  // Joel's local time in the board, refreshed every half minute. Empty until the script runs.
+  function tick() {
+    document.querySelectorAll<HTMLElement>("[data-local-time]").forEach((element) => {
+      const tz = element.dataset.tz || "UTC";
+      element.textContent = new Intl.DateTimeFormat(document.documentElement.lang, {
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h23",
+        timeZone: tz,
+      }).format(new Date());
+    });
+  }
+  tick();
+  setInterval(tick, 30_000);
+</script>
+
 <style>
   .where {
     display: grid;

@@ -3,7 +3,6 @@ import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import Intro from "../components/Intro.astro";
 import { SITE_URL, PERSONAL } from "../data";
-import { THEME_STORAGE_KEY } from "../lib/theme";
 import { HERO_IMAGE } from "../lib/hero-image";
 import type { Dict, Locale } from "../i18n";
 import "../styles/global.css";
@@ -12,7 +11,7 @@ interface Props {
   t: Dict;
   locale: Locale;
   alternate: { en: string; fr: string };
-  current: "home" | "work" | "writing";
+  current: "home" | "work" | "writing" | "pics" | "music" | "kojima";
   title: string;
   description: string;
 }
@@ -33,7 +32,7 @@ const jsonLd = {
 ---
 
 <!doctype html>
-<html lang={locale} data-theme="light">
+<html lang={locale} data-theme="dark" style="color-scheme: dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -44,6 +43,7 @@ const jsonLd = {
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preload" href="/fonts/clash-grotesk-500.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/cabinet-grotesk-400.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/monoton.woff2" as="font" type="font/woff2" crossorigin />
     {
       current === "home" && (
         <link
@@ -57,8 +57,7 @@ const jsonLd = {
         />
       )
     }
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#1b1b1b" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#1b1b1b" />
 
     <link rel="alternate" hreflang="en" href={`${SITE_URL}${alternate.en}`} />
     <link rel="alternate" hreflang="fr" href={`${SITE_URL}${alternate.fr}`} />
@@ -78,27 +77,8 @@ const jsonLd = {
 
     <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
 
-    <!-- Theme before first paint: the saved choice (footer switcher, src/lib/theme.ts), otherwise the
-         system setting, which keeps being followed. -->
-    <script is:inline define:vars={{ themeKey: THEME_STORAGE_KEY }}>
-      (() => {
-        const media = matchMedia("(prefers-color-scheme: dark)");
-        const saved = () => {
-          try {
-            const value = localStorage.getItem(themeKey);
-            return value === "light" || value === "dark" ? value : null;
-          } catch {
-            return null;
-          }
-        };
-        const apply = () => {
-          const theme = saved() ?? (media.matches ? "dark" : "light");
-          document.documentElement.dataset.theme = theme;
-          document.documentElement.style.colorScheme = theme;
-        };
-        apply();
-        media.addEventListener("change", apply);
-      })();
+    <!-- The site is dark only: data-theme="dark" is fixed on <html> above. -->
+    <script is:inline>
       // The opening title plays once per session, and never when motion is unwelcome (Intro.astro).
       (() => {
         let seen = false;
@@ -111,6 +91,7 @@ const jsonLd = {
         document.documentElement.dataset.intro = seen || calm ? "off" : "on";
       })();
     </script>
+    <slot name="head" />
   </head>
   <body id="top">
     <Intro t={t} />

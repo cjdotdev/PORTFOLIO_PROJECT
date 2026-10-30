@@ -7,6 +7,17 @@
  */
 const WIDTHS = [480, 720, 1000, 1400] as const;
 
+/**
+ * The photograph the engraving was drawn from, at the same framing and ratio, so the two line up
+ * exactly. It shows through the drawing on hover, focus or tap (Hero.astro). Not preloaded.
+ */
+const PHOTO_WIDTHS = [480, 720, 1000] as const;
+
+export const HERO_PHOTO = {
+  src: "/img/portrait-photo-v1-720.webp",
+  srcset: PHOTO_WIDTHS.map((w) => `/img/portrait-photo-v1-${w}.webp ${w}w`).join(", "),
+};
+
 export const HERO_IMAGE = {
   src: "/img/engraving-v1-1000.webp",
   srcset: WIDTHS.map((w) => `/img/engraving-v1-${w}.webp ${w}w`).join(", "),

@@ -1,0 +1,18 @@
+---
+import Layout from "../layouts/Layout.astro";
+import PicsPage from "../sections/PicsPage.astro";
+import { getDict } from "../i18n";
+
+const t = getDict("en");
+---
+
+<Layout
+  t={t}
+  locale="en"
+  alternate={{ en: "/pics/", fr: "/fr/pics/" }}
+  current="pics"
+  title={t.meta.picsTitle}
+  description={t.meta.picsDescription}
+>
+  <PicsPage t={t} />
+</Layout>

@@ -1,0 +1,19 @@
+---
+import Layout from "../layouts/Layout.astro";
+import MusicPage from "../sections/MusicPage.astro";
+import { getDict } from "../i18n";
+
+const t = getDict("en");
+---
+
+<Layout
+  t={t}
+  locale="en"
+  alternate={{ en: "/music/", fr: "/fr/music/" }}
+  current="music"
+  title={t.meta.musicTitle}
+  description={t.meta.musicDescription}
+>
+  <link slot="head" rel="preconnect" href="https://audio-ssl.itunes.apple.com" crossorigin />
+  <MusicPage t={t} />
+</Layout>

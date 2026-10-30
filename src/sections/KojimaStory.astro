@@ -1,0 +1,1139 @@
+---
+import { KOJIMA_PHOTOS, KOJIMA_RECORD, kojimaSrc, kojimaSrcset, type KojimaPhoto, type KojimaPhotoId } from "../data/kojima";
+import type { Dict } from "../i18n";
+
+interface Props {
+  t: Dict;
+}
+
+const { t } = Astro.props;
+const k = t.kojima;
+const r = k.record;
+
+const photo = (id: KojimaPhotoId): KojimaPhoto => KOJIMA_PHOTOS[id];
+const largest = (id: KojimaPhotoId) => photo(id).widths.at(-1)!;
+const words = (line: string) => line.split(" ");
+
+// Every photo, with the words that already describe it, for the credits at the end.
+const described = new Map<KojimaPhotoId, string>([["cover", k.cover.alt]]);
+for (const chapter of k.chapters) for (const beat of chapter.beats) if (beat.photo) described.set(beat.photo, beat.caption ?? beat.alt ?? "");
+described.set("robe", k.letter.caption);
+const credits = [...described].map(([id, label]) => ({ id, label, credit: photo(id).credit }));
+
+const record = [
+  { value: KOJIMA_RECORD.tripleCrown, label: r.tripleCrown },
+  { value: KOJIMA_RECORD.iwgp, label: r.iwgp },
+  { value: KOJIMA_RECORD.ghc, label: r.ghc },
+  { value: KOJIMA_RECORD.nwa, label: r.nwa },
+  { value: KOJIMA_RECORD.iwgpTag, label: r.iwgpTag },
+];
+---
+
+<article class="saga" data-saga>
+  <!-- A seal in the corner: it fills as the story goes and shows the chapter's kanji. -->
+  <a class="seal-progress" href="#cover" aria-label={k.ui.top}>
+    <svg viewBox="0 0 48 48" aria-hidden="true">
+      <circle class="seal-track" cx="24" cy="24" r="22" pathLength="1"></circle>
+      <circle class="seal-fill" data-progress cx="24" cy="24" r="22" pathLength="1"></circle>
+    </svg>
+    <span class="seal-kanji" lang="ja" aria-hidden="true" data-progress-kanji>{k.cover.kanji.slice(0, 1)}</span>
+  </a>
+
+  <!-- ─── Cover ─── -->
+  <header class="cover" id="cover">
+    <p class="cover-kanji" lang="ja" aria-hidden="true">{k.cover.kanji}</p>
+    <div class="cover-text">
+      <a class="back" href={k.ui.backHref}>
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        {k.ui.back}
+      </a>
+      <h1 class="cover-name">{k.cover.name}</h1>
+      <p class="cover-reading"><span lang="ja">{k.cover.kanji}</span> · {k.cover.reading}</p>
+      <p class="cover-lede">{k.cover.lede}</p>
+      <a class="begin" href={`#chapter-${k.chapters[0].id}`}>
+        {k.cover.begin}
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </a>
+      <nav class="index" aria-label={k.cover.chapters}>
+        <ol role="list">
+          {
+            k.chapters.map((chapter) => (
+              <li>
+                <a href={`#chapter-${chapter.id}`}>
+                  <span class="index-kanji" lang="ja" aria-hidden="true">{chapter.kanji}</span>
+                  <span class="index-title">{chapter.title}</span>
+                  <span class="index-meta">{chapter.meta.split(" · ").at(-1)}</span>
+                </a>
+              </li>
+            ))
+          }
+        </ol>
+      </nav>
+    </div>
+    <figure class="cover-photo">
+      <img
+        src={kojimaSrc("cover", 800)}
+        srcset={kojimaSrcset("cover")}
+        sizes="(max-width: 55rem) 90vw, 40vw"
+        alt={k.cover.alt}
+        width={largest("cover")}
+        height={Math.round(largest("cover") / photo("cover").ratio)}
+        fetchpriority="high"
+        decoding="async"
+      />
+      <figcaption lang="ja">{k.cover.native}</figcaption>
+    </figure>
+  </header>
+
+  <!-- ─── Chapters ─── -->
+  {
+    k.chapters.map((chapter) => (
+      <section class="chapter" id={`chapter-${chapter.id}`} data-chapter={chapter.kanji} aria-labelledby={`title-${chapter.id}`}>
+        <div class="card" data-scene="pass">
+          <span class="card-mark" lang="ja" aria-hidden="true">
+            {chapter.kanji}
+          </span>
+          <div class="card-text">
+            <span class="hanko" lang="ja" aria-hidden="true">
+              {chapter.kanji}
+            </span>
+            <h2 class="card-title" id={`title-${chapter.id}`}>
+              {chapter.title}
+            </h2>
+            <p class="card-subtitle">{chapter.subtitle}</p>
+            <p class="card-intro">{chapter.intro}</p>
+            <p class="card-meta">
+              {chapter.number} · {chapter.meta}
+            </p>
+          </div>
+        </div>
+
+        {chapter.beats.map((beat, index) => {
+          const shot = beat.photo ? photo(beat.photo) : null;
+          const kind = shot ? shot.fit : "type";
+          return (
+            <div class:list={["beat", `beat-${kind}`, { flip: index % 2 === 1 }]} data-scene="pin">
+              <div class="stage">
+                {kind !== "full" && (
+                  <span class="stage-mark" lang="ja" aria-hidden="true">
+                    {beat.kanji}
+                  </span>
+                )}
+                {beat.photo && shot && kind === "full" && (
+                  <img
+                    class="shot"
+                    src={kojimaSrc(beat.photo, shot.widths[0])}
+                    srcset={kojimaSrcset(beat.photo)}
+                    sizes="100vw"
+                    alt={beat.alt}
+                    width={largest(beat.photo)}
+                    height={Math.round(largest(beat.photo) / shot.ratio)}
+                    style={shot.focus ? `object-position: ${shot.focus}` : undefined}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                )}
+                {beat.photo && shot && kind === "frame" && (
+                  <div class="frame" style={`aspect-ratio: ${shot.ratio}`}>
+                    <img
+                      src={kojimaSrc(beat.photo, shot.widths[0])}
+                      srcset={kojimaSrcset(beat.photo)}
+                      sizes="(max-width: 55rem) 80vw, 40vw"
+                      alt={beat.alt}
+                      width={largest(beat.photo)}
+                      height={Math.round(largest(beat.photo) / shot.ratio)}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+                )}
+                {beat.display && (
+                  <p
+                    class:list={["lines", { long: beat.display.some((line) => line.length > 12) }]}
+                    aria-hidden="true"
+                    style={`--n: ${beat.display.length}`}
+                  >
+                    {beat.display.map((line, i) => (
+                      <span style={`--i: ${i}`}>{line}</span>
+                    ))}
+                  </p>
+                )}
+                <div class="beat-card">
+                  <h3>
+                    <span class="beat-kanji" lang="ja">
+                      {beat.kanji}
+                    </span>
+                    <span class="beat-title">{beat.title}</span>
+                  </h3>
+                  <p>{beat.text}</p>
+                </div>
+                {beat.caption && <p class="caption">{beat.caption}</p>}
+              </div>
+            </div>
+          );
+        })}
+
+        <div class="close" data-scene="pass">
+          <p class="close-line" style={`--n: ${words(chapter.close).length}`}>
+            {words(chapter.close).map((word, i) => (
+              <span style={`--i: ${i}`}>{word} </span>
+            ))}
+          </p>
+        </div>
+      </section>
+    ))
+  }
+
+  <!-- ─── To the reader ─── -->
+  <section class="letter" id="letter" data-chapter={k.letter.kanji.slice(0, 1)} aria-labelledby="letter-title">
+    <div class="letter-text">
+      <p class="letter-kanji" lang="ja" aria-hidden="true">{k.letter.kanji}</p>
+      <h2 class="letter-title" id="letter-title">{k.letter.title}</h2>
+      {k.letter.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+      <p class="sign">{k.letter.sign}</p>
+      <p class="orange">{k.letter.orange}</p>
+    </div>
+    <figure class="letter-photo">
+      <img
+        src={kojimaSrc("robe", largest("robe"))}
+        alt={k.letter.alt}
+        width={largest("robe")}
+        height={Math.round(largest("robe") / photo("robe").ratio)}
+        loading="lazy"
+        decoding="async"
+      />
+      <figcaption>{k.letter.caption}</figcaption>
+    </figure>
+  </section>
+
+  <!-- ─── The record ─── -->
+  <section class="record" aria-labelledby="record-title">
+    <h2 class="record-title" id="record-title">{r.title}</h2>
+    <div class="record-lead">
+      <p class="big" data-count={KOJIMA_RECORD.titles}>{KOJIMA_RECORD.titles}</p>
+      <p class="big-label">{r.titles}</p>
+    </div>
+    <dl class="record-grid">
+      {
+        record.map((item) => (
+          <div>
+            <dt>{item.label}</dt>
+            <dd>
+              <span data-count={item.value}>{item.value}</span> {item.value > 1 ? r.times : r.time}
+            </dd>
+          </div>
+        ))
+      }
+      <div>
+        <dt>{r.g1}</dt>
+        <dd>2010</dd>
+      </div>
+      <div>
+        <dt>{r.debut}</dt>
+        <dd>{r.debutDate}</dd>
+      </div>
+    </dl>
+  </section>
+
+  <!-- ─── Thanks and credits ─── -->
+  <footer class="thanks">
+    <p class="thanks-kanji" lang="ja" aria-hidden="true">{k.thanks.kanji}</p>
+    <h2 class="thanks-title">{k.thanks.title}</h2>
+    <p class="thanks-body">{k.thanks.body}</p>
+    <details class="credits">
+      <summary>{k.thanks.credits}</summary>
+      <ul role="list">
+        {
+          credits.map(({ label, credit }) => (
+            <li>
+              <a href={credit.source} target="_blank" rel="noopener noreferrer">
+                {label}
+              </a>
+              : {credit.author},{" "}
+              <a href={credit.licenseUrl} target="_blank" rel="noopener noreferrer">
+                {credit.license}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </details>
+    <a class="back" href="#cover">{k.ui.top}</a>
+  </footer>
+</article>
+
+<script>
+  // Scroll drives the story: every [data-scene] gets --p, its progress from 0 to 1. A "pin" scene is
+  // a tall block whose stage sticks under the header, and --p runs while it is stuck; a "pass" scene
+  // runs from entering the screen to leaving it. With reduced motion nothing is set and the CSS shows
+  // every scene in its finished state.
+  const saga = document.querySelector<HTMLElement>("[data-saga]");
+  const calm = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  if (saga) {
+    const scenes = [...saga.querySelectorAll<HTMLElement>("[data-scene]")];
+    const chapters = [...saga.querySelectorAll<HTMLElement>("[data-chapter]")];
+    const fill = saga.querySelector<SVGCircleElement>("[data-progress]")!;
+    const kanji = saga.querySelector<HTMLElement>("[data-progress-kanji]")!;
+    const first = kanji.textContent ?? "";
+    const head = parseFloat(getComputedStyle(document.documentElement).fontSize) * 4;
+    let frame = 0;
+
+    const clamp = (v: number) => Math.min(1, Math.max(0, v));
+
+    function update() {
+      frame = 0;
+      const vh = window.innerHeight;
+      if (!calm.matches) {
+        for (const scene of scenes) {
+          const box = scene.getBoundingClientRect();
+          if (box.bottom < -vh || box.top > vh * 2) continue;
+          const p =
+            scene.dataset.scene === "pin"
+              ? clamp((head - box.top) / Math.max(1, box.height - (vh - head)))
+              : clamp((vh - box.top) / (vh + box.height));
+          scene.style.setProperty("--p", p.toFixed(4));
+        }
+      }
+      const total = document.documentElement.scrollHeight - vh;
+      fill.style.strokeDashoffset = String(1 - clamp(total > 0 ? window.scrollY / total : 0));
+      const current = chapters.filter((chapter) => chapter.getBoundingClientRect().top < vh * 0.5).at(-1);
+      const mark = current ? Array.from(current.dataset.chapter ?? first)[0] : first;
+      if (kanji.textContent !== mark) kanji.textContent = mark;
+    }
+    function queue() {
+      if (!frame) frame = requestAnimationFrame(update);
+    }
+
+    function setMode() {
+      saga!.toggleAttribute("data-live", !calm.matches);
+      queue();
+    }
+    window.addEventListener("scroll", queue, { passive: true });
+    window.addEventListener("resize", queue);
+    calm.addEventListener("change", setMode);
+    setMode();
+
+    // The record counts up once, the first time it comes into view.
+    const counters = [...saga.querySelectorAll<HTMLElement>("[data-count]")];
+    const seen = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          seen.unobserve(entry.target);
+          const el = entry.target as HTMLElement;
+          const target = Number(el.dataset.count);
+          if (calm.matches) continue;
+          const start = performance.now();
+          const tick = (now: number) => {
+            const k = Math.min(1, (now - start) / 1100);
+            el.textContent = String(Math.round(target * (1 - Math.pow(1 - k, 4))));
+            if (k < 1) requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+        }
+      },
+      { threshold: 0.6 },
+    );
+    counters.forEach((counter) => seen.observe(counter));
+  }
+</script>
+
+<style>
+  /* The story is told at night: the photo scenes and closing lines sit on the ring's dark ground in
+     both themes. The chapter cards, the letter and the record use the page's own ground. */
+  .saga {
+    --night: #0f0f0f;
+    --night-ink: #f3f3f3;
+    --night-muted: #a3a3a3;
+    --night-line: rgb(255 255 255 / 0.1);
+    --night-accent: #e8916f;
+    --head: 4rem;
+    --screen: calc(100svh - var(--head));
+  }
+
+  /* ─── Progress seal ─── */
+  .seal-progress {
+    position: fixed;
+    bottom: var(--space-4);
+    left: var(--space-4);
+    z-index: 20;
+    display: grid;
+    place-items: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: var(--radius-pill);
+    background: var(--night);
+    color: var(--night-ink);
+    text-decoration: none;
+  }
+  .seal-progress svg {
+    position: absolute;
+    inset: 0;
+    transform: rotate(-90deg);
+  }
+  .seal-progress circle {
+    fill: none;
+    stroke-width: 2;
+  }
+  .seal-track {
+    stroke: var(--night-line);
+  }
+  .seal-fill {
+    stroke: var(--night-accent);
+    stroke-linecap: round;
+    stroke-dasharray: 1 1;
+    stroke-dashoffset: 1;
+  }
+  .seal-kanji {
+    font-family: var(--font-jp);
+    font-size: 1.25rem;
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  /* ─── Cover ─── */
+  .cover {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    align-items: center;
+    gap: var(--space-8) clamp(2rem, 1rem + 4vw, 5rem);
+    min-height: var(--screen);
+    max-width: var(--page-max);
+    margin-inline: auto;
+    padding: var(--space-8) var(--gutter) var(--space-12);
+    overflow: clip;
+  }
+  /* The nickname stands upright behind the photo, at the right edge, never behind the name. */
+  .cover-kanji {
+    position: absolute;
+    top: 50%;
+    right: calc(var(--gutter) - 0.15em);
+    margin: 0;
+    color: var(--accent-subtle);
+    font-family: var(--font-jp);
+    font-size: clamp(10rem, 6rem + 22vw, 30rem);
+    font-weight: 500;
+    line-height: 1;
+    writing-mode: vertical-rl;
+    translate: 0 -50%;
+    pointer-events: none;
+    user-select: none;
+  }
+  .cover-text {
+    position: relative;
+    display: grid;
+    gap: var(--space-4);
+    justify-items: start;
+  }
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-height: 2.75rem;
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--ease-standard);
+  }
+  .back:hover {
+    color: var(--foreground);
+  }
+  .cover-name {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(3.25rem, 1.8rem + 6.5vw, 7.5rem);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 0.92;
+  }
+  .cover-reading {
+    margin: 0;
+    color: var(--accent);
+    font-size: var(--text-lg);
+    font-weight: 500;
+  }
+  .cover-reading [lang="ja"] {
+    font-family: var(--font-jp);
+  }
+  .cover-lede {
+    max-width: 34rem;
+    margin: 0;
+    font-size: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+    line-height: 1.45;
+    text-wrap: pretty;
+  }
+  .begin {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 3rem;
+    margin-top: var(--space-2);
+    padding-inline: var(--space-6);
+    border-radius: var(--radius-control);
+    background: var(--primary);
+    color: var(--primary-foreground);
+    font-weight: 500;
+    text-decoration: none;
+    transition:
+      background-color var(--duration-fast) var(--ease-standard),
+      transform var(--duration-instant) var(--ease-standard);
+  }
+  .begin:hover {
+    background: color-mix(in srgb, var(--primary) 86%, var(--background));
+  }
+  .begin:active {
+    transform: scale(0.98);
+  }
+  .index {
+    width: 100%;
+    max-width: 34rem;
+    margin-top: var(--space-6);
+  }
+  .index ol {
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--border);
+  }
+  .index a {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 2.75rem;
+    border-bottom: 1px solid var(--border);
+    color: inherit;
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--ease-standard);
+  }
+  .index a:hover .index-title {
+    color: var(--accent);
+  }
+  .index-kanji {
+    font-family: var(--font-jp);
+    font-size: 1.125rem;
+  }
+  .index-title {
+    font-weight: 500;
+    transition: color var(--duration-fast) var(--ease-standard);
+  }
+  .index-meta {
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    font-variant-numeric: tabular-nums;
+  }
+  .cover-photo {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: var(--space-2);
+    margin: 0;
+  }
+  .cover-photo img {
+    width: 100%;
+    height: auto;
+    max-height: calc(var(--screen) - 6rem);
+    object-fit: cover;
+    object-position: 50% 20%;
+    border-radius: var(--radius-surface);
+    background: var(--surface-muted);
+  }
+  .cover-photo figcaption {
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .cover-name,
+    .cover-reading,
+    .cover-lede,
+    .begin {
+      animation: rise 0.9s var(--ease-enter) both;
+    }
+    .cover-reading {
+      animation-delay: 0.08s;
+    }
+    .cover-lede {
+      animation-delay: 0.16s;
+    }
+    .begin {
+      animation-delay: 0.24s;
+    }
+    .cover-photo img {
+      animation: unveil 1.2s var(--ease-enter) both;
+    }
+    .cover-kanji {
+      animation: settle 1.6s var(--ease-enter) both;
+    }
+  }
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(1.5rem);
+    }
+  }
+  @keyframes unveil {
+    from {
+      clip-path: inset(100% 0 0 0 round var(--radius-surface));
+      scale: 1.08;
+    }
+    to {
+      clip-path: inset(0 0 0 0 round var(--radius-surface));
+    }
+  }
+  @keyframes settle {
+    from {
+      opacity: 0;
+      translate: 0 -46%;
+    }
+  }
+
+  /* ─── Chapter card: the page ground, the kanji huge behind the title ─── */
+  .card {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: var(--screen);
+    padding: var(--space-16) var(--gutter);
+    overflow: clip;
+    text-align: center;
+  }
+  .card-mark {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: var(--accent-subtle);
+    font-family: var(--font-jp);
+    font-size: min(70vmin, 36rem);
+    font-weight: 500;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+  .card-text {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: var(--space-3);
+    max-width: 38rem;
+  }
+  .hanko {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: var(--space-3);
+    border-radius: 6px;
+    background: var(--accent);
+    color: var(--accent-foreground);
+    font-family: var(--font-jp);
+    font-size: 1.375rem;
+    line-height: 1;
+  }
+  .card-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 1.8rem + 5vw, 6rem);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 0.95;
+    text-wrap: balance;
+  }
+  .card-subtitle {
+    margin: 0;
+    color: var(--accent);
+    font-size: var(--text-lg);
+    font-weight: 500;
+  }
+  .card-intro {
+    margin: var(--space-3) 0 0;
+    font-size: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+    line-height: 1.45;
+    text-wrap: pretty;
+  }
+  .card-meta {
+    margin: var(--space-2) 0 0;
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+  }
+
+  /* ─── Beats: one screen each, pinned under the header while you scroll through it ─── */
+  .beat {
+    position: relative;
+    height: calc(var(--screen) * 2);
+    background: var(--night);
+    color: var(--night-ink);
+  }
+  .stage {
+    position: sticky;
+    top: var(--head);
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    align-items: center;
+    height: var(--screen);
+    padding: var(--space-8) var(--gutter);
+    overflow: clip;
+  }
+  .stage > * {
+    grid-row: 1;
+  }
+  .stage-mark {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: rgb(255 255 255 / 0.05);
+    font-family: var(--font-jp);
+    font-size: min(60vmin, 34rem);
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
+  }
+  .shot {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .frame {
+    position: relative;
+    grid-column: 7 / 12;
+    justify-self: center;
+    height: min(100%, 44rem);
+    max-width: 100%;
+    overflow: hidden;
+    border-radius: var(--radius-surface);
+    background: #1c1c1c;
+  }
+  .frame img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .flip .frame {
+    grid-column: 2 / 7;
+  }
+  .lines {
+    position: relative;
+    grid-column: 6 / 13;
+    display: grid;
+    gap: 0.1em;
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(2.75rem, 1rem + 6.5vw, 8rem);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 0.95;
+    font-variant-numeric: tabular-nums;
+  }
+  .lines.long {
+    font-size: clamp(2rem, 0.8rem + 4vw, 5rem);
+  }
+  .lines span:last-child {
+    color: var(--night-accent);
+  }
+  .flip .lines {
+    grid-column: 1 / 8;
+  }
+  .beat-card {
+    position: relative;
+    z-index: 1;
+    grid-column: 1 / 6;
+    display: grid;
+    gap: var(--space-3);
+    max-width: 30rem;
+    padding: var(--space-6);
+    border: 1px solid var(--night-line);
+    border-radius: var(--radius-surface);
+    background: rgb(15 15 15 / 0.8);
+    backdrop-filter: blur(10px);
+  }
+  .flip .beat-card {
+    grid-column: 8 / 13;
+    justify-self: end;
+  }
+  /* Clear of the progress seal in the bottom-left corner. */
+  .beat-full .beat-card {
+    align-self: end;
+    margin-bottom: 3.5rem;
+  }
+  .beat-card h3 {
+    display: grid;
+    gap: var(--space-1);
+    margin: 0;
+  }
+  .beat-kanji {
+    color: var(--night-accent);
+    font-family: var(--font-jp);
+    font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.5rem);
+    font-weight: 500;
+    line-height: 1.1;
+  }
+  .beat-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 1.3rem + 0.6vw, 1.875rem);
+    font-weight: 500;
+    letter-spacing: var(--tracking-display);
+    line-height: 1.1;
+  }
+  .beat-card p {
+    margin: 0;
+    color: #d9d9d9;
+    font-size: var(--text-lg);
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+  .caption {
+    position: absolute;
+    right: var(--gutter);
+    bottom: var(--space-4);
+    max-width: calc(100% - var(--gutter) * 2 - 4rem);
+    margin: 0;
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-pill);
+    background: rgb(15 15 15 / 0.7);
+    color: var(--night-muted);
+    font-size: var(--text-sm);
+  }
+  .flip.beat-full .caption {
+    right: auto;
+    left: calc(var(--gutter) + 4rem);
+  }
+
+  /* ─── Closing line: one sentence on the night ground ─── */
+  .close {
+    display: grid;
+    place-items: center;
+    min-height: var(--screen);
+    padding: var(--space-16) var(--gutter);
+    background: var(--night);
+    color: var(--night-ink);
+  }
+  .close-line {
+    max-width: 22ch;
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 1.2rem + 3.6vw, 4.5rem);
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    line-height: 1.05;
+    text-align: center;
+    text-wrap: balance;
+  }
+
+  /* ─── Motion: only once the script runs and motion is welcome ─── */
+  .saga[data-live] .card-mark {
+    transform: translateY(calc((0.5 - var(--p, 0.5)) * 30vh)) scale(calc(0.9 + var(--p, 0.5) * 0.2));
+  }
+  .saga[data-live] .card-text {
+    opacity: clamp(0, calc((var(--p, 0.5) - 0.12) * 5), 1);
+    transform: translateY(max(0px, calc((0.32 - var(--p, 0.5)) * 160px)));
+  }
+  .saga[data-live] .shot {
+    transform: scale(calc(1.16 - var(--p, 0.5) * 0.16)) translateY(calc((var(--p, 0.5) - 0.5) * -3%));
+    transform-origin: 50% 40%;
+  }
+  .saga[data-live] .frame {
+    transform: translateY(calc((0.5 - var(--p, 0.5)) * 10vh));
+  }
+  .saga[data-live] .frame img {
+    transform: scale(calc(1.12 - var(--p, 0.5) * 0.12));
+  }
+  .saga[data-live] .stage-mark {
+    transform: translateY(calc((0.5 - var(--p, 0.5)) * 24vh));
+  }
+  .saga[data-live] .beat-card {
+    opacity: clamp(0, calc((var(--p, 0.5) - 0.08) * 6), 1);
+    transform: translateY(max(0px, calc((0.25 - var(--p, 0.5)) * 140px)));
+  }
+  .saga[data-live] .lines span {
+    opacity: clamp(0.08, calc(var(--p, 0.5) * var(--n) * 1.7 - var(--i)), 1);
+    transform: translateX(calc((1 - clamp(0, calc(var(--p, 0.5) * var(--n) * 1.7 - var(--i)), 1)) * -1rem));
+  }
+  .saga[data-live] .caption {
+    opacity: clamp(0, calc((var(--p, 0.5) - 0.2) * 5), 1);
+  }
+  .saga[data-live] .close-line span {
+    opacity: clamp(0.12, calc((var(--p, 0.5) * 2.4 - 0.45) * var(--n) - var(--i)), 1);
+  }
+
+  /* ─── The letter ─── */
+  .letter {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+    align-items: center;
+    gap: var(--space-12) clamp(2rem, 1rem + 5vw, 6rem);
+    max-width: var(--page-max);
+    margin-inline: auto;
+    padding: var(--section) var(--gutter);
+  }
+  .letter-text {
+    display: grid;
+    gap: var(--space-4);
+  }
+  .letter-kanji {
+    margin: 0;
+    color: var(--accent);
+    font-family: var(--font-jp);
+    font-size: clamp(3rem, 2rem + 4vw, 5.5rem);
+    line-height: 1;
+  }
+  .letter-title {
+    margin: 0 0 var(--space-2);
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 1.6rem + 3.5vw, 4.5rem);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .letter-text > p:not(.letter-kanji, .sign, .orange) {
+    max-width: 36rem;
+    margin: 0;
+    font-size: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+    line-height: 1.55;
+    text-wrap: pretty;
+  }
+  .sign {
+    margin: var(--space-2) 0 0;
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: 500;
+  }
+  .orange {
+    margin: 0;
+    padding-left: var(--space-4);
+    border-left: 2px solid var(--accent);
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .letter-photo {
+    display: grid;
+    gap: var(--space-2);
+    margin: 0;
+  }
+  .letter-photo img {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-surface);
+    background: var(--surface-muted);
+  }
+  .letter-photo figcaption {
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+  }
+
+  /* ─── The record ─── */
+  .record {
+    display: grid;
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    gap: var(--space-8) clamp(2rem, 1rem + 5vw, 6rem);
+    max-width: var(--page-max);
+    margin-inline: auto;
+    padding: 0 var(--gutter) var(--section);
+  }
+  .record-title {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding-top: var(--space-8);
+    border-top: 1px solid var(--border);
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.5rem);
+    font-weight: 500;
+    letter-spacing: var(--tracking-display);
+  }
+  .record-lead {
+    display: grid;
+    align-content: start;
+  }
+  .big {
+    margin: 0;
+    color: var(--accent);
+    font-family: var(--font-display);
+    font-size: clamp(6rem, 3rem + 10vw, 11rem);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 0.85;
+    font-variant-numeric: tabular-nums;
+  }
+  .big-label {
+    margin: var(--space-2) 0 0;
+    font-size: var(--text-xl);
+    font-weight: 500;
+  }
+  .record-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 var(--space-8);
+    margin: 0;
+  }
+  .record-grid div {
+    display: grid;
+    gap: var(--space-1);
+    padding-block: var(--space-4);
+    border-bottom: 1px solid var(--border);
+  }
+  .record-grid dt {
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+  }
+  .record-grid dd {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 1.3rem + 0.6vw, 1.875rem);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ─── Thanks ─── */
+  .thanks {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-4);
+    padding: var(--section) var(--gutter);
+    background: var(--night);
+    color: var(--night-ink);
+    text-align: center;
+  }
+  .thanks-kanji {
+    margin: 0;
+    color: var(--night-accent);
+    font-family: var(--font-jp);
+    font-size: clamp(4rem, 2rem + 8vw, 8rem);
+    line-height: 1;
+  }
+  .thanks-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 1.4rem + 2.4vw, 3.5rem);
+    font-weight: 500;
+    letter-spacing: -0.015em;
+  }
+  .thanks-body {
+    max-width: 34rem;
+    margin: 0;
+    color: var(--night-muted);
+  }
+  .credits {
+    max-width: 52rem;
+    color: var(--night-muted);
+    font-size: var(--text-sm);
+    text-align: left;
+  }
+  .credits summary {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 2.75rem;
+    cursor: pointer;
+  }
+  .credits ul {
+    display: grid;
+    gap: var(--space-1);
+    margin: var(--space-2) 0 0;
+    padding: 0;
+  }
+  .credits a {
+    color: inherit;
+    text-underline-offset: 0.2em;
+  }
+  .thanks .back {
+    color: var(--night-muted);
+  }
+  .thanks .back:hover {
+    color: var(--night-ink);
+  }
+
+  /* ─── Smaller screens: the card sits under the picture or the type ─── */
+  @media (max-width: 55rem) {
+    .cover {
+      grid-template-columns: minmax(0, 1fr);
+      padding-top: var(--space-4);
+    }
+    .cover-kanji {
+      top: 0;
+      right: -0.1em;
+      translate: none;
+      font-size: clamp(8rem, 40vw, 14rem);
+    }
+    .cover-photo {
+      max-width: 26rem;
+    }
+    .cover-photo img {
+      max-height: 70svh;
+    }
+    .stage {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: minmax(0, 1fr) auto;
+      align-items: end;
+      gap: var(--space-4);
+      padding-block: var(--space-6);
+    }
+    .stage > * {
+      grid-row: auto;
+    }
+    .frame,
+    .flip .frame {
+      grid-column: 1;
+      grid-row: 1;
+      align-self: center;
+      height: 100%;
+      max-height: 100%;
+    }
+    .lines,
+    .flip .lines {
+      grid-column: 1;
+      grid-row: 1;
+      align-self: center;
+    }
+    .beat-card,
+    .flip .beat-card {
+      grid-column: 1;
+      grid-row: 2;
+      justify-self: stretch;
+      max-width: none;
+      padding: var(--space-5);
+    }
+    .beat-card p {
+      font-size: var(--text-base);
+    }
+    .beat-full .stage {
+      grid-template-rows: minmax(0, 1fr) auto;
+    }
+    .caption,
+    .flip.beat-full .caption {
+      top: var(--space-4);
+      right: auto;
+      bottom: auto;
+      left: var(--gutter);
+      max-width: calc(100% - var(--gutter) * 2 - 4.5rem);
+    }
+    .beat-full .beat-card {
+      margin-bottom: 0;
+    }
+    .letter,
+    .record {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .letter-photo {
+      max-width: 24rem;
+    }
+    .record-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    /* On a phone the beat cards span the bottom edge, so the seal moves under the header. */
+    .seal-progress {
+      top: calc(var(--head) + var(--space-3));
+      right: var(--space-3);
+      bottom: auto;
+      left: auto;
+      width: 2.75rem;
+      height: 2.75rem;
+    }
+  }
+</style>

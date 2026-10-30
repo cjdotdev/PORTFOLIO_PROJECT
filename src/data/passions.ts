@@ -1,8 +1,8 @@
 // ─── Off the clock ─────────────────────────────────────────────────
-// What Joel watches, plays and listens to. Facts come from Joel; the two older G1 finals were checked.
+// What Joel watches, plays and listens to. Facts come from Joel.
 // Copy that changes with the language lives in src/i18n (passions).
 
-/** Photos from Wikimedia Commons, cropped to 4:5 WebP in public/img/wrestlers/<id>-v<version>.webp. */
+/** Kojima's photo on the home page, from Wikimedia Commons, cropped to 4:5 WebP in public/img/wrestlers. */
 export interface Wrestler {
   id: string;
   name: string;
@@ -11,68 +11,14 @@ export interface Wrestler {
   credit: { author: string; license: string; licenseUrl: string; source: string };
 }
 
-const BY_SA_2 = "https://creativecommons.org/licenses/by-sa/2.0/";
-const BY_SA_3 = "https://creativecommons.org/licenses/by-sa/3.0/";
 const BY_SA_4 = "https://creativecommons.org/licenses/by-sa/4.0/";
-const BY_3 = "https://creativecommons.org/licenses/by/3.0/";
-const BY_2 = "https://creativecommons.org/licenses/by/2.0/";
 const commons = (file: string) => `https://commons.wikimedia.org/wiki/File:${file}`;
 
 export const WRESTLERS: Record<string, Wrestler> = {
   kojima: { id: "kojima", name: "Satoshi Kojima", version: 2, credit: { author: "Yuzunet", license: "CC BY-SA 4.0", licenseUrl: BY_SA_4, source: commons("20230122cozy1.jpg") } },
-  oiwa: { id: "oiwa", name: "Ryohei Oiwa", credit: { author: "結牙", license: "CC BY-SA 4.0", licenseUrl: BY_SA_4, source: commons("Ryohei_Oiwa_20260816.jpg") } },
-  uemura: { id: "uemura", name: "Yuya Uemura", credit: { author: "結牙", license: "CC BY-SA 4.0", licenseUrl: BY_SA_4, source: commons("Yuya_Uemura_20260816_(cropped).jpg") } },
-  tsuji: { id: "tsuji", name: "Yota Tsuji", credit: { author: "結牙", license: "CC BY-SA 4.0", licenseUrl: BY_SA_4, source: commons("Yota_Tsuji_20250105_(cropped).jpg") } },
-  tanahashi: { id: "tanahashi", name: "Hiroshi Tanahashi", version: 2, credit: { author: "ゾーヒョー", license: "CC BY-SA 4.0", licenseUrl: BY_SA_4, source: commons("Hiroshi_Tanahashi_2016.jpg") } },
-  nagata: { id: "nagata", name: "Yuji Nagata", credit: { author: "ゾーヒョー", license: "CC BY-SA 4.0", licenseUrl: BY_SA_4, source: commons("Yuji_Nagata_Aug_2015.JPG") } },
-  omega: { id: "omega", name: "Kenny Omega", credit: { author: "ゾーヒョー", license: "CC BY-SA 4.0", licenseUrl: BY_SA_4, source: commons("Kenny_Omega_IWGP_Intercontinental_Champion.jpg") } },
-  goto: { id: "goto", name: "Hirooki Goto", credit: { author: "ゾーヒョー", license: "CC BY-SA 4.0", licenseUrl: BY_SA_4, source: commons("Hirooki_Goto_2016.JPG") } },
-  okada: { id: "okada", name: "Kazuchika Okada", credit: { author: "ゾーヒョー", license: "CC BY-SA 4.0", licenseUrl: BY_SA_4, source: commons("Kazuchika_Okada_2016.JPG") } },
-  ospreay: { id: "ospreay", name: "Will Ospreay", credit: { author: "JJ Williams, Wrestling Observer Newsletter", license: "CC BY 3.0", licenseUrl: BY_3, source: commons("Will_Ospreay,_AEW_Revolution_2024_(cropped).jpg") } },
-  naito: { id: "naito", name: "Tetsuya Naito", credit: { author: "ゾーヒョー", license: "CC BY-SA 4.0", licenseUrl: BY_SA_4, source: commons("Tetsuya_Naitō_2016.JPG") } },
-  misawa: { id: "misawa", name: "Mitsuharu Misawa", credit: { author: "The Doppelganger", license: "CC BY-SA 3.0", licenseUrl: BY_SA_3, source: commons("Mitsuharu_Misawa,_2007.jpg") } },
-  ibushi: { id: "ibushi", name: "Kota Ibushi", credit: { author: "ゾーヒョー", license: "CC BY-SA 4.0", licenseUrl: BY_SA_4, source: commons("Kota_Ibushi_Aug_2015.JPG") } },
-  takagi: { id: "takagi", name: "Shingo Takagi", credit: { author: "Hirondon", license: "CC BY-SA 4.0", licenseUrl: BY_SA_4, source: commons("SHINGO_TAKAGI_2020.02.20.jpg") } },
-  hiromu: { id: "hiromu", name: "Hiromu Takahashi", credit: { author: "Hirondon", license: "CC BY-SA 4.0", licenseUrl: BY_SA_4, source: commons("Hiromu_Takahashi_2020.02.19.jpg") } },
-  ishii: { id: "ishii", name: "Tomohiro Ishii", credit: { author: "ゾーヒョー", license: "CC BY-SA 4.0", licenseUrl: BY_SA_4, source: commons("Tomohiro_Ishii_2016.JPG") } },
-  shibata: { id: "shibata", name: "Katsuyori Shibata", credit: { author: "ゾーヒョー", license: "CC BY-SA 4.0", licenseUrl: BY_SA_4, source: commons("Katsuyori_Shibata_2015.jpg") } },
-  liger: { id: "liger", name: "Jushin Thunder Liger", credit: { author: "OKfarm", license: "CC BY-SA 4.0", licenseUrl: BY_SA_4, source: commons("Jushin_Thunder_Liger_2019_nakayama_(cropped).jpg") } },
-  kawada: { id: "kawada", name: "Toshiaki Kawada", credit: { author: "Andrew Quentin", license: "CC BY-SA 2.0", licenseUrl: BY_SA_2, source: commons("Toshiaki_Kawada_and_Zeus_shaking_hands_crop.jpg") } },
-  akiyama: { id: "akiyama", name: "Jun Akiyama", credit: { author: "All Elite Wrestling", license: "CC BY-SA 4.0", licenseUrl: BY_SA_4, source: commons("Jun_Akiyama,_2022_(cropped).jpg") } },
-  moxley: { id: "moxley", name: "Jon Moxley", credit: { author: "Dante Luna", license: "CC BY 3.0", licenseUrl: BY_3, source: commons("Jon_Moxley_Oct_2019_(cropped).jpg") } },
-  danielson: { id: "danielson", name: "Bryan Danielson", credit: { author: "Ralph Arvesen", license: "CC BY-SA 2.0", licenseUrl: BY_SA_2, source: commons("Bryan_Danielson_2022-03-23_(cropped).jpg") } },
-  page: { id: "page", name: "Hangman Adam Page", credit: { author: "Super Festivals", license: "CC BY 2.0", licenseUrl: BY_2, source: commons("Adam_Page,_July_2022_2_(headshot).jpg") } },
-  swerve: { id: "swerve", name: "Swerve Strickland", credit: { author: "JDC808", license: "CC BY-SA 4.0", licenseUrl: BY_SA_4, source: commons("Swerve_Strickland_at_AEW_Dynamite-_April_10,_2024.jpg") } },
-  kobashi: { id: "kobashi", name: "Kenta Kobashi", credit: { author: "shawnsavior", license: "CC BY-SA 2.0", licenseUrl: BY_SA_2, source: commons("Kenta_Kobashi,_2007.jpg") } },
 };
 
 export const wrestlerPhoto = (id: string) => `/img/wrestlers/${id}-v${WRESTLERS[id]?.version ?? 1}.webp`;
-
-/** The G1 Climax matches Joel picked, oldest first. `note` keys into the dictionary. */
-export interface Match {
-  year: number;
-  edition: string;
-  final: boolean;
-  left: string;
-  right: string;
-  note: "firstTana" | "firstForeigner" | "favorite";
-}
-
-export const MATCHES: Match[] = [
-  { year: 2007, edition: "G1 Climax 17", final: true, left: "tanahashi", right: "nagata", note: "firstTana" },
-  { year: 2016, edition: "G1 Climax 26", final: true, left: "omega", right: "goto", note: "firstForeigner" },
-  { year: 2026, edition: "G1 Climax", final: false, left: "oiwa", right: "uemura", note: "favorite" },
-  { year: 2026, edition: "G1 Climax", final: false, left: "uemura", right: "tsuji", note: "favorite" },
-];
-
-/**
- * The scrolling roster: 25, Japanese promotions and AEW only. The first 13 are Joel's own picks;
- * the last 12 were proposed for him to keep or swap.
- */
-export const ROSTER = [
-  "kojima", "oiwa", "okada", "ospreay", "naito", "tanahashi", "misawa", "kobashi", "nagata", "uemura", "tsuji", "goto", "omega",
-  "ibushi", "takagi", "hiromu", "ishii", "shibata", "liger", "kawada", "akiyama", "moxley", "danielson", "page", "swerve",
-];
 
 export interface Song {
   title: string;
@@ -104,6 +50,9 @@ export const SONGS: Song[] = [
   { title: "Big Poppa", artist: "The Notorious B.I.G.", album: "Ready to Die", year: 1994, url: "https://music.apple.com/us/album/big-poppa/204669415?i=204669732", preview: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/a7/67/9e/a7679ee9-f358-dd4d-f6bc-85cb6b2d39da/mzaf_555885344151662906.plus.aac.p.m4a", cover: "/img/music/big-poppa-v1.webp" },
   { title: "Hit 'Em Up", artist: "2Pac", album: "Greatest Hits", year: 1998, url: "https://music.apple.com/us/album/hit-em-up/1440661662?i=1440661926", preview: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/2b/d5/7b/2bd57b22-f7c7-aa74-f09d-03691390b8ff/mzaf_16067229147945979824.plus.aac.p.m4a", cover: "/img/music/hit-em-up-v1.webp" },
 ];
+
+/** A stable slug for a song, taken from its cover file: "/img/music/hit-em-up-v1.webp" gives "hit-em-up". */
+export const songId = (song: Song) => song.cover.replace(/^.*\/|-v\d+\.webp$/g, "");
 
 export interface Game {
   id: "fpww" | "sfa3";

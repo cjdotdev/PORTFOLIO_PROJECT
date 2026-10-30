@@ -1,5 +1,5 @@
 ---
-import { GAMES, MATCHES, ROSTER, SONGS, WRESTLERS, wrestlerPhoto } from "../data/passions";
+import { GAMES, SONGS, WRESTLERS, songId, wrestlerPhoto } from "../data/passions";
 import type { Dict } from "../i18n";
 
 interface Props {
@@ -10,8 +10,9 @@ const { t } = Astro.props;
 const p = t.passions;
 const w = p.wrestling;
 const kojima = WRESTLERS.kojima;
-const credited = Object.values(WRESTLERS);
-const roster = ROSTER.map((id) => WRESTLERS[id]);
+const songData = JSON.stringify(SONGS.map((song) => ({ ...song, id: songId(song) })));
+const first = SONGS[0];
+const deckFirst = `${p.music.deckHref}?song=${songId(first)}`;
 ---
 
 <section class="passions" id="off-the-clock" aria-labelledby="passions-title">
@@ -20,88 +21,24 @@ const roster = ROSTER.map((id) => WRESTLERS[id]);
     <p class="lede">{p.lede}</p>
   </div>
 
-  <!-- The ring: a night band that carries the wrestling, like Itaja's "How it works". -->
+  <!-- The ring: a night band for Kojima, who gave the site its orange, and the games. -->
   <div class="ring">
     <div class="container">
       <div class="story">
         <div class="story-text">
           <h3 class="ring-title">{w.title}</h3>
           <p class="ring-lede">{w.body}</p>
-          <p class="kojima-line">{w.kojima}</p>
+          <a class="story-link" href={w.href}>
+            {w.cta}
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          </a>
         </div>
         <figure class="kojima">
-          <img src={wrestlerPhoto(kojima.id)} alt={kojima.name} width="720" height="900" loading="lazy" decoding="async" />
-          <figcaption><span class="dot" aria-hidden="true"></span>{w.kojimaCaption}</figcaption>
+          <a href={w.href} tabindex="-1" aria-hidden="true">
+            <img src={wrestlerPhoto(kojima.id)} alt="" width="720" height="900" loading="lazy" decoding="async" />
+          </a>
+          <figcaption><span class="dot" aria-hidden="true"></span>{w.caption}</figcaption>
         </figure>
-      </div>
-
-      <!-- G1 Climax: the year counter and the match list stay pinned while the face-offs scroll by. -->
-      <div class="g1" data-g1>
-        <div class="rail">
-          <p class="label">{w.g1}</p>
-          <p class="year" aria-hidden="true"><span data-year>{MATCHES[0].year}</span></p>
-          <p class="label sub">{w.matchesLabel}</p>
-          <ol class="steps" role="list">
-            {
-              MATCHES.map((match, index) => (
-                <li data-step-index={index} aria-current={index === 0 ? "step" : undefined}>
-                  <span class="step-n">{String(index + 1).padStart(2, "0")}</span>
-                  <span class="step-name">
-                    {WRESTLERS[match.left].name.split(" ").at(-1)} {w.vs} {WRESTLERS[match.right].name.split(" ").at(-1)}
-                  </span>
-                  <span class="step-year">{match.year}</span>
-                </li>
-              ))
-            }
-          </ol>
-        </div>
-
-        <ol class="bouts" role="list">
-          {
-            MATCHES.map((match, index) => {
-              const left = WRESTLERS[match.left];
-              const right = WRESTLERS[match.right];
-              return (
-                <li class="bout" data-bout={index} data-year={match.year}>
-                  <p class="bout-meta">
-                    {match.edition}
-                    {match.final && <> · {w.final}</>} · {match.year}
-                  </p>
-                  <h4 class="bout-title">
-                    {left.name} <span class="vs">{w.vs}</span> {right.name}
-                  </h4>
-                  <div class="faceoff">
-                    <img src={wrestlerPhoto(left.id)} alt={left.name} width="480" height="600" loading="lazy" decoding="async" />
-                    <span class="faceoff-vs" aria-hidden="true">VS</span>
-                    <img src={wrestlerPhoto(right.id)} alt={right.name} width="480" height="600" loading="lazy" decoding="async" />
-                  </div>
-                  <p class="bout-note">{w.notes[match.note]}</p>
-                </li>
-              );
-            })
-          }
-        </ol>
-      </div>
-    </div>
-
-    <!-- Roster: 25 names on a strip that keeps moving; it stops under the pointer or keyboard focus. -->
-    <div class="roster">
-      <h3 class="ring-sub container">{w.roster}</h3>
-      <div class="marquee">
-        <div class="track">
-          {
-            [0, 1].map((copy) => (
-              <ul role="list" class="lineup" aria-hidden={copy === 1 ? "true" : undefined}>
-                {roster.map((wrestler) => (
-                  <li>
-                    <img src={wrestlerPhoto(wrestler.id)} alt="" width="400" height="500" loading="lazy" decoding="async" />
-                    <span>{wrestler.name}</span>
-                  </li>
-                ))}
-              </ul>
-            ))
-          }
-        </div>
       </div>
     </div>
 
@@ -141,6 +78,30 @@ const roster = ROSTER.map((id) => WRESTLERS[id]);
       <h3 class="display">{p.music.title}</h3>
       <p class="lede">{p.music.body}</p>
     </div>
+    <div class="disc-gallery" data-disc-gallery data-songs={songData} data-deck-href={p.music.deckHref} hidden>
+      <div class="disc-stage" data-stage tabindex="0" role="group" aria-roledescription="carousel" aria-label={p.music.gallery}>
+        <canvas aria-hidden="true"></canvas>
+      </div>
+      <div class="disc-now">
+        <button class="disc-step" type="button" data-prev aria-label={p.music.prev}>
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        </button>
+        <div class="disc-caption" aria-live="polite">
+          <a class="disc-title" data-now-title href={deckFirst}>{first.title}</a>
+          <span class="song-meta" data-now-meta>{first.artist} · {first.album} · {first.year}</span>
+          <span class="disc-links">
+            <a class="disc-deck" data-now-deck href={deckFirst}>{p.music.deck}</a>
+            <a class="song-listen" data-now-apple href={first.url} target="_blank" rel="noopener noreferrer">
+              {p.music.listen}<span class="sr-only" data-sr-title>: {first.title}</span>
+            </a>
+          </span>
+        </div>
+        <button class="disc-step" type="button" data-next aria-label={p.music.next}>
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        </button>
+      </div>
+    </div>
+
     <ol class="songs" role="list">
       {
         SONGS.map((song) => (
@@ -165,14 +126,10 @@ const roster = ROSTER.map((id) => WRESTLERS[id]);
       <summary>{p.credits}</summary>
       <p>{p.creditsNote}</p>
       <ul role="list">
-        {
-          credited.map((wrestler) => (
-            <li>
-              <a href={wrestler.credit.source} target="_blank" rel="noopener noreferrer">{wrestler.name}</a>: {wrestler.credit.author},{" "}
-              <a href={wrestler.credit.licenseUrl} target="_blank" rel="noopener noreferrer">{wrestler.credit.license}</a>
-            </li>
-          ))
-        }
+        <li>
+          <a href={kojima.credit.source} target="_blank" rel="noopener noreferrer">{kojima.name}</a>: {kojima.credit.author},{" "}
+          <a href={kojima.credit.licenseUrl} target="_blank" rel="noopener noreferrer">{kojima.credit.license}</a>
+        </li>
       </ul>
       <p class="rights">{p.rightsNote}</p>
     </details>
@@ -180,50 +137,23 @@ const roster = ROSTER.map((id) => WRESTLERS[id]);
 </section>
 
 <script>
-  // The pinned rail follows the face-off in the middle of the screen: its year counts to the match's
-  // year and its row lights up. Without JavaScript the rail simply shows the first match.
-  document.querySelectorAll<HTMLElement>("[data-g1]").forEach((root) => {
-    const yearOut = root.querySelector<HTMLElement>("[data-year]")!;
-    const steps = [...root.querySelectorAll<HTMLElement>("[data-step-index]")];
-    const bouts = [...root.querySelectorAll<HTMLElement>("[data-bout]")];
-    const calm = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let shown = Number(yearOut.textContent);
-    let frame = 0;
+  // The disc gallery loads Three.js only when the music block comes near the screen. Without WebGL
+  // or JavaScript the cover grid below it stays, with the same links.
+  import { canRender, readSongs } from "../lib/music/support";
 
-    function countTo(target: number) {
-      cancelAnimationFrame(frame);
-      if (calm.matches || target === shown) {
-        shown = target;
-        yearOut.textContent = String(target);
-        return;
-      }
-      const from = shown;
-      const start = performance.now();
-      const step = (now: number) => {
-        const k = Math.min(1, (now - start) / 650);
-        const eased = 1 - Math.pow(1 - k, 4);
-        shown = Math.round(from + (target - from) * eased);
-        yearOut.textContent = String(shown);
-        if (k < 1) frame = requestAnimationFrame(step);
-      };
-      frame = requestAnimationFrame(step);
-    }
-
-    function activate(index: number) {
-      steps.forEach((step, i) => (i === index ? step.setAttribute("aria-current", "step") : step.removeAttribute("aria-current")));
-      bouts.forEach((bout, i) => bout.toggleAttribute("data-active", i === index));
-      countTo(Number(bouts[index].dataset.year));
-    }
-
+  document.querySelectorAll<HTMLElement>("[data-disc-gallery]").forEach((root) => {
+    if (!canRender()) return;
     const observer = new IntersectionObserver(
-      (entries) => {
-        const hit = entries.filter((entry) => entry.isIntersecting).at(-1);
-        if (hit) activate(Number((hit.target as HTMLElement).dataset.bout));
+      async ([entry]) => {
+        if (!entry.isIntersecting) return;
+        observer.disconnect();
+        const { mountGallery } = await import("../lib/music/gallery");
+        root.hidden = false;
+        mountGallery(root, readSongs(root), root.dataset.deckHref ?? "/music/");
       },
-      { rootMargin: "-45% 0px -45% 0px" },
+      { rootMargin: "600px 0px" },
     );
-    bouts.forEach((bout) => observer.observe(bout));
-    activate(0);
+    observer.observe(root);
   });
 </script>
 
@@ -285,17 +215,40 @@ const roster = ROSTER.map((id) => WRESTLERS[id]);
     display: grid;
     gap: var(--space-5);
   }
-  .kojima-line {
-    max-width: 34rem;
-    padding-left: var(--space-4);
-    border-left: 1px solid var(--ring-accent);
-    font-size: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
-    line-height: 1.35;
-    text-wrap: pretty;
+  .story-link {
+    display: inline-flex;
+    align-items: center;
+    justify-self: start;
+    gap: var(--space-2);
+    min-height: 2.75rem;
+    padding-inline: var(--space-5);
+    border-radius: var(--radius-control);
+    background: var(--ring-accent);
+    color: #1b0d07;
+    font-weight: 500;
+    text-decoration: none;
+    transition:
+      background-color var(--duration-fast) var(--ease-standard),
+      transform var(--duration-instant) var(--ease-standard);
+  }
+  .story-link:hover {
+    background: #f0a888;
+  }
+  .story-link:active {
+    transform: scale(0.98);
+  }
+  .story-link svg {
+    transition: translate var(--duration-fast) var(--ease-standard);
+  }
+  .story-link:hover svg {
+    translate: 3px 0;
   }
   .kojima {
     display: grid;
     gap: var(--space-3);
+  }
+  .kojima a {
+    display: block;
   }
   .kojima img {
     width: 100%;
@@ -314,215 +267,6 @@ const roster = ROSTER.map((id) => WRESTLERS[id]);
     height: 0.5rem;
     border-radius: var(--radius-pill);
     background: var(--ring-accent);
-  }
-
-  /* ─── G1 Climax: pinned rail + scrolling face-offs ─── */
-  .g1 {
-    display: grid;
-    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-    gap: var(--space-8) clamp(2rem, 1rem + 5vw, 6rem);
-    margin-top: clamp(5rem, 4rem + 5vw, 9rem);
-  }
-  .rail {
-    position: sticky;
-    top: 6rem;
-    align-self: start;
-    display: grid;
-    gap: var(--space-3);
-  }
-  .label {
-    color: var(--ring-accent);
-    font-size: var(--text-sm);
-    font-weight: 500;
-  }
-  .label.sub {
-    margin-top: var(--space-6);
-    color: var(--ring-muted);
-  }
-  .year {
-    font-family: var(--font-display);
-    font-size: clamp(5rem, 3rem + 7vw, 9.5rem);
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    line-height: 0.9;
-    font-variant-numeric: tabular-nums;
-  }
-  .steps {
-    border-top: 1px solid var(--ring-line);
-  }
-  .steps li {
-    display: grid;
-    grid-template-columns: 2rem minmax(0, 1fr) auto;
-    align-items: baseline;
-    gap: var(--space-3);
-    padding-block: var(--space-3);
-    border-bottom: 1px solid var(--ring-line);
-    color: var(--ring-muted);
-    font-size: var(--text-sm);
-    transition: color var(--duration-standard) var(--ease-standard);
-  }
-  .steps li[aria-current] {
-    color: var(--ring-ink);
-  }
-  .steps li[aria-current] .step-n {
-    color: var(--ring-accent);
-  }
-  .step-n,
-  .step-year {
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    font-variant-numeric: tabular-nums;
-  }
-  .step-name {
-    font-weight: 500;
-  }
-  .bouts {
-    display: grid;
-  }
-  .bout {
-    display: grid;
-    align-content: center;
-    gap: var(--space-4);
-    min-height: 78vh;
-    padding-block: var(--space-12);
-    opacity: 0.35;
-    transition: opacity var(--duration-considered) var(--ease-standard);
-  }
-  .bout[data-active] {
-    opacity: 1;
-  }
-  .bout-meta {
-    color: var(--ring-accent);
-    font-family: var(--font-mono);
-    font-size: 0.8125rem;
-  }
-  .bout-title {
-    font-family: var(--font-display);
-    font-size: clamp(1.75rem, 1.2rem + 1.8vw, 2.5rem);
-    font-weight: 500;
-    letter-spacing: var(--tracking-display);
-    line-height: 1.05;
-    text-wrap: balance;
-  }
-  .vs {
-    color: var(--ring-muted);
-    font-weight: 400;
-  }
-  .faceoff {
-    position: relative;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-3);
-  }
-  .faceoff img {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 4 / 5;
-    object-fit: cover;
-    border-radius: var(--radius-panel);
-    filter: grayscale(1) contrast(1.05);
-    transition: filter var(--duration-considered) var(--ease-standard);
-  }
-  .bout[data-active] .faceoff img {
-    filter: grayscale(0.15);
-  }
-  .faceoff-vs {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    z-index: 1;
-    display: grid;
-    place-items: center;
-    width: 3.5rem;
-    height: 3.5rem;
-    translate: -50% -50%;
-    border: 4px solid var(--ring-bg);
-    border-radius: var(--radius-pill);
-    background: var(--ring-accent);
-    color: #1b0d07;
-    font-family: var(--font-display);
-    font-size: var(--text-base);
-    font-weight: 600;
-  }
-  .bout-note {
-    max-width: 30rem;
-    color: var(--ring-muted);
-    font-size: var(--text-lg);
-  }
-
-  /* ─── Roster marquee ─── */
-  .roster {
-    margin-top: clamp(4rem, 3rem + 4vw, 7rem);
-  }
-  .marquee {
-    overflow: hidden;
-    mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
-  }
-  .track {
-    display: flex;
-    width: max-content;
-  }
-  .lineup {
-    display: flex;
-    gap: var(--space-3);
-    padding-right: var(--space-3);
-  }
-  .lineup li {
-    display: grid;
-    gap: var(--space-2);
-    width: clamp(8.5rem, 7rem + 4vw, 11rem);
-    font-size: var(--text-sm);
-    font-weight: 500;
-  }
-  .lineup img {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 4 / 5;
-    object-fit: cover;
-    border-radius: 18px;
-    filter: grayscale(1);
-    transition:
-      filter var(--duration-considered) var(--ease-standard),
-      translate var(--duration-standard) var(--ease-enter);
-  }
-  /* Kojima opens the strip, and he stays in colour there too. */
-  .lineup li:first-child img {
-    filter: none;
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .lineup li:hover img {
-      filter: grayscale(0);
-      translate: 0 -4px;
-    }
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    .track {
-      animation: roll 80s linear infinite;
-    }
-    .marquee:hover .track,
-    .marquee:focus-within .track {
-      animation-play-state: paused;
-    }
-  }
-  @keyframes roll {
-    to {
-      translate: -50% 0;
-    }
-  }
-  /* Without motion the strip becomes a list you scroll yourself, and the copy disappears. */
-  @media (prefers-reduced-motion: reduce) {
-    .marquee {
-      overflow-x: auto;
-      mask-image: none;
-      padding-inline: var(--gutter);
-      scroll-snap-type: x mandatory;
-    }
-    .lineup li {
-      scroll-snap-align: start;
-    }
-    .lineup[aria-hidden] {
-      display: none;
-    }
   }
 
   /* ─── Games ─── */
@@ -618,6 +362,114 @@ const roster = ROSTER.map((id) => WRESTLERS[id]);
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: var(--space-4);
   }
+  /* Once the discs are up they carry the songs; the grid is the version without WebGL. */
+  .music:has([data-disc-gallery][data-ready]) .songs {
+    display: none;
+  }
+  .disc-gallery {
+    display: grid;
+    gap: var(--space-6);
+  }
+  .disc-stage {
+    position: relative;
+    height: clamp(18rem, 12rem + 20vw, 30rem);
+    margin-inline: calc(var(--gutter) * -1);
+    border-radius: var(--radius-surface);
+    cursor: grab;
+    touch-action: pan-y;
+    user-select: none;
+  }
+  .disc-stage:active {
+    cursor: grabbing;
+  }
+  .disc-stage:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+  .disc-stage canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .disc-now {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-4);
+    max-width: 44rem;
+    width: 100%;
+    margin-inline: auto;
+    text-align: center;
+  }
+  .disc-caption {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-1);
+  }
+  .disc-title {
+    color: inherit;
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 1.2rem + 1.8vw, 2.25rem);
+    font-weight: 500;
+    letter-spacing: var(--tracking-display);
+    line-height: 1.1;
+    text-decoration: none;
+    text-wrap: balance;
+  }
+  .disc-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-2) var(--space-6);
+    margin-top: var(--space-3);
+  }
+  .disc-links .song-listen {
+    margin-top: 0;
+  }
+  .disc-deck {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding-inline: var(--space-5);
+    border-radius: var(--radius-control);
+    background: var(--primary);
+    color: var(--primary-foreground);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    text-decoration: none;
+    transition:
+      background-color var(--duration-fast) var(--ease-standard),
+      transform var(--duration-instant) var(--ease-standard);
+  }
+  .disc-deck:hover {
+    background: color-mix(in srgb, var(--primary) 86%, var(--background));
+  }
+  .disc-deck:active {
+    transform: scale(0.98);
+  }
+  .disc-links .song-listen {
+    align-self: center;
+  }
+  .disc-step {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-pill);
+    background: var(--surface);
+    color: var(--foreground);
+    cursor: pointer;
+    transition:
+      border-color var(--duration-fast) var(--ease-standard),
+      transform var(--duration-instant) var(--ease-standard);
+  }
+  .disc-step:hover {
+    border-color: var(--foreground);
+  }
+  .disc-step:active {
+    transform: scale(0.94);
+  }
   .songs a {
     display: grid;
     gap: var(--space-1);
@@ -687,29 +539,11 @@ const roster = ROSTER.map((id) => WRESTLERS[id]);
 
   /* ─── Smaller screens ─── */
   @media (max-width: 55rem) {
-    .story,
-    .g1 {
+    .story {
       grid-template-columns: minmax(0, 1fr);
     }
     .kojima {
       max-width: 22rem;
-    }
-    /* No pinned rail on a phone: each face-off carries its own year, the counter would only repeat it. */
-    .rail {
-      position: static;
-    }
-    .rail .year,
-    .rail .sub,
-    .rail .steps {
-      display: none;
-    }
-    .bout {
-      min-height: 0;
-      padding-block: var(--space-8);
-      opacity: 1;
-    }
-    .bout .faceoff img {
-      filter: grayscale(0.15);
     }
     .songs {
       grid-template-columns: repeat(2, minmax(0, 1fr));

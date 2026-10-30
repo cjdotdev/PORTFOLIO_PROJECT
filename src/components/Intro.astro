@@ -1,5 +1,6 @@
 ---
 import Mark from "./Mark.astro";
+import { CJ_C, CJ_GROUP, CJ_VIEWBOX } from "../data/cj-mark";
 import type { Dict } from "../i18n";
 
 interface Props {
@@ -7,28 +8,69 @@ interface Props {
 }
 
 const { t } = Astro.props;
-const WORDS = ["I", "AM", "THE", "ONE"];
+const WORDS = ["I", "AM", "THE", "GREAT", "ONE"];
+
+// The middle of the C's stroke, from its upper tip round the left to its lower end, in the mark's
+// own units: the pen follows it and the ink mask is drawn along it, so the C appears behind the nib.
+const C_LINE =
+  "M150 28 C146 14 126 6 112 8 C94 10 76 24 66 42 C56 60 50 80 50 96 C50 118 60 134 76 139 C92 144 108 137 120 130 C125 128 129 128 133 128";
+// The hand (720 x 450 px, Rijksmuseum, 1605) drawn 300 units wide, a little larger than the mark;
+// its nib sits at (0, 125.75), on the image's left edge.
+const HAND = { width: 300, height: 187.5, nibY: 125.75 };
+// The pen comes in from the lower right to the C's upper tip, writes, and leaves the same way.
+const ENTER_PATH = "M360 270 C300 170 210 70 150 28";
+const ENTER_START = "360 270";
+const LEAVE_PATH = "M133 128 C200 150 300 220 390 330";
 ---
 
 <!--
-  The opening title: about three seconds, once per browser session. Pure CSS, so it plays and ends on
-  its own even without JavaScript; the script only lets a click or a key skip it. The inline script in
-  Layout.astro sets data-intro="off" before the first paint for repeat visits and reduced motion, and
-  then this never renders on screen.
+  The opening title: about eleven seconds, once per browser session, one continuous shot. The words hit
+  letter by letter; ONE falls apart; an engraved hand (sepia, 1605) writes the C in one stroke; the J
+  drops and swings with light running across it; the shadow builds out; "Joel CODJA" writes itself
+  under the mark; then the mark flies to its place in the header as the page opens. Everything runs on the CSS clock: the ink is a stroke drawn
+  along the C, and the script puts the nib wherever that stroke (or the way in or out) has reached. Pure CSS, so it plays and ends on its own; the script measures the header for the
+  flight and lets a click or a key skip it. Layout.astro sets data-intro="off" before the first paint
+  for repeat visits and reduced motion, and then this never renders on screen.
 -->
 <div class="intro" data-intro-root aria-hidden="true">
   <div class="curtain top"></div>
   <div class="curtain bottom"></div>
   <div class="stage">
     <span class="flare"></span>
+    <span class="shock"></span>
     {
-      WORDS.map((word, index) => (
-        <span class:list={["word", { last: index === WORDS.length - 1 }]} style={`--n:${index}`}>
-          {word}
+      WORDS.map((word, n) => (
+        <span class:list={["word", { great: word === "GREAT", last: n === WORDS.length - 1 }]} style={`--n:${n}`}>
+          {word.split("").map((letter, i) => (
+            <span class:list={["l", word === "ONE" && ["o", "n", "e"][i]]} style={`--i:${i}`}>
+              {letter}
+            </span>
+          ))}
         </span>
       ))
     }
-    <Mark size="100%" class="mark" />
+    <span class="flare flare-hit"></span>
+    <Mark size="var(--mark)" class="mark" glint />
+    <div class="sign-wrap">
+      <p class="sign"><span class="first">Joel</span> <span class="surname">CODJA</span></p>
+      <span class="caret"></span>
+    </div>
+    <svg class="scribe" viewBox={CJ_VIEWBOX} aria-hidden="true" data-scribe>
+      <defs>
+        <mask id="intro-ink" maskUnits="userSpaceOnUse" x="-60" y="-60" width="400" height="400">
+          <path class="nib-write" d={C_LINE} pathLength="1" fill="none" stroke="#fff" stroke-width="52" stroke-linecap="round" stroke-linejoin="round" />
+        </mask>
+      </defs>
+      <g class="ink" mask="url(#intro-ink)">
+        <g transform={CJ_GROUP}><path transform={CJ_C.transform} d={CJ_C.d} /></g>
+      </g>
+      {/* Invisible tracks for the way in and out: their drawn length is the pen's progress. */}
+      <path class="track nib-enter" d={ENTER_PATH} pathLength="1" />
+      <path class="track nib-leave" d={LEAVE_PATH} pathLength="1" />
+      <g class="hand" data-hand transform={`translate(${ENTER_START})`}>
+        <image href="/img/intro-hand-v1.webp" x="0" y={-HAND.nibY} width={HAND.width} height={HAND.height} />
+      </g>
+    </svg>
   </div>
   <div class="grain"></div>
   <span class="bar bar-top"></span>
@@ -52,18 +94,59 @@ const WORDS = ["I", "AM", "THE", "ONE"];
     root?.remove();
     skip?.remove();
     document.removeEventListener("keydown", onKey);
+    window.removeEventListener("resize", aim);
   }
   function onKey(event: KeyboardEvent) {
     if (event.key === "Tab") return;
     end();
   }
 
+  // The flight: from the middle of the screen up to the header's mark at the top centre, same centre,
+  // same size. The
+  // header mark is hidden while the intro plays and shows again the moment this one lands on it.
+  function aim() {
+    const big = root?.querySelector<HTMLElement>(".mark");
+    const small = document.querySelector<HTMLElement>(".brand .cj");
+    if (!big || !small) return;
+    const from = big.getBoundingClientRect();
+    const to = small.getBoundingClientRect();
+    if (!from.width || !to.width) return;
+    big.style.setProperty("--fly-x", `${to.left + to.width / 2 - (from.left + from.width / 2)}px`);
+    big.style.setProperty("--fly-y", `${to.top + to.height / 2 - (from.top + from.height / 2)}px`);
+    big.style.setProperty("--fly-s", String(to.width / from.width));
+  }
+
+  // The pen: each frame, read how far each track has been drawn (its CSS stroke-dashoffset, from 1 to
+  // 0) and put the nib at that point, so hand and ink can never drift apart.
+  function follow() {
+    const scribe = root?.querySelector<SVGSVGElement>("[data-scribe]");
+    const hand = scribe?.querySelector<SVGGElement>("[data-hand]");
+    if (!scribe || !hand) return;
+    const tracks = [".nib-leave", ".nib-write", ".nib-enter"].map((selector) => scribe.querySelector<SVGPathElement>(selector)!);
+    const step = () => {
+      if (html.dataset.intro !== "on") return;
+      for (const track of tracks) {
+        const done = 1 - parseFloat(getComputedStyle(track).strokeDashoffset);
+        if (done > 0 || track === tracks[2]) {
+          const point = track.getPointAtLength(Math.max(0, done) * track.getTotalLength());
+          hand.setAttribute("transform", `translate(${point.x.toFixed(1)} ${point.y.toFixed(1)})`);
+          break;
+        }
+      }
+      requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+
   if (html.dataset.intro === "on" && root) {
+    aim();
+    follow();
+    window.addEventListener("resize", aim);
     root.addEventListener("click", end);
     skip?.addEventListener("click", end);
     document.addEventListener("keydown", onKey);
     root.addEventListener("animationend", (event) => {
-      if ((event.target as HTMLElement).classList.contains("bottom")) end();
+      if (event.animationName.includes("fly") || (event.target as HTMLElement).classList.contains("bottom")) end();
     });
   } else {
     end();
@@ -71,11 +154,18 @@ const WORDS = ["I", "AM", "THE", "ONE"];
 </script>
 
 <style>
-  /* Timeline (seconds): 0.1 flare · 0.45 I · 0.8 AM · 1.15 THE · 1.5 ONE · 2.05 mark draws ·
-     2.75 curtains open · 3.35 gone. */
+  /* Timeline (seconds)
+     0.1 flare · words hit letter by letter: 0.5 I · 1.12 AM · 1.74 THE · 2.36 GREAT (stretches at
+     2.66) · 2.98 ONE, its shockwave at 3.2 · 3.75 ONE falls apart
+     4.0 the hand comes in · 4.6 to 5.8 it writes the C in sepia · 5.8 it leaves, the C cools to white
+     6.35 the J drops · 6.8 catches and swings · 7.05 light runs across it
+     8.1 the shadow builds out in three steps · 8.5 hit and a second flare
+     8.75 to 10.35 "Joel CODJA" writes itself under the mark, a terracotta caret leading
+     10.75 the mark flies to the header while the curtains open · 11.65 gone */
   .intro {
     --ink: #f3f3f3;
     --night: #0b0b0b;
+    --hot: #e8916f;
     position: fixed;
     inset: 0;
     z-index: 100;
@@ -84,7 +174,7 @@ const WORDS = ["I", "AM", "THE", "ONE"];
     overflow: hidden;
     color: var(--ink);
     cursor: pointer;
-    animation: leave 0.01s linear 3.35s forwards;
+    animation: leave 0.01s linear 11.8s forwards;
   }
   :global(html[data-intro="off"]) .intro,
   :global(html[data-intro="off"]) .skip-intro,
@@ -103,14 +193,14 @@ const WORDS = ["I", "AM", "THE", "ONE"];
   /* Full shorthands: a shorthand without a name compiles to "animation: none". */
   .top {
     top: 0;
-    animation: part-up 0.6s cubic-bezier(0.76, 0, 0.24, 1) 2.75s forwards;
+    animation: part-up 0.7s cubic-bezier(0.76, 0, 0.24, 1) 10.75s forwards;
   }
   .bottom {
     bottom: 0;
-    animation: part-down 0.6s cubic-bezier(0.76, 0, 0.24, 1) 2.75s forwards;
+    animation: part-down 0.7s cubic-bezier(0.76, 0, 0.24, 1) 10.75s forwards;
   }
 
-  /* Letterbox bands: the frame of a film, closing in a hair as the title lands. */
+  /* Letterbox bands: the frame of a film. */
   .bar {
     position: absolute;
     left: 0;
@@ -121,21 +211,23 @@ const WORDS = ["I", "AM", "THE", "ONE"];
   }
   .bar-top {
     top: 0;
-    animation: part-up 0.6s cubic-bezier(0.76, 0, 0.24, 1) 2.75s forwards;
+    animation: part-up 0.7s cubic-bezier(0.76, 0, 0.24, 1) 10.75s forwards;
   }
   .bar-bottom {
     bottom: 0;
-    animation: part-down 0.6s cubic-bezier(0.76, 0, 0.24, 1) 2.75s forwards;
+    animation: part-down 0.7s cubic-bezier(0.76, 0, 0.24, 1) 10.75s forwards;
   }
 
+  /* The stage sits above the curtains and the bands, so the mark can fly out over the opening page. */
   .stage {
+    --mark: clamp(10rem, 42vmin, 22rem);
     position: relative;
-    z-index: 2;
+    z-index: 5;
     display: grid;
     place-items: center;
     width: 100%;
     height: 100%;
-    animation: fade-out 0.35s ease-in 2.6s forwards;
+    pointer-events: none;
   }
   .stage > :global(*) {
     grid-area: 1 / 1;
@@ -145,51 +237,177 @@ const WORDS = ["I", "AM", "THE", "ONE"];
   .flare {
     width: min(70vw, 56rem);
     height: 1px;
-    background: #e8916f;
+    background: var(--hot);
     box-shadow: 0 0 24px 2px rgb(232 145 111 / 0.6);
     scale: 0 1;
     opacity: 0;
     animation: flare 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
   }
+  /* The same light leak once more, wider and lower, at the instant the shadow hits. */
+  .flare-hit {
+    width: min(90vw, 72rem);
+    translate: 0 calc(var(--mark) * 0.52);
+    animation-delay: 8.5s;
+  }
 
-  /* Each word lands one beat after the last: out of focus and wide, then sharp and tight. */
+  /* ─── The words: Unbounded Black, every letter slamming in on its own ─── */
+  /* Each word holds 0.62 s. GREAT, the widest word, is 4.6 em with its tracking, so 18vw keeps it inside the screen. */
   .word {
-    font-family: var(--font-display);
-    font-size: clamp(5rem, 22vw, 20rem);
-    font-weight: 500;
-    letter-spacing: -0.05em;
+    --t: calc(0.5s + var(--n) * 0.62s);
+    font-family: "Unbounded", var(--font-display);
+    font-size: clamp(3rem, 18vw, 17rem);
+    font-weight: 900;
+    letter-spacing: 0.02em;
     line-height: 0.8;
     white-space: nowrap;
-    opacity: 0;
-    animation: beat 0.35s cubic-bezier(0.16, 1, 0.3, 1) calc(0.45s + var(--n) * 0.35s) both;
+    /* Shown for exactly its half second, then a hard cut, like a title card. */
+    animation: card 0.62s linear var(--t) both;
   }
-  .word.last {
-    color: #e8916f;
+  .l {
+    display: inline-block;
+    animation: slam 0.42s cubic-bezier(0.16, 1, 0.3, 1) calc(var(--t) + var(--i) * 0.045s) both;
+  }
+  /* GREAT lands, then stretches wide for an instant and snaps back. */
+  .great {
     animation:
-      land 0.7s cubic-bezier(0.16, 1, 0.3, 1) calc(0.45s + var(--n) * 0.35s) both,
-      fade-out 0.25s ease-in 1.95s forwards;
+      card 0.62s linear var(--t) both,
+      stretch 0.36s cubic-bezier(0.3, 0, 0.2, 1) 2.66s both;
+  }
+  /* ONE holds, then falls apart under gravity, each letter tumbling its own way, to clear the page
+     for the hand. */
+  .last {
+    color: var(--hot);
+    animation: none;
+  }
+  .last .l {
+    animation:
+      slam 0.42s cubic-bezier(0.16, 1, 0.3, 1) calc(var(--t) + var(--i) * 0.045s) both,
+      fall 0.6s cubic-bezier(0.55, 0, 1, 0.45) calc(3.75s + var(--i) * 0.06s) forwards;
+  }
+  .last .o {
+    --spin: 12deg;
+  }
+  .last .n {
+    --spin: -18deg;
+  }
+  .last .e {
+    --spin: 26deg;
   }
 
-  /* The c/J mark draws itself where ONE stood. */
-  .stage :global(.mark) {
-    width: clamp(7rem, 22vmin, 12rem);
-    height: auto;
-    color: var(--ink);
-  }
-  .stage :global(.mark .ring),
-  .stage :global(.mark .slash) {
-    stroke-dasharray: 1;
-    stroke-dashoffset: 1;
-    animation: draw 0.7s cubic-bezier(0.65, 0, 0.35, 1) 2.05s forwards;
-  }
-  .stage :global(.mark .slash) {
-    animation-duration: 0.35s;
-    animation-delay: 2.25s;
-  }
-  .stage :global(.mark .letters) {
+  /* The shockwave behind ONE. */
+  .shock {
+    width: calc(var(--mark) * 0.7);
+    aspect-ratio: 1;
+    border: 2px solid var(--hot);
+    border-radius: 50%;
     opacity: 0;
-    transform-origin: 128px 128px;
-    animation: letters 0.45s cubic-bezier(0.16, 1, 0.3, 1) 2.3s forwards;
+    animation: shock 0.9s cubic-bezier(0.16, 1, 0.3, 1) 3.2s both;
+  }
+
+  /* ─── The mark ─── */
+  .stage :global(.mark) {
+    color: var(--ink);
+    perspective: 900px;
+    animation:
+      hit 0.34s cubic-bezier(0.2, 0, 0, 1) 8.5s both,
+      fly 0.9s cubic-bezier(0.7, 0, 0.2, 1) 10.75s forwards;
+  }
+  /* The mark's own white C takes over from the written sepia one, in the same place. */
+  .stage :global(.mark .cj-c) {
+    animation: appear 0.45s ease-out 5.85s both;
+  }
+  .stage :global(.mark .cj-j) {
+    animation:
+      drop 0.45s cubic-bezier(0.55, 0, 1, 0.45) 6.35s both,
+      swing 1.5s cubic-bezier(0.37, 0, 0.63, 1) 6.8s both;
+  }
+  .stage :global(.mark .cj-glint) {
+    animation: glint 0.8s cubic-bezier(0.45, 0, 0.55, 1) 7.05s both;
+  }
+  /* The shadow comes out of the letters in three hard steps, like depth being extruded. */
+  .stage :global(.mark .cj-echo) {
+    fill: var(--hot);
+    animation:
+      appear 0.01s linear 8.1s both,
+      extrude 0.4s steps(3, jump-start) 8.1s both,
+      echo-land 0.9s linear 10.75s forwards;
+  }
+
+  /* The signature: Joel in the site's display face, CODJA in Monoton as on the page, revealed left
+     to right over 1.6 s behind a terracotta caret, like a line being written. */
+  .sign-wrap {
+    position: relative;
+    translate: 0 calc(var(--mark) * 0.7);
+  }
+  .sign {
+    display: flex;
+    align-items: baseline;
+    gap: 0.35em;
+    margin: 0;
+    color: var(--ink);
+    font-size: clamp(1.75rem, 5.5vw, 4.25rem);
+    line-height: 1;
+    white-space: nowrap;
+    clip-path: inset(-0.2em 100% -0.2em 0);
+    animation:
+      write-on 1.6s cubic-bezier(0.45, 0, 0.4, 1) 8.75s forwards,
+      fade-out 0.3s ease-in 10.7s forwards;
+  }
+  .first {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .surname {
+    font-family: "Monoton", var(--font-display);
+    letter-spacing: 0.02em;
+  }
+  .caret {
+    position: absolute;
+    top: -0.15em;
+    bottom: -0.15em;
+    left: 0;
+    width: 2px;
+    background: var(--hot);
+    opacity: 0;
+    animation: caret 1.6s cubic-bezier(0.45, 0, 0.4, 1) 8.75s forwards;
+  }
+
+  /* The scribe: the same square as the mark, laid over it. The written C is sepia ink (the colour of
+     the engraved hand) and gives way to the mark's white C once the hand has gone. */
+  .scribe {
+    width: var(--mark);
+    height: var(--mark);
+    overflow: visible;
+  }
+  .ink {
+    fill: #e8c8a0;
+    animation:
+      appear 0.01s linear 4.6s both,
+      fade-out 0.45s ease-out 5.85s forwards;
+  }
+  /* The stroke that reveals the ink, and the two tracks the pen follows in and out. */
+  .nib-write,
+  .track {
+    stroke-dasharray: 1 1;
+    stroke-dashoffset: 1;
+  }
+  .track {
+    fill: none;
+    stroke: none;
+  }
+  .nib-enter {
+    animation: draw 0.6s cubic-bezier(0.2, 0.7, 0.3, 1) 4s both;
+  }
+  .nib-write {
+    animation: draw 1.2s cubic-bezier(0.45, 0, 0.4, 1) 4.6s both;
+  }
+  .nib-leave {
+    animation: draw 0.6s cubic-bezier(0.5, 0, 0.8, 0.4) 5.8s both;
+  }
+  .hand {
+    opacity: 0;
+    animation: present 2.4s linear 4s both;
   }
 
   /* Film grain, jittered a few times a second. */
@@ -202,7 +420,7 @@ const WORDS = ["I", "AM", "THE", "ONE"];
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
     animation:
       grain 0.5s steps(4) infinite,
-      fade-out 0.3s ease-in 2.7s forwards;
+      fade-out 0.3s ease-in 10.7s forwards;
   }
 
   .skip-intro {
@@ -219,11 +437,16 @@ const WORDS = ["I", "AM", "THE", "ONE"];
     font: inherit;
     font-size: var(--text-sm);
     cursor: pointer;
-    animation: leave 0.01s linear 2.7s forwards;
+    animation: leave 0.01s linear 10.7s forwards;
   }
   .skip-intro:hover {
     border-color: rgb(255 255 255 / 0.6);
     color: #fff;
+  }
+
+  /* The header's own mark waits for the flying one to land on it. */
+  :global(html[data-intro="on"] .brand .cj) {
+    visibility: hidden;
   }
 
   @keyframes flare {
@@ -236,55 +459,192 @@ const WORDS = ["I", "AM", "THE", "ONE"];
       opacity: 0;
     }
   }
-  @keyframes beat {
+  @keyframes card {
     0% {
       opacity: 0;
-      filter: blur(18px);
-      letter-spacing: 0.25em;
-      scale: 1.18;
     }
-    55% {
-      opacity: 1;
-      filter: blur(0);
-      letter-spacing: -0.05em;
-      scale: 1;
-    }
-    /* Hard cut, like a title card: gone the instant the next word lands. */
+    0.1%,
     99.9% {
       opacity: 1;
-      filter: blur(0);
     }
     100% {
       opacity: 0;
     }
   }
-  @keyframes land {
+  @keyframes slam {
     from {
       opacity: 0;
-      filter: blur(22px);
-      letter-spacing: 0.3em;
-      scale: 1.25;
+      filter: blur(14px);
+      translate: 0 -0.45em;
+      scale: 1.4;
+    }
+    55% {
+      opacity: 1;
+      filter: blur(0);
     }
     to {
       opacity: 1;
       filter: blur(0);
-      letter-spacing: -0.05em;
+      translate: 0 0;
       scale: 1;
     }
   }
+  @keyframes stretch {
+    40% {
+      scale: 1.16 0.93;
+    }
+    to {
+      scale: 1 1;
+    }
+  }
+  @keyframes fall {
+    to {
+      opacity: 0;
+      translate: 0.15em 1.8em;
+      rotate: var(--spin);
+    }
+  }
+  @keyframes shock {
+    0% {
+      opacity: 0;
+      scale: 0.2;
+    }
+    1% {
+      opacity: 0.9;
+    }
+    to {
+      opacity: 0;
+      scale: 3.2;
+    }
+  }
+  @keyframes drop {
+    from {
+      opacity: 0;
+      translate: 0 -150%;
+    }
+    30% {
+      opacity: 1;
+    }
+    to {
+      opacity: 1;
+      translate: 0 0;
+    }
+  }
+  /* A pendant on its hook: each swing smaller than the last, then still. */
+  @keyframes swing {
+    from {
+      rotate: 0deg;
+    }
+    16% {
+      rotate: 17deg;
+    }
+    38% {
+      rotate: -10deg;
+    }
+    58% {
+      rotate: 6deg;
+    }
+    76% {
+      rotate: -2.5deg;
+    }
+    90% {
+      rotate: 1deg;
+    }
+    to {
+      rotate: 0deg;
+    }
+  }
+  @keyframes glint {
+    from {
+      opacity: 0;
+      translate: 75px 0;
+    }
+    20%,
+    80% {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+      translate: 290px 0;
+    }
+  }
+  /* The shadow starts tucked exactly under the letters (where its cut-out hides it). */
+  @keyframes extrude {
+    from {
+      translate: -3.6% -3.6%;
+    }
+    to {
+      translate: 0 0;
+    }
+  }
+  @keyframes write-on {
+    to {
+      clip-path: inset(-0.2em 0 -0.2em 0);
+    }
+  }
+  @keyframes caret {
+    0% {
+      left: 0;
+      opacity: 1;
+    }
+    90% {
+      opacity: 1;
+    }
+    100% {
+      left: 100%;
+      opacity: 0;
+    }
+  }
   @keyframes draw {
+    from {
+      stroke-dashoffset: 1;
+    }
     to {
       stroke-dashoffset: 0;
     }
   }
-  @keyframes letters {
+  @keyframes present {
+    0% {
+      opacity: 0;
+    }
+    4%,
+    96% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+  @keyframes appear {
     from {
       opacity: 0;
-      scale: 0.86;
     }
     to {
       opacity: 1;
+    }
+  }
+  @keyframes hit {
+    from {
       scale: 1;
+    }
+    35% {
+      scale: 1.07;
+    }
+    to {
+      scale: 1;
+    }
+  }
+  /* Into the header: same centre, same size, and the page's own colours by the time it lands. */
+  @keyframes fly {
+    to {
+      translate: var(--fly-x, 0) var(--fly-y, -44vh);
+      scale: var(--fly-s, 0.1);
+      color: var(--foreground);
+    }
+  }
+  @keyframes echo-land {
+    to {
+      fill: var(--accent);
     }
   }
   @keyframes fade-out {

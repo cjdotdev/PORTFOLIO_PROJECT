@@ -29,8 +29,9 @@ const { rise = false, say, decorative = false } = Astro.props;
 </div>
 
 <style>
-  /* The surname spans the container exactly: the font size is a fixed share of the container's
-     inline size (measured for Geist 500 at this tracking), so it never wraps or overflows. */
+  /* The surname spans the container exactly: in Monoton, "CODJA" is 4 em of ink from the C to the A,
+     so a font size of a quarter of the container's inline size fills it, and it never wraps. The
+     letters stand 0.88 em tall with their overshoot, which the 0.9 line height holds. */
   .monument {
     position: relative;
     display: flex;
@@ -39,15 +40,14 @@ const { rise = false, say, decorative = false } = Astro.props;
   }
   .word {
     display: flex;
-    font-family: var(--font-display);
-    font-size: calc(100cqi * 0.32);
-    font-weight: 500;
-    letter-spacing: -0.035em;
-    line-height: 0.74;
+    font-family: "Monoton", var(--font-display);
+    font-size: calc(100cqi * 0.25);
+    font-weight: 400;
+    line-height: 0.9;
     text-transform: uppercase;
     white-space: nowrap;
-    /* Optical alignment: Geist's C sits a hair right of the box. */
-    margin-left: -0.035em;
+    /* The C's side bearing: the ink starts flush with the container. */
+    margin-left: -0.027em;
   }
   /* The pronunciation annotates the letters from under the baseline, right-aligned on the A, so it
      never reads as one more line of the portrait caption above. */
@@ -105,9 +105,10 @@ const { rise = false, say, decorative = false } = Astro.props;
       animation: rise 1s var(--ease-enter) both;
       animation-delay: calc(80ms + var(--i) * 70ms);
     }
-    /* When the opening title plays, the letters rise as its curtains part. */
+    /* While the opening title plays, the letters wait below the baseline; they rise the moment it
+       ends (or is skipped), as the mark lands in the header. */
     :global(html[data-intro="on"]) .rise .word span {
-      animation-delay: calc(2.85s + var(--i) * 70ms);
+      animation-play-state: paused;
     }
   }
   @keyframes rise {

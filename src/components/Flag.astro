@@ -1,0 +1,46 @@
+---
+/**
+ * A round flag for a language: the United Kingdom for English, France for French. Drawn in SVG (emoji
+ * flags do not render on Windows) and cropped to a circle by the parent; ids are unique per instance
+ * so several flags can sit on one page.
+ */
+import type { Locale } from "../i18n";
+
+interface Props {
+  code: Locale;
+  size?: number;
+}
+
+const { code, size = 16 } = Astro.props;
+const uid = `flag-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+{
+  code === "fr" ? (
+    <svg class="flag" viewBox="0 0 30 30" width={size} height={size} aria-hidden="true">
+      <rect width="10" height="30" fill="#0055a4" />
+      <rect x="10" width="10" height="30" fill="#ffffff" />
+      <rect x="20" width="10" height="30" fill="#ef4135" />
+    </svg>
+  ) : (
+    <svg class="flag" viewBox="15 0 30 30" width={size} height={size} aria-hidden="true">
+      <defs>
+        <clipPath id={`${uid}-t`}>
+          <path d="M30 15h30v15zv15H0zH0V0zV0h30z" />
+        </clipPath>
+      </defs>
+      <rect width="60" height="30" fill="#012169" />
+      <path d="M0 0l60 30m0-30L0 30" stroke="#fff" stroke-width="6" />
+      <path d="M0 0l60 30m0-30L0 30" clip-path={`url(#${uid}-t)`} stroke="#c8102e" stroke-width="4" />
+      <path d="M30 0v30M0 15h60" stroke="#fff" stroke-width="10" />
+      <path d="M30 0v30M0 15h60" stroke="#c8102e" stroke-width="6" />
+    </svg>
+  )
+}
+
+<style>
+  .flag {
+    display: block;
+    border-radius: 50%;
+  }
+</style>

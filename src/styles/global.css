@@ -8,6 +8,33 @@
 /* Clash Grotesk (display) and Cabinet Grotesk (text), Indian Type Foundry via Fontshare, ITF Free
    Font License. Self-hosted in public/fonts so no third-party connection holds up the first paint;
    Layout.astro preloads the two the first screen needs. */
+/* The surname, set in Monoton by Vernon Adams (OFL, licence in public/fonts/monoton-OFL.txt). Only
+   C, O, D, J and A are in the file. */
+@font-face {
+  font-family: "Monoton";
+  src: url("/fonts/monoton.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+/* The opening title's I AM THE GREAT ONE, in Unbounded Black (OFL, licence in
+   public/fonts/unbounded-OFL.txt). Only those ten letters are in the file. */
+@font-face {
+  font-family: "Unbounded";
+  src: url("/fonts/unbounded-900-intro.woff2") format("woff2");
+  font-weight: 900;
+  font-style: normal;
+  font-display: block;
+}
+/* Only the kanji and kana of the Kojima story (src/i18n/kojima.ts), cut from Noto Serif CJK JP (OFL).
+   Regenerate the subset when that text gains a new character. */
+@font-face {
+  font-family: "Kojima Serif JP";
+  src: url("/fonts/noto-serif-jp-kojima-500.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
 @font-face {
   font-family: "Clash Grotesk";
   src: url("/fonts/clash-grotesk-500.woff2") format("woff2");
@@ -56,6 +83,7 @@
   --font-mono: "Geist Mono Variable", ui-monospace, "SFMono-Regular", Menlo, monospace;
   --font-display: "Clash Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-body: "Cabinet Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-jp: "Kojima Serif JP", "Noto Serif CJK JP", "Yu Mincho", "Hiragino Mincho ProN", serif;
   /* Clash is drawn tight and Cabinet has a small x-height: looser display tracking than Geist's
      -0.03em, neutral body tracking, and a 17px body. */
   --tracking-display: -0.012em;

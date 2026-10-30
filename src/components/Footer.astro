@@ -107,11 +107,10 @@ const elsewhere = [
     color: var(--foreground);
   }
 
-  /* The name returns at full width on an inverted band: near-black in light mode, near-white in dark. */
+  /* The name returns at full width, on the page's own dark ground under a hairline. */
   .band {
     padding-top: clamp(3rem, 2rem + 4vw, 6rem);
-    background: var(--primary);
-    color: var(--primary-foreground);
+    border-top: 1px solid var(--border);
     overflow: clip;
   }
   .legal {
@@ -120,7 +119,7 @@ const elsewhere = [
     justify-content: space-between;
     gap: var(--space-2) var(--space-6);
     padding-block: var(--space-6) var(--space-8);
-    color: color-mix(in srgb, var(--primary-foreground) 72%, var(--primary));
+    color: var(--text-secondary);
     font-size: var(--text-sm);
   }
   .legal a {
@@ -128,6 +127,6 @@ const elsewhere = [
     text-underline-offset: 0.22em;
   }
   .legal a:hover {
-    color: var(--primary-foreground);
+    color: var(--foreground);
   }
 </style>

@@ -1,12 +1,12 @@
 ---
 import Mark from "./Mark.astro";
+import LangSwitch from "./LangSwitch.astro";
 import { localePath, type Dict, type Locale } from "../i18n";
-import { PERSONAL } from "../data";
 
 interface Props {
   t: Dict;
   locale: Locale;
-  current: "home" | "work" | "writing";
+  current: "home" | "work" | "writing" | "pics" | "music" | "kojima";
   switchHref: string;
 }
 
@@ -15,24 +15,20 @@ const home = localePath(locale, "/");
 const links = [
   { id: "work", label: t.nav.work, href: localePath(locale, "/projects/") },
   { id: "writing", label: t.nav.writing, href: localePath(locale, "/blog/") },
+  { id: "pics", label: t.nav.pics, href: localePath(locale, "/pics/") },
   { id: "contact", label: t.nav.contact, href: `${home}#contact` },
 ];
-const otherLocale = locale === "fr" ? "en" : "fr";
-const otherName = locale === "fr" ? "English" : "Français";
 ---
 
 <!--
-  Built like makisend.lixalistudio.tech's header (Arc site-header): a 64px sticky bar that takes the
-  page background and a hairline once the page scrolls; under 760px the links fold into a sheet that
-  drops from the bar, with a scrim behind it and the language and theme as two actions at its foot.
+  Three parts, like lenis.dev: the links on the left, the CJ mark alone in the centre, the language
+  switch on the right. The site is dark only, so there is no theme switch. A 64px sticky bar that
+  takes the page background and a hairline once the page scrolls; under 760px the links fold into a
+  sheet that drops from the bar, with a scrim behind it and the language switch at its foot, and the
+  mark stays in the centre.
 -->
 <header class="header" data-header>
   <div class="bar container">
-    <a class="brand" href={home} aria-label={t.nav.home} aria-current={current === "home" ? "page" : undefined}>
-      <Mark size={26} class="mark" />
-      <span class:list={["brand-name", { "on-home": current === "home" }]}>{PERSONAL.name}</span>
-    </a>
-
     <nav class="nav" aria-label={t.nav.label}>
       <ul role="list">
         {
@@ -47,19 +43,12 @@ const otherName = locale === "fr" ? "English" : "Français";
       </ul>
     </nav>
 
+    <a class="brand" href={home} aria-label={t.nav.home} aria-current={current === "home" ? "page" : undefined}>
+      <Mark size={36} class="mark" />
+    </a>
+
     <div class="actions">
-      <a class="pill wide" href={switchHref} hreflang={otherLocale} lang={otherLocale} aria-label={t.nav.switchTo}>
-        {t.nav.switchShort}
-      </a>
-      <button type="button" class="pill icon wide" data-theme-toggle aria-label={t.theme.toDark} data-to-dark={t.theme.toDark} data-to-light={t.theme.toLight}>
-        <svg class="sun" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-          <circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.75"></circle>
-          <path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"></path>
-        </svg>
-        <svg class="moon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-          <path d="M20.3 14.6A8.5 8.5 0 0 1 9.4 3.7a8.5 8.5 0 1 0 10.9 10.9Z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"></path>
-        </svg>
-      </button>
+      <span class="wide"><LangSwitch t={t} locale={locale} href={switchHref} /></span>
       <button type="button" class="menu" data-menu-button aria-expanded="false" aria-controls="site-sheet" aria-label={t.nav.menu}>
         <span class="burger" aria-hidden="true"><span></span><span></span></span>
       </button>
@@ -82,38 +71,14 @@ const otherName = locale === "fr" ? "English" : "Français";
         }
       </ul>
       <div class="sheet-actions">
-        <a class="action" href={switchHref} hreflang={otherLocale} lang={otherLocale}>{otherName}</a>
-        <button type="button" class="action" data-theme-toggle aria-label={t.theme.toDark} data-to-dark={t.theme.toDark} data-to-light={t.theme.toLight}>
-          <span class="when-light">{t.theme.darkShort}</span>
-          <span class="when-dark">{t.theme.lightShort}</span>
-        </button>
+        <LangSwitch t={t} locale={locale} href={switchHref} variant="list" />
       </div>
     </div>
   </div>
 </header>
 
 <script>
-  import { resolveTheme, readTheme, setTheme } from "../lib/theme";
-
   const header = document.querySelector<HTMLElement>("[data-header]");
-
-  // Theme: every toggle shows where it would switch to; switching saves the choice.
-  const toggles = document.querySelectorAll<HTMLButtonElement>("[data-theme-toggle]");
-  const syncToggles = () => {
-    const dark = document.documentElement.dataset.theme === "dark";
-    toggles.forEach((button) => {
-      button.setAttribute("aria-label", (dark ? button.dataset.toLight : button.dataset.toDark) ?? "");
-      button.setAttribute("aria-pressed", String(dark));
-    });
-  };
-  syncToggles();
-  toggles.forEach((button) =>
-    button.addEventListener("click", () => {
-      setTheme(resolveTheme(readTheme()) === "dark" ? "light" : "dark");
-      syncToggles();
-    }),
-  );
-  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", syncToggles);
 
   // Scrolled: the bar takes the page background and a hairline, as on makisend.lixalistudio.tech.
   const onScroll = () => header?.toggleAttribute("data-scrolled", window.scrollY > 8);
@@ -160,32 +125,55 @@ const otherName = locale === "fr" ? "English" : "Français";
     border-bottom-color: var(--border);
     background: var(--background);
   }
+  /* Two equal outer columns keep the mark on the exact centre of the bar, whatever their contents. */
   .bar {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
     gap: var(--space-2);
     height: 4rem;
   }
   .brand {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-3);
+    grid-column: 2;
+    display: inline-grid;
+    place-items: center;
+    min-width: 2.75rem;
     min-height: 2.75rem;
-    font-size: var(--text-base);
-    font-weight: 500;
     text-decoration: none;
-    white-space: nowrap;
   }
   .brand :global(.mark) {
     flex: none;
-    transition: rotate var(--duration-considered) var(--ease-spring);
   }
-  .brand:hover :global(.mark) {
-    rotate: -12deg;
+  /* Touch the earring and it swings: the J rocks on its hook and settles, the C stays put. */
+  @media (prefers-reduced-motion: no-preference) {
+    .brand:hover :global(.mark .cj-j),
+    .brand:focus-visible :global(.mark .cj-j) {
+      animation: earring 1.1s cubic-bezier(0.37, 0, 0.63, 1);
+    }
+  }
+  @keyframes earring {
+    18% {
+      rotate: 11deg;
+    }
+    40% {
+      rotate: -7deg;
+    }
+    60% {
+      rotate: 4deg;
+    }
+    80% {
+      rotate: -1.5deg;
+    }
+    to {
+      rotate: 0deg;
+    }
   }
 
   .nav {
-    margin-left: auto;
+    grid-column: 1;
+    justify-self: start;
+    /* The first link's text lines up with the page gutter. */
+    margin-left: calc(var(--space-3) * -1);
   }
   .nav ul {
     display: flex;
@@ -216,55 +204,11 @@ const otherName = locale === "fr" ? "English" : "Français";
   }
 
   .actions {
+    grid-column: 3;
+    justify-self: end;
     display: flex;
     align-items: center;
     gap: var(--space-2);
-    margin-left: var(--space-2);
-  }
-  .pill {
-    display: inline-grid;
-    place-items: center;
-    min-width: 2.25rem;
-    height: 2.25rem;
-    padding: 0 var(--space-3);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-pill);
-    background: transparent;
-    color: var(--text-secondary);
-    font: inherit;
-    font-size: var(--text-sm);
-    font-weight: 500;
-    text-decoration: none;
-    cursor: pointer;
-    transition:
-      color var(--duration-fast) var(--ease-standard),
-      border-color var(--duration-fast) var(--ease-standard);
-  }
-  .pill:hover {
-    border-color: var(--border-strong);
-    color: var(--foreground);
-  }
-  .icon {
-    padding: 0;
-  }
-  .icon svg {
-    grid-area: 1 / 1;
-    transition:
-      opacity var(--duration-standard) var(--ease-standard),
-      rotate var(--duration-considered) var(--ease-enter);
-  }
-  /* The icon shows where the switch goes: the moon in light mode, the sun in dark mode. */
-  .sun {
-    opacity: 0;
-    rotate: -90deg;
-  }
-  :global(:root[data-theme="dark"]) .sun {
-    opacity: 1;
-    rotate: 0deg;
-  }
-  :global(:root[data-theme="dark"]) .moon {
-    opacity: 0;
-    rotate: 90deg;
   }
 
   /* Menu button: two lines that cross into an X. */
@@ -359,32 +303,7 @@ const otherName = locale === "fr" ? "English" : "Français";
     background: var(--accent);
   }
   .sheet-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-2);
     margin-top: var(--space-5);
-  }
-  .action {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    height: var(--control-height-md);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-control);
-    background: none;
-    color: var(--foreground);
-    font: inherit;
-    font-size: var(--text-sm);
-    font-weight: 500;
-    text-decoration: none;
-    cursor: pointer;
-  }
-  .when-dark,
-  :global(:root[data-theme="dark"]) .when-light {
-    display: none;
-  }
-  :global(:root[data-theme="dark"]) .when-dark {
-    display: inline;
   }
   @media (prefers-reduced-motion: no-preference) {
     .sheet:not([hidden]) {
@@ -413,13 +332,6 @@ const otherName = locale === "fr" ? "English" : "Français";
     }
     .menu {
       display: grid;
-    }
-    .actions {
-      margin-left: auto;
-    }
-    /* On the home page the hero's name lockup says "Joel Codja" right below: the mark is enough. */
-    .on-home {
-      display: none;
     }
   }
   @media (min-width: 47.5rem) {
