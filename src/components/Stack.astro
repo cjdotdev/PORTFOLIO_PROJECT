@@ -1,0 +1,99 @@
+---
+import { STACK } from "../data";
+import { TECH } from "../data/tech";
+import type { Dict } from "../i18n";
+
+interface Props {
+  t: Dict;
+}
+
+const { t } = Astro.props;
+---
+
+<!--
+  The tools Joel works with: four rows between hairlines, the group on the left and its tools on the
+  right, each as its one-colour mark and its name. Typography only, no tiles (Joel's rule).
+-->
+<div class="stack">
+  <h3 class="stack-title">{t.stack.title}</h3>
+  <dl class="rows">
+    {
+      STACK.map((group) => (
+        <div class="row">
+          <dt>{t.stack.groups[group.id]}</dt>
+          <dd>
+            <ul role="list">
+              {group.tools.map((id) => (
+                <li>
+                  <svg viewBox={TECH[id].viewBox} fill="currentColor" aria-hidden="true" set:html={TECH[id].body} />
+                  {TECH[id].name}
+                </li>
+              ))}
+            </ul>
+          </dd>
+        </div>
+      ))
+    }
+  </dl>
+</div>
+
+<style>
+  .stack {
+    display: grid;
+    gap: var(--space-6);
+  }
+  .stack-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.375rem, 1.1rem + 0.8vw, 1.75rem);
+    font-weight: 500;
+    letter-spacing: var(--tracking-display);
+  }
+  .rows {
+    margin: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .row {
+    display: grid;
+    grid-template-columns: minmax(0, 14rem) minmax(0, 1fr);
+    gap: var(--space-3) var(--space-6);
+    align-items: baseline;
+    padding-block: var(--space-5);
+    border-top: 1px solid var(--border);
+  }
+  dt {
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+  dd {
+    margin: 0;
+  }
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3) var(--space-6);
+    margin: 0;
+    padding: 0;
+  }
+  li {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-lg);
+  }
+  li svg {
+    flex: none;
+    width: 1.125rem;
+    height: 1.125rem;
+    color: var(--text-secondary);
+  }
+  /* Phone: the group above its tools. */
+  @media (max-width: 39.99rem) {
+    .row {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    li {
+      font-size: var(--text-base);
+    }
+  }
+</style>

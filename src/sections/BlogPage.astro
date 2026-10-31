@@ -20,14 +20,16 @@ const posts = getBlogPosts();
   </p>
 </header>
 
-<div class="container">
-  <PostList posts={posts} t={t} locale={locale} level={2} />
+<div class="container list">
+  <PostList posts={posts} t={t} locale={locale} level={2} filters />
 </div>
 
 <style>
   .page-head {
     display: grid;
     gap: var(--space-4);
-    padding-block: clamp(3rem, 2rem + 4vw, 6rem) clamp(2rem, 1.5rem + 2vw, 3.5rem);
+  }
+  .list {
+    padding-bottom: var(--section-space);
   }
 </style>

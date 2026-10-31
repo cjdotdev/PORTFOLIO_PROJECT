@@ -9,117 +9,264 @@ interface Props {
   locale: Locale;
   /** h3 under a section heading on the home page, h2 on /blog. */
   level?: 2 | 3;
+  /** /blog: topic filters over the list. */
+  filters?: boolean;
 }
 
-const { posts, t, locale, level = 3 } = Astro.props;
+const { posts, t, locale, level = 3, filters = false } = Astro.props;
 const format = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
   year: "numeric",
   month: "short",
   day: "numeric",
   timeZone: "UTC",
 });
+const [featured, ...rest] = posts;
+const topics = [...new Set(posts.flatMap((post) => post.tags))].sort();
 ---
 
-{
-  posts.length > 0 ? (
-    <ol class="posts" role="list">
-      {posts.map((post) => (
-        <li>
-          <time datetime={post.date}>{format.format(new Date(post.date))}</time>
-          <div class="body" lang="en">
-            {/* Literal h2/h3: Astro's scoped styles do not reach a dynamic tag. */}
-            {level === 2 ? (
-              <h2 class="title">
-                <a href={post.url} target="_blank" rel="noopener noreferrer">
-                  {post.title}
-                </a>
-              </h2>
-            ) : (
-              <h3 class="title">
-                <a href={post.url} target="_blank" rel="noopener noreferrer">
-                  {post.title}
-                </a>
-              </h3>
-            )}
-            <p>{post.brief}</p>
-          </div>
-        </li>
-      ))}
-    </ol>
-  ) : (
-    <p class="empty">
-      {t.writing.empty}{" "}
-      <a class="link" href={PERSONAL.hashnode} target="_blank" rel="noopener noreferrer">
-        Hashnode
-      </a>
-    </p>
-  )
-}
+<!--
+  Writing, laid out after Sanity's blog without its boxes (no cards on this site): the newest post
+  featured across the full width, its title large on the left and its summary on the right; the others
+  in a grid, each opened by a hairline, its date and topics at the foot like Sanity's author row. On
+  /blog, topics filter the list. The whole post is the link's target; the title is the only link.
+-->
+<div class="writing" data-writing>
+  {
+    filters && topics.length > 1 && (
+      <div class="filters" role="group" aria-label={t.writing.filters}>
+        <button type="button" aria-pressed="true" data-topic="">
+          {t.writing.allTopics}
+        </button>
+        {topics.map((topic) => (
+          <button type="button" aria-pressed="false" data-topic={topic} lang="en">
+            {topic}
+          </button>
+        ))}
+      </div>
+    )
+  }
+  {
+    featured ? (
+      <ol class="posts" role="list">
+        {[featured, ...rest].map((post, i) => (
+          <li class:list={["post", { featured: i === 0 }]} data-tags={post.tags.join("|")}>
+            <div class="text" lang="en">
+              {level === 2 ? (
+                <h2 class="title">
+                  <a href={post.url} target="_blank" rel="noopener noreferrer">
+                    {post.title}
+                  </a>
+                </h2>
+              ) : (
+                <h3 class="title">
+                  <a href={post.url} target="_blank" rel="noopener noreferrer">
+                    {post.title}
+                  </a>
+                </h3>
+              )}
+              <p class="brief">{post.brief}</p>
+            </div>
+            <p class="meta mono">
+              <time datetime={post.date}>{format.format(new Date(post.date))}</time>
+              <span class="tags" lang="en">
+                {post.tags.map((tag) => (
+                  <span>{tag}</span>
+                ))}
+              </span>
+            </p>
+          </li>
+        ))}
+      </ol>
+    ) : (
+      <p class="empty">
+        {t.writing.empty}{" "}
+        <a class="link" href={PERSONAL.hashnode} target="_blank" rel="noopener noreferrer">
+          Hashnode
+        </a>
+      </p>
+    )
+  }
+</div>
+
+<script>
+  // /blog: a topic shows only its posts; "All" shows them all again. The featured slot goes to the
+  // first post still shown.
+  document.querySelectorAll<HTMLElement>("[data-writing]").forEach((root) => {
+    const buttons = [...root.querySelectorAll<HTMLButtonElement>("[data-topic]")];
+    const posts = [...root.querySelectorAll<HTMLElement>(".post")];
+    buttons.forEach((button) =>
+      button.addEventListener("click", () => {
+        const topic = button.dataset.topic ?? "";
+        buttons.forEach((other) => other.setAttribute("aria-pressed", String(other === button)));
+        let first = true;
+        for (const post of posts) {
+          const shown = !topic || (post.dataset.tags ?? "").split("|").includes(topic);
+          post.hidden = !shown;
+          post.classList.toggle("featured", shown && first);
+          if (shown) first = false;
+        }
+      }),
+    );
+  });
+</script>
 
 <style>
-  .posts {
-    border-top: 1px solid var(--border);
+  .writing {
+    display: grid;
+    gap: var(--space-8);
   }
-  li {
+
+  /* Topic filters: words, the chosen one underlined in terracotta. */
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-6);
+  }
+  .filters button {
+    min-height: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--text-secondary);
+    font: inherit;
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.35em;
+    cursor: pointer;
+    transition:
+      color var(--duration-fast) var(--ease-standard),
+      text-decoration-color var(--duration-fast) var(--ease-standard);
+  }
+  .filters button:hover,
+  .filters button[aria-pressed="true"] {
+    color: var(--foreground);
+  }
+  .filters button[aria-pressed="true"] {
+    text-decoration-color: var(--accent);
+  }
+
+  .posts {
+    display: grid;
+    gap: var(--space-12) var(--space-8);
+    margin: 0;
+    padding: 0;
+  }
+  .post {
     position: relative;
     display: grid;
-    grid-template-columns: 9rem minmax(0, 1fr);
-    gap: var(--space-2) var(--space-8);
-    padding-block: var(--space-6);
-    border-bottom: 1px solid var(--border);
+    grid-template-rows: 1fr auto;
+    gap: var(--space-6);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--border);
   }
-  time {
-    padding-top: 0.35em;
-    color: var(--text-secondary);
-    font-size: var(--text-sm);
-    font-variant-numeric: tabular-nums;
+  /* A post filtered out: its display: grid would otherwise override the hidden attribute. */
+  .post[hidden] {
+    display: none;
   }
-  .body {
+  .text {
     display: grid;
-    gap: var(--space-2);
-    max-width: 44rem;
+    align-content: start;
+    gap: var(--space-3);
   }
   .title {
+    margin: 0;
     font-family: var(--font-display);
-    font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.375rem);
+    font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
     font-weight: 500;
-    letter-spacing: -0.02em;
-    line-height: 1.25;
+    letter-spacing: var(--tracking-display);
+    line-height: 1.2;
     text-wrap: balance;
   }
-  /* The whole row is the link's target; the title stays the only link in the tab order. */
+  /* The whole post is the link's target; the title stays the only link in the tab order. */
   .title a {
     text-decoration: none;
+    transition: color var(--duration-fast) var(--ease-standard);
   }
   .title a::after {
     content: "";
     position: absolute;
     inset: 0;
   }
-  li:hover .title a {
+  .post:hover .title a {
     color: var(--accent);
   }
   .title a:focus-visible {
     outline: none;
   }
-  li:has(.title a:focus-visible) {
+  .post:has(.title a:focus-visible) {
     outline: 2px solid var(--focus-outline);
-    outline-offset: 4px;
+    outline-offset: 6px;
     border-radius: 6px;
   }
-  .body p {
+  .brief {
     color: var(--text-secondary);
     text-wrap: pretty;
   }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-4);
+    color: var(--text-secondary);
+  }
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  /* The newest post, across the full width: title large on the left, summary and meta on the right. */
+  .featured {
+    padding-block: var(--space-8);
+    border-bottom: 1px solid var(--border);
+  }
+  .featured .title {
+    font-size: clamp(1.75rem, 1.2rem + 1.8vw, 2.75rem);
+    line-height: 1.1;
+  }
+  .featured .brief {
+    font-size: var(--text-lg);
+  }
+
   .empty {
     color: var(--text-secondary);
   }
-  @media (max-width: 40rem) {
-    li {
-      grid-template-columns: minmax(0, 1fr);
+
+  @media (min-width: 40rem) {
+    .posts {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-    time {
-      padding-top: 0;
+    .featured {
+      grid-column: 1 / -1;
+    }
+  }
+  @media (min-width: 64rem) {
+    .posts {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .featured {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      grid-template-rows: auto;
+      column-gap: clamp(2rem, 1rem + 4vw, 6rem);
+    }
+    /* The summary moves beside the title, the meta under the summary. */
+    .featured .text {
+      display: contents;
+    }
+    .featured .title {
+      grid-column: 1;
+      grid-row: 1 / span 2;
+    }
+    .featured .brief {
+      grid-column: 2;
+      grid-row: 1;
+    }
+    .featured .meta {
+      grid-column: 2;
+      grid-row: 2;
+      align-self: end;
     }
   }
 </style>

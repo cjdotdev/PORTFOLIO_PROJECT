@@ -130,3 +130,15 @@ export interface Experience {
 export const EXPERIENCE: Experience[] = [
   { id: "lixali", company: "Lixali Studio", site: "https://lixalistudio.tech", start: "2026-04" },
 ];
+
+/**
+ * The tools Joel works with, in four rows under "What I can do for you". Only what a shipped project
+ * or his own code proves (MakiSend, linkedin-scheduler, this site): a recruiter will ask where.
+ * PostgreSQL, Redis, GraphQL and Express stay out until Joel confirms he has used them.
+ */
+export const STACK: { id: "languages" | "apis" | "cloud" | "quality"; tools: TechId[] }[] = [
+  { id: "languages", tools: ["typescript", "sql", "python"] },
+  { id: "apis", tools: ["hono", "node", "rest", "openapi", "scalar", "zod"] },
+  { id: "cloud", tools: ["workers", "d1", "queues", "workflows", "drizzle", "sqlite"] },
+  { id: "quality", tools: ["vitest", "github-actions", "docker"] },
+];

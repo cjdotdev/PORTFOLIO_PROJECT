@@ -83,6 +83,9 @@
   --page-max: 75rem;
   --gutter: clamp(1rem, 0.6rem + 1.6vw, 2rem);
   --section: clamp(4rem, 2.5rem + 6vw, 7.5rem);
+  /* Each section's padding at top and bottom: two of them make the one gap between any two
+     sections, the same everywhere on the site (about 144px on a desktop, 77px on a phone). */
+  --section-space: calc(var(--section) * 0.6);
 }
 :root[data-theme="dark"] {
   --background: #1b1b1b;
@@ -114,6 +117,8 @@ html {
   text-rendering: optimizeLegibility;
   scroll-behavior: smooth;
   scroll-padding-top: 5rem;
+  /* The scrollbar's room is always kept, so locking the scroll (during the intro) shifts nothing. */
+  scrollbar-gutter: stable;
 }
 body {
   margin: 0;
@@ -179,7 +184,11 @@ a {
 }
 /* Two neighbouring sections add their paddings: each carries 0.6 so the gap between them is 1.2. */
 .section {
-  padding-block: calc(var(--section) * 0.6);
+  padding-block: var(--section-space);
+}
+/* The heading block that opens a page of its own (/blog, /pics, /projects). */
+.page-head {
+  padding-block: var(--section-space) var(--space-12);
 }
 
 /* DESIGN.md display-md / display-lg, Geist 500. */

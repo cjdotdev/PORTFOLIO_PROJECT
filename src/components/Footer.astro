@@ -51,8 +51,9 @@ const elsewhere = [
 </footer>
 
 <style>
+  /* The last section's own padding plus this make the site's one section gap above the footer row. */
   .footer {
-    margin-top: var(--section);
+    margin-top: calc(var(--section-space) - var(--space-6));
   }
   .row {
     position: relative;
@@ -63,7 +64,7 @@ const elsewhere = [
     gap: var(--space-4);
     padding-block: var(--space-6);
   }
-  /* The rule spans the content column, not the gutters. */
+  /* The hairline closes the page above the icons; it spans the content column, not the gutters. */
   .row::before {
     content: "";
     position: absolute;
@@ -109,8 +110,7 @@ const elsewhere = [
 
   /* The name returns at full width, on the page's own dark ground under a hairline. */
   .band {
-    padding-top: clamp(3rem, 2rem + 4vw, 6rem);
-    border-top: 1px solid var(--border);
+    padding-top: clamp(5rem, 3rem + 5vw, 8rem);
     overflow: clip;
   }
   .legal {

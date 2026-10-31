@@ -49,7 +49,14 @@ const LEFT = new Set(["libreville", "moanda"]);
             >
               <circle class="hit" r="18" />
               {home && <circle class="pulse" r="7" />}
-              <circle class="dot" r={home ? 6.5 : 4.5} />
+              <circle class="dot" r={home ? 4 : 4.5} />
+              {/* Lucide "map-pin", its point on the town: the destination, where Joel comes from. */}
+              {home && (
+                <g class="home-pin" transform="translate(-15.6 -28.6) scale(1.3)" aria-hidden="true">
+                  <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" />
+                  <circle cx="12" cy="10" r="3" />
+                </g>
+              )}
               <text class="name" x={left ? -11 : 11} y="5" text-anchor={left ? "end" : "start"}>
                 {city.name}
               </text>
@@ -233,6 +240,23 @@ const LEFT = new Set(["libreville", "moanda"]);
   .city:focus-visible .dot {
     stroke: var(--foreground);
     stroke-width: 2.5;
+  }
+  /* Ntoum's pin: terracotta, its eye cut out in the card's colour, a halo so it reads over lines. */
+  .home-pin {
+    pointer-events: none;
+    transition: translate var(--duration-fast) var(--ease-standard);
+  }
+  .home-pin path {
+    fill: var(--accent);
+    stroke: var(--surface);
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+  }
+  .home-pin circle {
+    fill: var(--surface);
+  }
+  .city.home.is-active .home-pin {
+    translate: 0 -3px;
   }
   .pulse {
     fill: var(--accent);

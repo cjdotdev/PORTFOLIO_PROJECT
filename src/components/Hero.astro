@@ -10,10 +10,11 @@ interface Props {
 }
 
 const { t } = Astro.props;
-// The headline is the role at the studio (a link); the line under it gives the country (with its
-// flag). The templates' {placeholders} mark where each fact goes.
-const statementParts = t.hero.statement.split(/(\{\w+\})/).filter(Boolean);
+// The headline is the job and the specialty; the line under it gives the country (with its flag),
+// where the template's {country} placeholder sits.
 const lineParts = t.hero.line.split(/(\{\w+\})/).filter(Boolean);
+// The two specialties, written [like this] in the copy, are the terracotta words.
+const specialtyParts = t.hero.specialty.split(/(\[[^\]]+\])/).filter(Boolean);
 ---
 
 <section class="hero container" aria-labelledby="hero-title">
@@ -21,19 +22,9 @@ const lineParts = t.hero.line.split(/(\{\w+\})/).filter(Boolean);
     <div class="copy">
       <h1 id="hero-title" class="display-lg">
         <span class="sr-only">{PERSONAL.name}. </span>
-        {
-          statementParts.map((part) =>
-            part === "{role}" ? (
-              t.hero.role
-            ) : part === "{company}" ? (
-              <a class="studio" href="https://lixalistudio.tech" target="_blank" rel="noopener noreferrer">
-                Lixali Studio
-              </a>
-            ) : (
-              part
-            ),
-          )
-        }
+        {t.hero.role} <span class="specialty">
+          {specialtyParts.map((part) => (part.startsWith("[") ? <em>{part.slice(1, -1)}</em> : part))}
+        </span>
       </h1>
       <p class="lede">
         {
@@ -184,6 +175,7 @@ const lineParts = t.hero.line.split(/(\{\w+\})/).filter(Boolean);
     display: grid;
     gap: clamp(2rem, 6svh - 1rem, 4rem);
     padding-top: clamp(0.5rem, 4svh - 1rem, 2.5rem);
+    padding-bottom: var(--section-space);
   }
   .top {
     display: grid;
@@ -197,23 +189,25 @@ const lineParts = t.hero.line.split(/(\{\w+\})/).filter(Boolean);
     max-width: 34rem;
     padding-bottom: var(--space-8);
   }
+  /* The headline is one sentence in two sizes: the job at the display size, the specialty under it
+     at about half, so the job reads first and the hero stays short. */
+  .specialty {
+    display: block;
+    margin-top: 0.35em;
+    font-size: clamp(1.25rem, 0.95rem + 0.9vw, 1.75rem);
+    font-weight: 400;
+    letter-spacing: var(--tracking-display);
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+  .specialty em {
+    color: var(--accent);
+    font-style: normal;
+  }
   /* The country stands out of the line's grey. */
   .fact {
     color: var(--foreground);
     font-weight: 500;
-  }
-  /* The studio, in the headline, takes the terracotta. Its underline is drawn in proportion to the
-     headline's size. */
-  .studio {
-    color: var(--accent);
-    text-decoration: underline;
-    text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent);
-    text-decoration-thickness: 0.04em;
-    text-underline-offset: 0.14em;
-    transition: text-decoration-color var(--duration-fast) var(--ease-standard);
-  }
-  .studio:hover {
-    text-decoration-color: currentColor;
   }
   .country {
     white-space: nowrap;

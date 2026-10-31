@@ -1,0 +1,56 @@
+---
+import { siGithub } from "simple-icons";
+import { PERSONAL } from "../data";
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+// Simple Icons (CC0) no longer ships LinkedIn's mark; this is LinkedIn's own "in" logo, 24px grid.
+const LINKEDIN =
+  "M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 1 1 0-4.125 2.062 2.062 0 0 1 0 4.125zM7.119 20.452H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z";
+const links = [
+  { label: "GitHub", href: PERSONAL.github, path: siGithub.path },
+  { label: "LinkedIn", href: PERSONAL.linkedin, path: LINKEDIN },
+];
+---
+
+<!-- GitHub and LinkedIn as icons only, beside the language switch: 44px targets, named for screen readers. -->
+<ul class:list={["social", className]} role="list">
+  {
+    links.map((link) => (
+      <li>
+        <a href={link.href} target="_blank" rel="noopener noreferrer" aria-label={link.label} title={link.label}>
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
+            <path d={link.path} />
+          </svg>
+        </a>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .social {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+  }
+  a {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--radius-pill);
+    color: var(--text-secondary);
+    transition:
+      color var(--duration-fast) var(--ease-standard),
+      background-color var(--duration-fast) var(--ease-standard);
+  }
+  a:hover {
+    background: var(--surface);
+    color: var(--foreground);
+  }
+</style>

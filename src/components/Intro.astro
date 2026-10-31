@@ -478,6 +478,18 @@ const LEAVE_PATH = "M133 128 C200 150 300 220 390 330";
   }
 
   /* The header's own mark waits for the flying one to land on it. */
+  /* No scrolling while the intro plays: wheel, touch and keys all stay put until it ends or is
+     skipped (data-intro then turns "done"). The scrollbar keeps its room (scrollbar-gutter in
+     global.css), so nothing shifts when it comes back and the flight still lands on the header mark. */
+  :global(html[data-intro="on"]),
+  :global(html[data-intro="on"] body) {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+  :global(html[data-intro="on"] body) {
+    touch-action: none;
+  }
+
   :global(html[data-intro="on"] .brand .cj) {
     visibility: hidden;
   }

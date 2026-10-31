@@ -38,6 +38,12 @@ jobs:
 
       - name: Build
         run: pnpm build
+        # The contact form sends through EmailJS. These are public keys (they ship in the page), kept
+        # as repository secrets so they live in one place; without them the form always fails.
+        env:
+          PUBLIC_EMAILJS_SERVICE_ID: ${{ secrets.PUBLIC_EMAILJS_SERVICE_ID }}
+          PUBLIC_EMAILJS_TEMPLATE_ID: ${{ secrets.PUBLIC_EMAILJS_TEMPLATE_ID }}
+          PUBLIC_EMAILJS_PUBLIC_KEY: ${{ secrets.PUBLIC_EMAILJS_PUBLIC_KEY }}
 
       - name: Ensure Pages project exists
         run: npx wrangler@4 pages project create joelcodja --production-branch=main || true

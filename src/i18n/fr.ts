@@ -38,10 +38,13 @@ export const fr: Dict = {
     skip: "Passer l'intro",
   },
   hero: {
-    // Le titre est le fait tout simple (métier et studio) ; la ligne dessous dit d'où vient Joel.
-    statement: "{role} chez {company}.",
+    // Le titre est le métier et la spécialité (le studio a sa propre ligne plus bas) ; la ligne dessous
+    // dit d'où vient Joel.
+    // Une phrase en deux tailles : le métier en grand, la spécialité dessous. Les [crochets] marquent
+    // les deux spécialités, en terracotta.
+    role: "Développeur backend,",
+    specialty: "spécialisé en [conception d'API] et en [architectures serverless edge].",
     line: "Originaire du {country}, basé à Cotonou.",
-    role: "Développeur backend",
     primary: "M'écrire",
     secondary: "Télécharger mon CV",
     say: "se dit ko-ja",
@@ -202,6 +205,10 @@ export const fr: Dict = {
       },
     ],
   },
+  stack: {
+    title: "Les outils que j'utilise",
+    groups: { languages: "Langages", apis: "API", cloud: "Cloud et données", quality: "Qualité et livraison" },
+  },
   about: {
     title: "Ce que je peux faire pour vous",
   },
@@ -222,7 +229,9 @@ export const fr: Dict = {
     all: "Tous les articles",
     read: "Lire sur Hashnode",
     empty: "Pas encore d'article. Les nouveaux apparaissent ici dès leur publication sur Hashnode.",
-    englishNote: "Articles en anglais.",
+    englishNote: "Les articles sont uniquement en anglais.",
+    filters: "Filtrer par sujet",
+    allTopics: "Tous",
   },
   projectsPage: {
     title: "Projets",
@@ -233,49 +242,38 @@ export const fr: Dict = {
   },
   passions: {
     title: "En dehors du code",
-    lede: "Du puroresu, de l'afrobeat et une manette. Ce que je regarde, joue et écoute une fois l'ordinateur fermé.",
+    lede: "Je suis un grand fan de catch, de puroresu avant tout.",
     wrestling: {
       title: "Le orange vient d'ici.",
-      body: "Satoshi Kojima, mon catcheur préféré de tous les temps. Même Ryohei Oiwa ne le bat pas. Il a chargé des camions devant le dojo jusqu'à ce qu'on le laisse entrer, et il a fini avec les trois couronnes du catch japonais.",
+      body: "Satoshi Kojima a toujours inspiré ma façon de travailler : la discipline et la constance. Il a chargé des camions devant le dojo jusqu'à ce qu'on le laisse entrer, puis il a continué à se présenter jusqu'à détenir les trois couronnes du catch japonais.",
       cta: "Lire son histoire",
       href: "/fr/kojima/",
       caption: "Satoshi Kojima. Le orange commence ici.",
     },
-    games: {
-      title: "Manette en main",
-      notes: {
-        fpww: "Presque tous les week-ends.",
-        sfa3: "Ryu, toujours.",
-      },
-    },
-    music: {
-      title: "En boucle",
-      body: "C'est ma copine qui m'a fait découvrir Asake, et presque toute cette liste : de l'afrobeat, de la pop des années 2000 et du rap des années 90. Tout ça tourne pendant que je code.",
-      listen: "Écouter sur Apple Music",
-      gallery: "Les disques en boucle",
-      prev: "Disque précédent",
-      next: "Disque suivant",
-      deck: "L'écouter sur la platine",
-      deckHref: "/fr/music/",
-    },
     credits: "Crédits photo",
     creditsNote: "Photo de Kojima issue de Wikimedia Commons, recadrée et convertie en WebP.",
-    rightsNote:
-      "Pochettes via Apple Music, © les artistes et leurs labels. Fire Pro Wrestling World © Spike Chunsoft, visuels de sa page Steam. Street Fighter Alpha 3 © Capcom, d'après le flyer arcade de 1998. Affichés pour dire ce que j'écoute et ce à quoi je joue ; tous les droits restent à leurs propriétaires.",
   },
   contact: {
     title: "Parlons-en",
-    lede: "Vous recrutez pour un poste backend, ou un article vous fait réagir ? Écrivez-moi directement ou passez par le formulaire.",
-    name: "Nom",
-    email: "Email",
-    message: "Message",
-    namePlaceholder: "Ada Lovelace",
-    emailPlaceholder: "vous@entreprise.com",
-    messagePlaceholder: "Sur quoi travaillez-vous ?",
-    submit: "Envoyer le message",
-    sending: "Envoi",
-    sent: "Message envoyé. Merci, je vous réponds par email.",
-    error: "Le message n'est pas parti. Réessayez, ou écrivez à {email}.",
+    lede: "Un poste backend, un projet à construire ou à reprendre, ou juste un bonjour ? Envoyez une requête à ma boîte mail, ou écrivez-moi directement.",
+    // Le formulaire est une requête d'API : clés, méthode et statuts restent en anglais (c'est du code) ;
+    // les commentaires // et les exemples sont dans la langue de la page.
+    request: {
+      label: "Envoyer un message",
+      comment: "un message, directement dans ma boîte mail",
+      subject: "De quoi s'agit-il ?",
+      subjects: { hire: "un poste backend", project: "un projet à construire, reprendre ou connecter", hello: "juste un bonjour" },
+      namePlaceholder: "Ada Lovelace",
+      emailPlaceholder: "vous@entreprise.com",
+      messagePlaceholder: "Sur quoi travaillez-vous ?",
+      submit: "Envoyer la requête",
+      sending: "Envoi",
+      sent: "received",
+      sentComment: "Je réponds sous deux jours.",
+      failed: "Votre message n'est pas parti. Écrivez-moi à {email}.",
+      again: "En envoyer un autre",
+      engravingAlt: "Gravure : Mercure, messager des dieux, vole sur un nuage et brandit une lettre",
+    },
   },
   footer: {
     elsewhere: "Ailleurs",

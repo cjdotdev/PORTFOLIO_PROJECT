@@ -37,10 +37,13 @@ export const en = {
     skip: "Skip intro",
   },
   hero: {
-    // The headline is the plain fact (role and studio); the line under it says where Joel comes from.
-    statement: "{role} at {company}.",
+    // The headline is the job and the specialty (the studio has its own row further down); the line
+    // under it says where Joel comes from.
+    // One sentence in two sizes: the job large, the specialty under it. [Brackets] mark the two
+    // specialties, set in terracotta.
+    role: "Backend developer,",
+    specialty: "specialised in [API design] and [serverless edge architectures].",
     line: "From {country}, based in Cotonou.",
-    role: "Backend developer",
     primary: "Email me",
     secondary: "Download my CV",
     say: "say ko-ja",
@@ -201,6 +204,10 @@ export const en = {
       },
     ],
   },
+  stack: {
+    title: "The tools I use",
+    groups: { languages: "Languages", apis: "APIs", cloud: "Cloud and data", quality: "Quality and delivery" },
+  },
   about: {
     title: "What I can do for you",
   },
@@ -221,7 +228,9 @@ export const en = {
     all: "All posts",
     read: "Read on Hashnode",
     empty: "No posts yet. New ones appear here as I publish them on Hashnode.",
-    englishNote: "",
+    englishNote: "Articles are in English only.",
+    filters: "Filter by topic",
+    allTopics: "All",
   },
   projectsPage: {
     title: "Projects",
@@ -232,49 +241,38 @@ export const en = {
   },
   passions: {
     title: "Off the clock",
-    lede: "Puroresu, Afrobeats and a controller. What I watch, play and listen to once the laptop closes.",
+    lede: "Outside of code, I'm a huge wrestling fan, puroresu above all.",
     wrestling: {
       title: "The orange comes from here.",
-      body: "Satoshi Kojima, my favourite wrestler of all time. Not even Ryohei Oiwa beats him. He loaded trucks outside the dojo until they let him in, and ended up with all three crowns of Japanese wrestling.",
+      body: "Satoshi Kojima has always inspired the way I work: discipline and consistency. He loaded trucks outside the dojo until they let him in, then kept showing up until he held all three crowns of Japanese wrestling.",
       cta: "Read his story",
       href: "/kojima/",
       caption: "Satoshi Kojima. The orange starts here.",
     },
-    games: {
-      title: "Controller in hand",
-      notes: {
-        fpww: "Almost every weekend.",
-        sfa3: "Ryu, always.",
-      },
-    },
-    music: {
-      title: "On repeat",
-      body: "My girlfriend got me into Asake, and into most of this list: Afrobeats, 2000s pop and 90s rap. It all plays while I code.",
-      listen: "Listen on Apple Music",
-      gallery: "Discs on repeat",
-      prev: "Previous disc",
-      next: "Next disc",
-      deck: "Play it on the deck",
-      deckHref: "/music/",
-    },
     credits: "Photo credits",
     creditsNote: "Kojima's photo from Wikimedia Commons, cropped and converted to WebP.",
-    rightsNote:
-      "Album artwork via Apple Music, © the artists and their labels. Fire Pro Wrestling World © Spike Chunsoft, artwork from its Steam page. Street Fighter Alpha 3 © Capcom, from the 1998 arcade flyer. Shown to say what I listen to and play; all rights stay with their owners.",
   },
   contact: {
     title: "Let's talk",
-    lede: "Hiring for a backend role, or want to talk about a post? Write to me directly or use the form.",
-    name: "Name",
-    email: "Email",
-    message: "Message",
-    namePlaceholder: "Ada Lovelace",
-    emailPlaceholder: "you@company.com",
-    messagePlaceholder: "What are you working on?",
-    submit: "Send message",
-    sending: "Sending",
-    sent: "Message sent. Thank you, I will reply by email.",
-    error: "Your message did not send. Try again, or write to {email}.",
+    lede: "Hiring for a backend role, a project to build or take over, or just saying hello? Send a request to my inbox, or write to me directly.",
+    // The form is an API request: keys, method and statuses stay in English in both languages (they
+    // are code); the // comments and the placeholders are the language of the page.
+    request: {
+      label: "Send a message",
+      comment: "a message, straight to my inbox",
+      subject: "What is it about?",
+      subjects: { hire: "a backend role", project: "a project to build, take over or connect", hello: "just saying hello" },
+      namePlaceholder: "Ada Lovelace",
+      emailPlaceholder: "you@company.com",
+      messagePlaceholder: "What are you working on?",
+      submit: "Send request",
+      sending: "Sending",
+      sent: "received",
+      sentComment: "I reply within two days.",
+      failed: "Your message did not leave. Write to me at {email}.",
+      again: "Send another",
+      engravingAlt: "Engraving: Mercury, messenger of the gods, flies on a cloud and holds up a letter",
+    },
   },
   footer: {
     elsewhere: "Elsewhere",

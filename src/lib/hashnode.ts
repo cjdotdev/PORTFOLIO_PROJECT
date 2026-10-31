@@ -3,6 +3,8 @@ export interface BlogPost {
   url: string;
   brief: string;
   date: string;
+  /** Topics, in English like the posts: shown under each post and used by the filters on /blog. */
+  tags: string[];
 }
 
 const POSTS: BlogPost[] = [
@@ -12,6 +14,7 @@ const POSTS: BlogPost[] = [
     brief:
       "Key management, IV generation and authenticated encryption for data at rest in a Node.js service.",
     date: "2026-07-15",
+    tags: ["Security", "Node.js"],
   },
   {
     title: "Clean Architecture in Flutter: Why It Matters",
@@ -19,12 +22,14 @@ const POSTS: BlogPost[] = [
     brief:
       "The principles of Clean Architecture in Flutter, and why they make an app easier to test and change.",
     date: "2026-07-05",
+    tags: ["Architecture", "Flutter"],
   },
   {
     title: "Building a Robust Flutter Todo App: MVC Architecture and Offline-First Approach",
     url: "https://blog-cjdevcom.hashnode.dev/building-a-robust-flutter-todo-app",
     brief: "An MVC Flutter app that keeps working offline, with its data persisted in Hive.",
     date: "2026-06-29",
+    tags: ["Flutter", "Offline-first"],
   },
 ];
 

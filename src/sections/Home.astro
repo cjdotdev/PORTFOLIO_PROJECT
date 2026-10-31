@@ -3,9 +3,9 @@ import Hero from "../components/Hero.astro";
 import WhereAmI from "../components/WhereAmI.astro";
 import ProjectDeck from "../components/ProjectDeck.astro";
 import AboutStory from "../components/AboutStory.astro";
+import Stack from "../components/Stack.astro";
 import PostList from "../components/PostList.astro";
 import Contact from "../components/Contact.astro";
-import Passions from "../components/Passions.astro";
 import { EXPERIENCE } from "../data";
 import { getBlogPosts } from "../lib/hashnode";
 import { localePath, type Dict, type Locale } from "../i18n";
@@ -16,7 +16,8 @@ interface Props {
 }
 
 const { t, locale } = Astro.props;
-const posts = getBlogPosts().slice(0, 3);
+// The newest post featured, then up to three more in a row.
+const posts = getBlogPosts().slice(0, 4);
 const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
   month: "short",
   year: "numeric",
@@ -31,6 +32,7 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
 <section class="section container about reveal" aria-labelledby="about-title">
   <h2 id="about-title" class="display">{t.about.title}</h2>
   <AboutStory t={t} />
+  <Stack t={t} />
   <div class="experience">
     <h3 class="experience-title">{t.experience.title}</h3>
     <ul role="list">
@@ -74,8 +76,6 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
 
 <WhereAmI t={t} locale={locale} />
 
-<Passions t={t} />
-
 <Contact t={t} />
 
 <style>
@@ -110,7 +110,8 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
   /* The help sentence takes the section's full width, between the lines about Joel and his experience. */
   /* The title, then the three phases told as the page scrolls, take the full width. */
   .about > #about-title,
-  .about > :global(.story) {
+  .about > :global(.story),
+  .about > :global(.stack) {
     grid-column: 1 / -1;
   }
   /* Where Joel does all of it today: the closing line of the section, between two hairlines. Each

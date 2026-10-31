@@ -1,5 +1,5 @@
 ---
-import { GAMES, SONGS, WRESTLERS, songId, wrestlerPhoto } from "../data/passions";
+import { WRESTLERS, wrestlerPhoto } from "../data/passions";
 import type { Dict } from "../i18n";
 
 interface Props {
@@ -10,9 +10,6 @@ const { t } = Astro.props;
 const p = t.passions;
 const w = p.wrestling;
 const kojima = WRESTLERS.kojima;
-const songData = JSON.stringify(SONGS.map((song) => ({ ...song, id: songId(song) })));
-const first = SONGS[0];
-const deckFirst = `${p.music.deckHref}?song=${songId(first)}`;
 ---
 
 <section class="passions" id="off-the-clock" aria-labelledby="passions-title">
@@ -21,7 +18,8 @@ const deckFirst = `${p.music.deckHref}?song=${songId(first)}`;
     <p class="lede">{p.lede}</p>
   </div>
 
-  <!-- The ring: a night band for Kojima, who gave the site its orange, and the games. -->
+  <!-- The ring: a night band for Kojima, who gave the site its orange. Music and games were taken out
+       (Joel, 2026-10-31): the section is about wrestling only. -->
   <div class="ring">
     <div class="container">
       <div class="story">
@@ -42,86 +40,9 @@ const deckFirst = `${p.music.deckHref}?song=${songId(first)}`;
       </div>
     </div>
 
-    <div class="container">
-      <div class="games">
-        <h3 class="ring-sub">{p.games.title}</h3>
-        <ul role="list">
-          {
-            GAMES.map((game) => (
-              <li class:list={["game", `game-${game.id}`]}>
-                <a href={game.url} target="_blank" rel="noopener noreferrer">
-                  <span class="game-art" aria-hidden="true">
-                    {game.id === "fpww" ? (
-                      <>
-                        <img class="game-bg" src="/img/games/fpww-ring-v1.webp" alt="" width="1100" height="355" loading="lazy" decoding="async" />
-                        <img class="game-logo" src="/img/games/fpww-logo-v1.webp" alt="" width="560" height="417" loading="lazy" decoding="async" />
-                      </>
-                    ) : (
-                      <img class="game-flyer" src="/img/games/sfa3-flyer-v1.webp" alt="" width="278" height="357" loading="lazy" decoding="async" />
-                    )}
-                  </span>
-                  <span class="game-text">
-                    <span class="game-name">{game.name}</span>
-                    <span class="game-note">{p.games.notes[game.id]}</span>
-                  </span>
-                </a>
-              </li>
-            ))
-          }
-        </ul>
-      </div>
-    </div>
   </div>
 
-  <div class="container music reveal">
-    <div class="music-head">
-      <h3 class="display">{p.music.title}</h3>
-      <p class="lede">{p.music.body}</p>
-    </div>
-    <div class="disc-gallery" data-disc-gallery data-songs={songData} data-deck-href={p.music.deckHref} hidden>
-      <div class="disc-stage" data-stage tabindex="0" role="group" aria-roledescription="carousel" aria-label={p.music.gallery}>
-        <canvas aria-hidden="true"></canvas>
-      </div>
-      <div class="disc-now">
-        <button class="disc-step" type="button" data-prev aria-label={p.music.prev}>
-          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" /></svg>
-        </button>
-        <div class="disc-caption" aria-live="polite">
-          <a class="disc-title" data-now-title href={deckFirst}>{first.title}</a>
-          <span class="song-meta" data-now-meta>{first.artist} · {first.album} · {first.year}</span>
-          <span class="disc-links">
-            <a class="disc-deck" data-now-deck href={deckFirst}>{p.music.deck}</a>
-            <a class="song-listen" data-now-apple href={first.url} target="_blank" rel="noopener noreferrer">
-              {p.music.listen}<span class="sr-only" data-sr-title>: {first.title}</span>
-            </a>
-          </span>
-        </div>
-        <button class="disc-step" type="button" data-next aria-label={p.music.next}>
-          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" /></svg>
-        </button>
-      </div>
-    </div>
-
-    <ol class="songs" role="list">
-      {
-        SONGS.map((song) => (
-          <li>
-            <a href={song.url} target="_blank" rel="noopener noreferrer">
-              <img src={song.cover} alt="" width="400" height="400" loading="lazy" decoding="async" />
-              <span class="song-title">{song.title}</span>
-              <span class="song-meta">
-                {song.artist} · {song.album} · {song.year}
-              </span>
-              <span class="song-listen">
-                {p.music.listen}
-                <span class="sr-only">: {song.title}</span>
-              </span>
-            </a>
-          </li>
-        ))
-      }
-    </ol>
-
+  <div class="container credits-wrap">
     <details class="credits">
       <summary>{p.credits}</summary>
       <p>{p.creditsNote}</p>
@@ -131,35 +52,13 @@ const deckFirst = `${p.music.deckHref}?song=${songId(first)}`;
           <a href={kojima.credit.licenseUrl} target="_blank" rel="noopener noreferrer">{kojima.credit.license}</a>
         </li>
       </ul>
-      <p class="rights">{p.rightsNote}</p>
     </details>
   </div>
 </section>
 
-<script>
-  // The disc gallery loads Three.js only when the music block comes near the screen. Without WebGL
-  // or JavaScript the cover grid below it stays, with the same links.
-  import { canRender, readSongs } from "../lib/music/support";
-
-  document.querySelectorAll<HTMLElement>("[data-disc-gallery]").forEach((root) => {
-    if (!canRender()) return;
-    const observer = new IntersectionObserver(
-      async ([entry]) => {
-        if (!entry.isIntersecting) return;
-        observer.disconnect();
-        const { mountGallery } = await import("../lib/music/gallery");
-        root.hidden = false;
-        mountGallery(root, readSongs(root), root.dataset.deckHref ?? "/music/");
-      },
-      { rootMargin: "600px 0px" },
-    );
-    observer.observe(root);
-  });
-</script>
-
 <style>
   .passions {
-    padding-top: calc(var(--section) * 0.6);
+    padding-block: var(--section-space);
   }
   .head {
     display: grid;
@@ -174,7 +73,7 @@ const deckFirst = `${p.music.deckHref}?song=${songId(first)}`;
     --ring-muted: #a3a3a3;
     --ring-line: #2a2a2a;
     --ring-accent: #e8916f;
-    padding-block: clamp(4rem, 3rem + 5vw, 7.5rem);
+    padding-block: var(--section-space);
     background: var(--ring-bg);
     color: var(--ring-ink);
   }
@@ -196,14 +95,6 @@ const deckFirst = `${p.music.deckHref}?song=${songId(first)}`;
     font-size: var(--text-lg);
     text-wrap: pretty;
   }
-  .ring-sub {
-    margin-bottom: var(--space-6);
-    font-family: var(--font-display);
-    font-size: clamp(1.5rem, 1.3rem + 0.6vw, 1.75rem);
-    font-weight: 500;
-    letter-spacing: var(--tracking-display);
-  }
-
   /* Kojima: the only photo in colour, because the orange is the point. */
   .story {
     display: grid;
@@ -269,248 +160,8 @@ const deckFirst = `${p.music.deckHref}?song=${songId(first)}`;
     background: var(--ring-accent);
   }
 
-  /* ─── Games ─── */
-  .games {
-    margin-top: clamp(4rem, 3rem + 4vw, 7rem);
-  }
-  .games ul {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-4);
-  }
-  .game a {
-    display: grid;
-    height: 100%;
-    overflow: hidden;
-    border: 1px solid var(--ring-line);
-    border-radius: var(--radius-surface);
-    color: inherit;
-    text-decoration: none;
-    transition: border-color var(--duration-standard) var(--ease-standard);
-  }
-  .game a:hover {
-    border-color: #4a4a4a;
-  }
-  .game-art {
-    position: relative;
-    display: grid;
-    place-items: center;
-    aspect-ratio: 16 / 9;
-    overflow: hidden;
-    background: #060606;
-  }
-  .game-art > * {
-    grid-area: 1 / 1;
-  }
-  .game-bg {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0.85;
-  }
-  .game-logo {
-    position: relative;
-    width: min(70%, 22rem);
-    height: auto;
-    filter: drop-shadow(0 8px 20px rgb(0 0 0 / 0.5));
-    transition: scale var(--duration-considered) var(--ease-enter);
-  }
-  .game-flyer {
-    height: 88%;
-    width: auto;
-    border-radius: 6px;
-    box-shadow: 0 12px 30px rgb(0 0 0 / 0.6);
-    rotate: -3deg;
-    transition: rotate var(--duration-considered) var(--ease-enter);
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .game a:hover .game-logo {
-      scale: 1.04;
-    }
-    .game a:hover .game-flyer {
-      rotate: 0deg;
-    }
-  }
-  .game-text {
-    display: grid;
-    gap: var(--space-1);
-    padding: var(--space-5) var(--space-6) var(--space-6);
-  }
-  .game-name {
-    font-family: var(--font-display);
-    font-size: clamp(1.375rem, 1.1rem + 1vw, 1.75rem);
-    font-weight: 500;
-    letter-spacing: var(--tracking-display);
-  }
-  .game-note {
-    color: var(--ring-accent);
-    font-size: var(--text-lg);
-  }
-
-  /* ─── Music, back on the page ground ─── */
-  .music {
-    display: grid;
-    gap: var(--space-8);
-    padding-top: clamp(4rem, 3rem + 4vw, 7rem);
-  }
-  .music-head {
-    display: grid;
-    gap: var(--space-4);
-  }
-  .songs {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: var(--space-4);
-  }
-  /* Once the discs are up they carry the songs; the grid is the version without WebGL. */
-  .music:has([data-disc-gallery][data-ready]) .songs {
-    display: none;
-  }
-  .disc-gallery {
-    display: grid;
-    gap: var(--space-6);
-  }
-  .disc-stage {
-    position: relative;
-    height: clamp(18rem, 12rem + 20vw, 30rem);
-    margin-inline: calc(var(--gutter) * -1);
-    border-radius: var(--radius-surface);
-    cursor: grab;
-    touch-action: pan-y;
-    user-select: none;
-  }
-  .disc-stage:active {
-    cursor: grabbing;
-  }
-  .disc-stage:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: -2px;
-  }
-  .disc-stage canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
-  .disc-now {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    align-items: center;
-    gap: var(--space-4);
-    max-width: 44rem;
-    width: 100%;
-    margin-inline: auto;
-    text-align: center;
-  }
-  .disc-caption {
-    display: grid;
-    justify-items: center;
-    gap: var(--space-1);
-  }
-  .disc-title {
-    color: inherit;
-    font-family: var(--font-display);
-    font-size: clamp(1.75rem, 1.2rem + 1.8vw, 2.25rem);
-    font-weight: 500;
-    letter-spacing: var(--tracking-display);
-    line-height: 1.1;
-    text-decoration: none;
-    text-wrap: balance;
-  }
-  .disc-links {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: var(--space-2) var(--space-6);
-    margin-top: var(--space-3);
-  }
-  .disc-links .song-listen {
-    margin-top: 0;
-  }
-  .disc-deck {
-    display: inline-flex;
-    align-items: center;
-    min-height: 2.75rem;
-    padding-inline: var(--space-5);
-    border-radius: var(--radius-control);
-    background: var(--primary);
-    color: var(--primary-foreground);
-    font-size: var(--text-sm);
-    font-weight: 500;
-    text-decoration: none;
-    transition:
-      background-color var(--duration-fast) var(--ease-standard),
-      transform var(--duration-instant) var(--ease-standard);
-  }
-  .disc-deck:hover {
-    background: color-mix(in srgb, var(--primary) 86%, var(--background));
-  }
-  .disc-deck:active {
-    transform: scale(0.98);
-  }
-  .disc-links .song-listen {
-    align-self: center;
-  }
-  .disc-step {
-    display: grid;
-    place-items: center;
-    width: 2.75rem;
-    height: 2.75rem;
-    border: 1px solid var(--border-strong);
-    border-radius: var(--radius-pill);
-    background: var(--surface);
-    color: var(--foreground);
-    cursor: pointer;
-    transition:
-      border-color var(--duration-fast) var(--ease-standard),
-      transform var(--duration-instant) var(--ease-standard);
-  }
-  .disc-step:hover {
-    border-color: var(--foreground);
-  }
-  .disc-step:active {
-    transform: scale(0.94);
-  }
-  .songs a {
-    display: grid;
-    gap: var(--space-1);
-    color: inherit;
-    text-decoration: none;
-  }
-  .songs img {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 1;
-    margin-bottom: var(--space-3);
-    border-radius: var(--radius-panel);
-    background: var(--surface-muted);
-    transition: translate var(--duration-standard) var(--ease-enter);
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .songs a:hover img {
-      translate: 0 -4px;
-    }
-    .songs a:hover .song-listen {
-      text-decoration-color: currentColor;
-    }
-  }
-  .song-title {
-    font-family: var(--font-display);
-    font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
-    font-weight: 500;
-    letter-spacing: var(--tracking-display);
-  }
-  .song-meta {
-    color: var(--text-secondary);
-    font-size: var(--text-sm);
-  }
-  .song-listen {
-    margin-top: var(--space-2);
-    color: var(--accent);
-    font-size: var(--text-sm);
-    font-weight: 500;
-    text-decoration: underline;
-    text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent);
-    text-underline-offset: 0.22em;
+  .credits-wrap {
+    padding-top: var(--space-6);
   }
   .credits {
     color: var(--text-secondary);
@@ -544,14 +195,6 @@ const deckFirst = `${p.music.deckHref}?song=${songId(first)}`;
     }
     .kojima {
       max-width: 22rem;
-    }
-    .songs {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-  @media (max-width: 40rem) {
-    .games ul {
-      grid-template-columns: minmax(0, 1fr);
     }
   }
 </style>

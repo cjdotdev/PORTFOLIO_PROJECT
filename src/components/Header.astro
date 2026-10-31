@@ -1,6 +1,7 @@
 ---
 import Mark from "./Mark.astro";
 import LangSwitch from "./LangSwitch.astro";
+import SocialIcons from "./SocialIcons.astro";
 import { localePath, type Dict, type Locale } from "../i18n";
 import { PROJECTS_PAGE } from "../data";
 
@@ -50,6 +51,7 @@ const links = [
     </a>
 
     <div class="actions">
+      <SocialIcons class="wide" />
       <span class="wide"><LangSwitch t={t} locale={locale} href={switchHref} /></span>
       <button type="button" class="menu" data-menu-button aria-expanded="false" aria-controls="site-sheet" aria-label={t.nav.menu}>
         <span class="burger" aria-hidden="true"><span></span><span></span></span>
@@ -74,6 +76,7 @@ const links = [
       </ul>
       <div class="sheet-actions">
         <LangSwitch t={t} locale={locale} href={switchHref} variant="list" />
+        <SocialIcons class="sheet-social" />
       </div>
     </div>
   </div>
@@ -331,7 +334,12 @@ const links = [
     background: var(--accent);
   }
   .sheet-actions {
+    display: grid;
+    gap: var(--space-3);
     margin-top: var(--space-5);
+  }
+  .sheet-actions :global(.sheet-social) {
+    margin-left: calc(var(--space-3) * -1);
   }
   @media (prefers-reduced-motion: no-preference) {
     .sheet:not([hidden]) {
@@ -355,7 +363,8 @@ const links = [
 
   @media (max-width: 47.49rem) {
     .nav,
-    .wide {
+    .wide,
+    .actions > :global(.wide) {
       display: none;
     }
     .menu {

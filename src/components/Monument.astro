@@ -38,7 +38,15 @@ const { rise = false, say, decorative = false } = Astro.props;
     flex-direction: column;
     container-type: inline-size;
   }
+  /* The footer repeat is decoration: it should not be picked up by a text selection. */
+  .monument[aria-hidden="true"] {
+    user-select: none;
+  }
+  /* The surname is a mark, not text to copy: it cannot be selected (the page's own name is in the
+     h1 and the header). */
   .word {
+    -webkit-user-select: none;
+    user-select: none;
     display: flex;
     font-family: "Monoton", var(--font-display);
     font-size: calc(100cqi * 0.25);
