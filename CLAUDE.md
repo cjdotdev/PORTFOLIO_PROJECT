@@ -59,6 +59,14 @@ longer used (kept until Joel says to delete it).
 
 **Intro** (`Intro.astro`): once per session (`sessionStorage["joelcodja.intro"] = "seen"`), skippable.
 Its engraved quill hand is the site's signature; do not reuse it for other gestures.
+No words any more (Joel dropped "I AM THE GREAT ONE"): the hand writes the C, the J drops, the shadow
+builds, "JOEL" over "CODJA" (Monoton) writes itself, then the mark flies to the header (aimed again
+just before take-off, or it lands beside the header mark on phones). Animate only transform and
+opacity at the start: the page is still loading and anything that repaints stutters (the old opening
+light line did).
+
+Opening (2026-10-31): the line of light, kept. Tried and rejected by Joel: an ink drop, a letterbox
+slam, a wax seal and the surname spelled C-O-D-J-A in Monoton title cards. Do not propose them again.
 
 **Projects deck** (`ProjectDeck.astro`, `CardBack.astro`): one component, one DOM, two arrangements
 picked by `matchMedia("(max-width: 39.99rem)")` and written to `data-mode`:
