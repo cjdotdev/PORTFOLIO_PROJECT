@@ -78,8 +78,9 @@ longer used (kept until Joel says to delete it).
 
 ## The home page, top to bottom
 
-Hero → projects deck (`#work`) → What I can do for you (+ where I do it today) → Writing → Where I am
-right now → Off the clock (passions) → Let's talk. Joel wants his work seen first.
+Hero → projects deck (`#work`) → What I can do for you (+ where I do it today) → Writing → Let's talk.
+Joel removed "Where I am right now" and "Off the clock" (Kojima) from the home page (2026-10-31); their
+components (`WhereAmI.astro`, `GabonMap.astro`, `Passions.astro`) and `/api/where` still exist, unused. Joel wants his work seen first.
 
 **Hero** (`Hero.astro`): one sentence in two sizes, "Backend developer," large, then "specialised in
 API design and serverless edge architectures." with the two specialties in terracotta (`[brackets]` in

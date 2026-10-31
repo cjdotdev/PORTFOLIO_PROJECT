@@ -1,6 +1,5 @@
 ---
 import Hero from "../components/Hero.astro";
-import WhereAmI from "../components/WhereAmI.astro";
 import ProjectDeck from "../components/ProjectDeck.astro";
 import AboutStory from "../components/AboutStory.astro";
 import Stack from "../components/Stack.astro";
@@ -74,11 +73,29 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
   <PostList posts={posts} t={t} locale={locale} />
 </section>
 
-<WhereAmI t={t} locale={locale} />
-
 <Contact t={t} />
 
+<script>
+  // Smooth scrolling on the home page, as on lenis.dev (Joel's test, 2026-10-31). Not with reduced
+  // motion. It waits while the intro plays (the intro locks the page), and anchors (#work, #contact)
+  // glide too, stopping under the sticky header (Lenis honours the page's scroll-padding-top).
+  import Lenis from "lenis";
+  import "lenis/dist/lenis.css";
+
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    const html = document.documentElement;
+    const lenis = new Lenis({ autoRaf: true, anchors: true });
+    const sync = () => (html.dataset.intro === "on" ? lenis.stop() : lenis.start());
+    sync();
+    new MutationObserver(sync).observe(html, { attributes: true, attributeFilter: ["data-intro"] });
+  }
+</script>
+
 <style>
+  /* Lenis drives the scroll here: the page's own smooth behaviour would fight it. */
+  :global(html.lenis) {
+    scroll-behavior: auto;
+  }
   .stack-md {
     display: grid;
     gap: var(--space-8);
