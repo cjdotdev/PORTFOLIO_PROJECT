@@ -155,15 +155,59 @@ export const fr: Dict = {
       },
     },
   },
-  about: {
-    title: "À propos",
-    body: [
-      "Depuis trois ans, je construis des API et des services en production, surtout avec Node.js et TypeScript.",
-      "J'aime les modèles de données propres, les API REST documentées et un code que la personne suivante peut modifier sans crainte.",
+  // Les trois phases de ce que Joel fait pour un client (construire, reprendre, connecter), racontées une à une au fil du défilement (AboutStory.astro).
+  // Chaque titre est le verbe (en terracotta) suivi du reste de sa proposition.
+  story: {
+    label: "Ce que je fais pour vous, en trois phases",
+    gets: "Ce que vous obtenez",
+    phases: [
+      {
+        id: "build",
+        verb: "Construire",
+        rest: "votre backend de zéro",
+        lead: "Vous avez une idée, un produit ou une application, et rien derrière pour l'instant.",
+        body: "Je modélise vos données, je construis l'API avec laquelle vos applications communiquent et je mets en place le travail de fond : e-mails, paiements, tâches planifiées. Le tout part en production testé et documenté dès le premier jour.",
+        gets: [
+          "Un modèle de données adapté à votre activité",
+          "Une API documentée sur laquelle vos applications peuvent compter",
+          "Un backend en production, testé et documenté",
+        ],
+        alt: "Gravure : une main sort d'un nuage et pose un compas sur un bloc de pierre, sous un ruban où l'on lit Labore et Constantia",
+      },
+      {
+        id: "takeover",
+        verb: "Reprendre",
+        rest: "un backend lent, fragile ou sans documentation",
+        lead: "Il fonctionne, à peu près. Mais personne n'ose y toucher, et la personne qui l'a construit est partie.",
+        body: "Je cartographie son fonctionnement réel et je le mets par écrit, puis je corrige d'abord ce qui fait mal, requêtes lentes, erreurs cachées, tests manquants, sans arrêter ce qui tourne. Votre équipe peut de nouveau livrer sans crainte.",
+        gets: [
+          "Une carte et une documentation de l'existant",
+          "Les pires problèmes corrigés d'abord, sans interruption",
+          "Un backend que votre équipe peut modifier sans risque",
+        ],
+        alt: "Gravure : une main serre fermement une corde",
+      },
+      {
+        id: "connect",
+        verb: "Connecter",
+        rest: "ce que vous avez aux paiements, aux e-mails et aux API externes",
+        lead: "Votre produit fonctionne, mais il doit parler au reste du monde.",
+        body: "Paiements, e-mails, CRM, autre plateforme : je les branche avec des webhooks, des nouvelles tentatives et des logs, pour qu'une panne chez eux ne devienne jamais une commande perdue chez vous.",
+        gets: [
+          "Paiements, e-mails et API tierces branchés",
+          "De nouvelles tentatives quand un service externe échoue",
+          "Des logs qui montrent ce qui s'est passé, et quand",
+        ],
+        alt: "Gravure : deux mains serrées en une poignée de main",
+      },
     ],
   },
+  about: {
+    title: "Ce que je peux faire pour vous",
+  },
   experience: {
-    title: "Expérience",
+    // Clôt « Ce que je peux faire pour vous » : là où Joel fait tout cela aujourd'hui.
+    title: "Là où je le fais aujourd'hui",
     present: "aujourd'hui",
     items: {
       lixali: {

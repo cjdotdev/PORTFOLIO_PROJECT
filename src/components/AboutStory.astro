@@ -1,0 +1,278 @@
+---
+import type { Dict } from "../i18n";
+
+interface Props {
+  t: Dict;
+}
+
+const { t } = Astro.props;
+const s = t.story;
+const number = (i: number) => String(i + 1).padStart(2, "0");
+---
+
+<!--
+  The three phases of what Joel does for a client (build, take over, connect), told one at a time as
+  the page scrolls. Tablet and desktop: the engraving of the current phase stays pinned on the left,
+  with the list of phases under it, while the phases scroll by on the right; when
+  the middle of the screen enters a new phase, its engraving draws itself in from the left like ink
+  and the previous one fades. Phone (for now): each phase simply shows its engraving above its text.
+  The engravings are public-domain prints from the Rijksmuseum, turned into sepia line work on a
+  transparent ground like the site's two hands: build, the Officina Plantiniana's printer's mark
+  (RP-P-OB-6971, c. 1636); take over, a drawing-book plate by Michael Snijders (RP-P-2009-677); connect,
+  an emblem of the Geuzen (RP-P-1886-A-10913, 1626).
+-->
+<div class="story" data-story>
+  <div class="stage">
+    <div class="plates">
+      {
+        s.phases.map((phase, i) => (
+          <figure class:list={["plate", { "is-active": i === 0 }]} data-plate={phase.id}>
+            <img src={`/img/about-${phase.id}.webp`} alt={phase.alt} draggable="false" decoding="async" />
+          </figure>
+        ))
+      }
+    </div>
+    <div class="nav" aria-hidden="true">
+      <ol class="nav-list" role="list">
+        {
+          s.phases.map((phase, i) => (
+            <li class:list={{ "is-active": i === 0 }} data-nav={phase.id}>
+              <span class="mono">{number(i)}</span>
+              {phase.verb}
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </div>
+
+  <ol class="phases" role="list" aria-label={s.label} data-phases>
+    {
+      s.phases.map((phase, i) => (
+        <li class="phase" data-phase={phase.id}>
+          <img class="phase-plate" src={`/img/about-${phase.id}.webp`} alt="" loading="lazy" decoding="async" draggable="false" />
+          <p class="mono num">{number(i)}</p>
+          <h3 class="phase-title">
+            <em>{phase.verb}</em> {phase.rest}
+          </h3>
+          <p class="lead">{phase.lead}</p>
+          <p class="body">{phase.body}</p>
+          <div class="gets">
+            <p class="label">{s.gets}</p>
+            <ul role="list">
+              {phase.gets.map((item) => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+</div>
+
+<script>
+  const story = document.querySelector<HTMLElement>("[data-story]");
+
+  if (story) {
+    const plates = [...story.querySelectorAll<HTMLElement>("[data-plate]")];
+    const navs = [...story.querySelectorAll<HTMLElement>("[data-nav]")];
+    const phases = [...story.querySelectorAll<HTMLElement>("[data-phase]")];
+
+    // The current phase is the last one whose top has passed the middle of the screen: measured from
+    // the scroll position, so it is right however the reader got there (a jump, a reload mid-page).
+    let current = "";
+    let frame = 0;
+    function update() {
+      frame = 0;
+      let id = phases[0].dataset.phase!;
+      for (const phase of phases) if (phase.getBoundingClientRect().top <= innerHeight / 2) id = phase.dataset.phase!;
+      if (id === current) return;
+      current = id;
+      plates.forEach((plate) => plate.classList.toggle("is-active", plate.dataset.plate === id));
+      navs.forEach((nav) => nav.classList.toggle("is-active", nav.dataset.nav === id));
+    }
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    addEventListener("scroll", schedule, { passive: true });
+    addEventListener("resize", schedule);
+    update();
+  }
+</script>
+
+<style>
+  .story {
+    display: grid;
+    gap: var(--space-16);
+  }
+
+  /* ─── The pinned side ─── */
+  .stage {
+    display: none;
+  }
+  .plates {
+    position: relative;
+    min-height: 0;
+  }
+  /* Each engraving waits wiped out to the left; the current one is drawn in from the left like ink,
+     and the one it replaces fades before its wipe resets. */
+  .plate {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    margin: 0;
+    opacity: 0;
+    clip-path: inset(0 100% 0 0);
+    transition:
+      opacity 0.45s var(--ease-standard),
+      clip-path 0s linear 0.45s;
+  }
+  .plate.is-active {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+    transition:
+      opacity 0.3s var(--ease-standard),
+      clip-path 1.1s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  .plate img {
+    align-self: center;
+    justify-self: center;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    opacity: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .nav-list {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin: 0;
+    padding: 0;
+    color: var(--text-muted);
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 0.9rem + 0.9vw, 1.625rem);
+    font-weight: 500;
+  }
+  .nav-list li {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-3);
+    transition: color var(--duration-fast) var(--ease-standard);
+  }
+  .nav-list .mono {
+    font-size: clamp(1.75rem, 1.2rem + 1.4vw, 2.5rem);
+    line-height: 1;
+  }
+  .nav-list li.is-active {
+    color: var(--foreground);
+  }
+  .nav-list li.is-active .mono {
+    color: var(--accent);
+  }
+
+  /* ─── The phases ─── */
+  .phases {
+    display: grid;
+    gap: var(--space-20);
+    margin: 0;
+    padding: 0;
+  }
+  .phase {
+    display: grid;
+    gap: var(--space-5);
+    align-content: center;
+  }
+  .phase-plate {
+    width: 100%;
+    max-width: 30rem;
+    height: auto;
+    opacity: 1;
+  }
+  .num {
+    color: var(--accent);
+    font-size: clamp(2.5rem, 1.6rem + 2.4vw, 4rem);
+    line-height: 1;
+  }
+  .phase-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 1.1rem + 2vw, 2.75rem);
+    font-weight: 400;
+    letter-spacing: var(--tracking-display);
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+  .phase-title em {
+    color: var(--accent);
+    font-style: normal;
+    font-weight: 500;
+  }
+  .lead {
+    max-width: 34rem;
+    font-size: var(--text-lg);
+    text-wrap: pretty;
+  }
+  .body {
+    max-width: 34rem;
+    color: var(--text-secondary);
+    text-wrap: pretty;
+  }
+  .gets {
+    display: grid;
+    gap: var(--space-2);
+    max-width: 34rem;
+    padding-top: var(--space-2);
+  }
+  .label {
+    color: var(--text-secondary);
+    font-size: var(--text-base);
+    font-weight: 500;
+  }
+  .gets ul {
+    margin: 0;
+    padding: 0;
+  }
+  .gets li {
+    padding-block: var(--space-3);
+    border-top: 1px solid var(--border);
+  }
+
+  /* Tablet and desktop: the engraving pinned on the left, one phase per screen on the right. */
+  @media (min-width: 48rem) {
+    .story {
+      grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+      gap: clamp(2rem, 1rem + 4vw, 6rem);
+      align-items: start;
+    }
+    .stage {
+      position: sticky;
+      top: 5rem;
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) auto;
+      gap: var(--space-6);
+      height: calc(100svh - 7rem);
+      max-height: 46rem;
+    }
+    .phases {
+      gap: 0;
+    }
+    .phase {
+      min-height: min(85svh, 52rem);
+      padding-block: var(--space-12);
+    }
+    .phase-plate {
+      display: none;
+    }
+  }
+  /* Tablet: the pinned column is narrow, so the three phases stack instead of sharing a line. */
+  @media (min-width: 48rem) and (max-width: 63.99rem) {
+    .nav-list {
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+  }
+</style>

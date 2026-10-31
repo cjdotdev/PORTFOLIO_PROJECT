@@ -2,6 +2,7 @@
 import Hero from "../components/Hero.astro";
 import WhereAmI from "../components/WhereAmI.astro";
 import ProjectDeck from "../components/ProjectDeck.astro";
+import AboutStory from "../components/AboutStory.astro";
 import PostList from "../components/PostList.astro";
 import Contact from "../components/Contact.astro";
 import Passions from "../components/Passions.astro";
@@ -29,21 +30,17 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
 
 <section class="section container about reveal" aria-labelledby="about-title">
   <h2 id="about-title" class="display">{t.about.title}</h2>
-  <div class="about-body">
-    {t.about.body.map((paragraph) => <p>{paragraph}</p>)}
-  </div>
+  <AboutStory t={t} />
   <div class="experience">
-    <h3 class="label">{t.experience.title}</h3>
+    <h3 class="experience-title">{t.experience.title}</h3>
     <ul role="list">
       {
         EXPERIENCE.map((job) => (
           <li>
-            <p class="job">
-              <span>{t.experience.items[job.id].role}</span>
-              <a class="link" href={job.site} target="_blank" rel="noopener noreferrer">
-                {job.company}
-              </a>
-            </p>
+            <a class="company" href={job.site} target="_blank" rel="noopener noreferrer">
+              {job.company}
+            </a>
+            <p class="role">{t.experience.items[job.id].role}</p>
             <p class="dates">
               <time datetime={job.start}>{month.format(new Date(`${job.start}-01`))}</time>
               {" – "}
@@ -110,52 +107,87 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
     grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
     gap: var(--space-8) clamp(2rem, 1rem + 4vw, 5rem);
   }
-  .about-body {
-    display: grid;
-    gap: var(--space-4);
-    max-width: 38rem;
-    font-size: var(--text-lg);
-    text-wrap: pretty;
+  /* The help sentence takes the section's full width, between the lines about Joel and his experience. */
+  /* The title, then the three phases told as the page scrolls, take the full width. */
+  .about > #about-title,
+  .about > :global(.story) {
+    grid-column: 1 / -1;
   }
+  /* Where Joel does all of it today: the closing line of the section, between two hairlines. Each
+     job is a row: the company large, then the role and the dates centred on it, the description
+     under the role. Past jobs, once added, stack as more rows of the same table. */
   .experience {
-    grid-column: 2;
+    grid-column: 1 / -1;
     display: grid;
-    gap: var(--space-3);
+    gap: var(--space-6);
+    margin-top: var(--space-8);
   }
-  .label {
-    color: var(--text-secondary);
-    font-size: var(--text-sm);
+  .experience-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.375rem, 1.1rem + 0.8vw, 1.75rem);
     font-weight: 500;
+    letter-spacing: var(--tracking-display);
+  }
+  .experience ul {
+    margin: 0;
+    padding: 0;
+    border-bottom: 1px solid var(--border);
   }
   .experience li {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: var(--space-1) var(--space-4);
-    padding-block: var(--space-4);
+    /* The company takes only its width, so the role sits just after it. */
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: var(--space-2) clamp(1.5rem, 0.75rem + 2vw, 3rem);
+    align-items: center;
+    padding-block: var(--space-6);
     border-top: 1px solid var(--border);
   }
-  .job {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
+  .company {
+    color: var(--accent);
+    font-family: var(--font-display);
+    font-size: clamp(2.25rem, 1.4rem + 2.6vw, 3.75rem);
+    font-weight: 500;
+    letter-spacing: var(--tracking-display);
+    line-height: 1.05;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-decoration-thickness: 0.04em;
+    text-underline-offset: 0.14em;
+    transition: text-decoration-color var(--duration-fast) var(--ease-standard);
+  }
+  .company:hover {
+    text-decoration-color: currentColor;
+  }
+  .role {
+    font-size: var(--text-lg);
     font-weight: 500;
   }
   .dates {
     color: var(--text-secondary);
-    font-size: var(--text-sm);
     font-variant-numeric: tabular-nums;
+    white-space: nowrap;
   }
   .desc {
-    grid-column: 1 / -1;
+    grid-column: 2 / -1;
     max-width: 38rem;
     color: var(--text-secondary);
+    text-wrap: pretty;
   }
   @media (max-width: 55rem) {
     .about {
       grid-template-columns: minmax(0, 1fr);
     }
-    .experience {
-      grid-column: 1;
+  }
+  /* Narrow: the company on its own line, then the role and dates, then the description. */
+  @media (max-width: 47.99rem) {
+    .experience li {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+    .company,
+    .desc {
+      grid-column: 1 / -1;
     }
   }
+
 </style>

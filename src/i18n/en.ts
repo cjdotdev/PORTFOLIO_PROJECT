@@ -154,15 +154,59 @@ export const en = {
       },
     },
   },
-  about: {
-    title: "About",
-    body: [
-      "I have spent three years building production APIs and services, mostly with Node.js and TypeScript.",
-      "I care about clean data models, documented REST APIs, and code the next person can change safely.",
+  // The three phases of what Joel does for a client (build, take over, connect), told one by one as the page scrolls (AboutStory.astro).
+  // Each title is the verb (in terracotta) and the rest of its clause.
+  story: {
+    label: "What I do for you, in three phases",
+    gets: "What you get",
+    phases: [
+      {
+        id: "build",
+        verb: "Build",
+        rest: "your backend from scratch",
+        lead: "You have an idea, a product or an app, and nothing behind it yet.",
+        body: "I model your data, build the API your apps talk to, and set up the work that runs in the background: emails, payments, scheduled tasks. It goes live tested and documented from day one.",
+        gets: [
+          "A data model that fits your business",
+          "A documented API your apps can rely on",
+          "A backend in production, tested and documented",
+        ],
+        alt: "Engraving: a hand comes out of a cloud and sets a compass on a block of stone, under a ribbon reading Labore et Constantia",
+      },
+      {
+        id: "takeover",
+        verb: "Take over",
+        rest: "a backend that is slow, fragile or undocumented",
+        lead: "It works, mostly. But nobody dares to touch it, and the person who built it has left.",
+        body: "I map how it really works and write it down, then fix what hurts first, slow queries, hidden errors, missing tests, without stopping what runs. Your team can ship again without fear.",
+        gets: [
+          "A map and documentation of what exists",
+          "The worst problems fixed first, without downtime",
+          "A backend your team can change safely",
+        ],
+        alt: "Engraving: a hand firmly grips a cord",
+      },
+      {
+        id: "connect",
+        verb: "Connect",
+        rest: "what you have to payments, email and outside APIs",
+        lead: "Your product works, but it has to talk to the rest of the world.",
+        body: "Payments, emails, a CRM, another platform: I wire them in with webhooks, retries and logs, so a failure on their side never becomes a lost order on yours.",
+        gets: [
+          "Payments, email and third-party APIs wired in",
+          "Retries when an outside service fails",
+          "Logs that show what happened, and when",
+        ],
+        alt: "Engraving: two hands clasped in a handshake",
+      },
     ],
   },
+  about: {
+    title: "What I can do for you",
+  },
   experience: {
-    title: "Experience",
+    // Closes "What I can do for you": where Joel does all of it today.
+    title: "Where I do this today",
     present: "now",
     items: {
       lixali: {
