@@ -14,9 +14,11 @@ interface Props {
   current: "home" | "work" | "writing" | "pics" | "music" | "kojima";
   title: string;
   description: string;
+  /** Keeps the page out of search results (a page that is hidden for now). */
+  noindex?: boolean;
 }
 
-const { t, locale, alternate, current, title, description } = Astro.props;
+const { t, locale, alternate, current, title, description, noindex = false } = Astro.props;
 const canonical = `${SITE_URL}${alternate[locale]}`;
 const ogImage = `${SITE_URL}/og.png`;
 const jsonLd = {
@@ -38,6 +40,7 @@ const jsonLd = {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
     <meta name="author" content={PERSONAL.name} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -89,6 +92,15 @@ const jsonLd = {
         }
         const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
         document.documentElement.dataset.intro = seen || calm ? "off" : "on";
+        // The hand comes in under a second after the first paint: fetch it now, before anything else.
+        if (!seen && !calm) {
+          const hand = document.createElement("link");
+          hand.rel = "preload";
+          hand.as = "image";
+          hand.href = "/img/intro-hand-v1.webp";
+          hand.fetchPriority = "high";
+          document.head.append(hand);
+        }
       })();
     </script>
     <slot name="head" />

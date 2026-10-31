@@ -17,15 +17,6 @@
   font-style: normal;
   font-display: block;
 }
-/* The opening title's I AM THE GREAT ONE, in Unbounded Black (OFL, licence in
-   public/fonts/unbounded-OFL.txt). Only those ten letters are in the file. */
-@font-face {
-  font-family: "Unbounded";
-  src: url("/fonts/unbounded-900-intro.woff2") format("woff2");
-  font-weight: 900;
-  font-style: normal;
-  font-display: block;
-}
 /* Only the kanji and kana of the Kojima story (src/i18n/kojima.ts), cut from Noto Serif CJK JP (OFL).
    Regenerate the subset when that text gains a new character. */
 @font-face {

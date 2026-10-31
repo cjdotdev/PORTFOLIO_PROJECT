@@ -4,7 +4,7 @@ import { siGithub } from "simple-icons";
 import contrastoShot from "../assets/work/contrasto.webp";
 import CardBack from "./CardBack.astro";
 import TechList from "./TechList.astro";
-import { PROJECTS } from "../data";
+import { PROJECTS, PROJECTS_PAGE } from "../data";
 import { localePath, type Dict, type Locale } from "../i18n";
 
 interface Props {
@@ -38,17 +38,22 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
     <div class="head">
       <h2 id="work-title" class="display">{t.work.title}</h2>
       {/* The way to every project: the finished ones' logos overlap in a row, each over the next, and
-          stay put; pointed at, the circle turns terracotta and its arrow runs through. */}
-      <a class="all" href={localePath(locale, "/projects/")}>
-        <span class="all-fan" aria-hidden="true">
-          {shipped.map((project, i) => <img src={project.logo} alt="" width="22" height="22" style={`--i:${i}`} />)}
-        </span>
-        <span class="all-label">{t.work.all}</span>
-        <span class="all-arrow" aria-hidden="true">
-          <svg viewBox="0 0 24 24" set:html={ARROW} />
-          <svg viewBox="0 0 24 24" set:html={ARROW} />
-        </span>
-      </a>
+          stay put; pointed at, the circle turns terracotta and its arrow runs through. Only while
+          /projects is shown (PROJECTS_PAGE). */}
+      {
+        PROJECTS_PAGE && (
+          <a class="all" href={localePath(locale, "/projects/")}>
+            <span class="all-fan" aria-hidden="true">
+              {shipped.map((project, i) => <img src={project.logo} alt="" width="22" height="22" style={`--i:${i}`} />)}
+            </span>
+            <span class="all-label">{t.work.all}</span>
+            <span class="all-arrow" aria-hidden="true">
+              <svg viewBox="0 0 24 24" set:html={ARROW} />
+              <svg viewBox="0 0 24 24" set:html={ARROW} />
+            </span>
+          </a>
+        )
+      }
     </div>
 
     <div class="board">
@@ -983,8 +988,11 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
       gap: clamp(2rem, 1rem + 3vw, 4rem);
       align-items: start;
     }
+    /* Tall enough for the drawn card to stand, but the tilted deck leaves about 6rem of bare table
+       under it: that strip runs into the section's bottom padding instead of adding to it. */
     .table {
       height: 38rem;
+      margin-bottom: -6rem;
     }
   }
 

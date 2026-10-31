@@ -37,13 +37,12 @@ export const en = {
     skip: "Skip intro",
   },
   hero: {
-    // Kept in English in both languages on purpose: a nickname, answering the intro's I AM THE GREAT ONE.
-    statement: "They call me the {great}.",
-    great: "“Great One”",
-    line: "{role} at {company}. From {country}, based in Cotonou.",
+    // The headline is the plain fact (role and studio); the line under it says where Joel comes from.
+    statement: "{role} at {company}.",
+    line: "From {country}, based in Cotonou.",
     role: "Backend developer",
     primary: "Email me",
-    secondary: "See my projects",
+    secondary: "Download my CV",
     say: "say ko-ja",
     portraitAlt: "Ink engraving of Joel Codja among palm trees",
     portraitPhoto: "Show the photo the engraving was drawn from",

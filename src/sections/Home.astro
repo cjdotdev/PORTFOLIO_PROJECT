@@ -25,8 +25,6 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
 
 <Hero t={t} locale={locale} />
 
-<WhereAmI t={t} locale={locale} />
-
 <ProjectDeck t={t} locale={locale} />
 
 <section class="section container about reveal" aria-labelledby="about-title">
@@ -76,6 +74,8 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
   </div>
   <PostList posts={posts} t={t} locale={locale} />
 </section>
+
+<WhereAmI t={t} locale={locale} />
 
 <Passions t={t} />
 

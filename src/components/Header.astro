@@ -2,6 +2,7 @@
 import Mark from "./Mark.astro";
 import LangSwitch from "./LangSwitch.astro";
 import { localePath, type Dict, type Locale } from "../i18n";
+import { PROJECTS_PAGE } from "../data";
 
 interface Props {
   t: Dict;
@@ -12,8 +13,9 @@ interface Props {
 
 const { t, locale, current, switchHref } = Astro.props;
 const home = localePath(locale, "/");
+// "Projects" shows only while /projects does (PROJECTS_PAGE): the deck sits right under the hero.
 const links = [
-  { id: "work", label: t.nav.work, href: localePath(locale, "/projects/") },
+  ...(PROJECTS_PAGE ? [{ id: "work", label: t.nav.work, href: localePath(locale, "/projects/") }] : []),
   { id: "writing", label: t.nav.writing, href: localePath(locale, "/blog/") },
   { id: "pics", label: t.nav.pics, href: localePath(locale, "/pics/") },
   { id: "contact", label: t.nav.contact, href: `${home}#contact` },

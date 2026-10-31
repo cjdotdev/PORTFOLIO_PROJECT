@@ -2,6 +2,7 @@
 import Layout from "../../layouts/Layout.astro";
 import ProjectsPage from "../../sections/ProjectsPage.astro";
 import { getDict } from "../../i18n";
+import { PROJECTS_PAGE } from "../../data";
 
 const t = getDict("fr");
 ---
@@ -13,6 +14,7 @@ const t = getDict("fr");
   current="work"
   title={t.meta.projectsTitle}
   description={t.meta.projectsDescription}
+  noindex={!PROJECTS_PAGE}
 >
   <ProjectsPage t={t} />
 </Layout>

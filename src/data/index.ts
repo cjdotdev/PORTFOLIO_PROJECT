@@ -6,6 +6,13 @@ import type { TechId } from "./tech";
 /** The site's public address. Change it here once the final domain is bought. */
 export const SITE_URL = "https://joelcodja.pages.dev";
 
+/**
+ * Whether /projects is shown. Hidden while it only repeats the home deck (Joel, 2026-10-31): nothing
+ * links to it, it asks search engines not to list it, and "Projects" leads to the deck on the home
+ * page instead. Set back to true once the page has something of its own (case studies).
+ */
+export const PROJECTS_PAGE = false;
+
 export const PERSONAL = {
   name: "Joel Codja",
   surname: "Codja",
@@ -15,6 +22,9 @@ export const PERSONAL = {
   linkedin: "https://www.linkedin.com/in/joel-codja-4356a2361/",
   twitter: "https://x.com/Gide749Gide",
   hashnode: "https://blog-cjdevcom.hashnode.dev",
+  // TODO(Joel): the CV is not in the repo yet. Put the PDF at public/cv/joel-codja-cv.pdf; until then
+  // the hero's "Download my CV" button leads to a 404.
+  cv: "/cv/joel-codja-cv.pdf",
 };
 
 /**

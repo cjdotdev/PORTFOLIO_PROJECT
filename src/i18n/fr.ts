@@ -38,13 +38,12 @@ export const fr: Dict = {
     skip: "Passer l'intro",
   },
   hero: {
-    // En anglais exprès, comme un surnom : il répond au I AM THE GREAT ONE de l'intro.
-    statement: "They call me the {great}.",
-    great: "“Great One”",
-    line: "{role} chez {company}. Originaire du {country}, basé à Cotonou.",
-    role: "Développeur Backend",
+    // Le titre est le fait tout simple (métier et studio) ; la ligne dessous dit d'où vient Joel.
+    statement: "{role} chez {company}.",
+    line: "Originaire du {country}, basé à Cotonou.",
+    role: "Développeur backend",
     primary: "M'écrire",
-    secondary: "Voir mes projets",
+    secondary: "Télécharger mon CV",
     say: "se dit ko-ja",
     portraitAlt: "Gravure à l'encre de Joel Codja entouré de palmiers",
     portraitPhoto: "Afficher la photo d'après laquelle la gravure a été dessinée",
