@@ -57,9 +57,16 @@ const number = (i: number) => String(i + 1).padStart(2, "0");
           </h3>
           <p class="lead">{phase.lead}</p>
           <p class="body">{phase.body}</p>
-          <div class="gets">
+          <div class="gets" data-gets>
             <p class="label">{s.gets}</p>
-            <ul role="list">
+            {/* Phone: the list folds behind this button; tablet and desktop show the label above. */}
+            <button type="button" class="gets-toggle" aria-expanded="false" aria-controls={`gets-${phase.id}`} data-gets-toggle>
+              {s.gets}
+              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                <path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+            <ul role="list" id={`gets-${phase.id}`}>
               {phase.gets.map((item) => (
                 <li>{item}</li>
               ))}
@@ -72,6 +79,15 @@ const number = (i: number) => String(i + 1).padStart(2, "0");
 </div>
 
 <script>
+  // Phone: "What you get" opens and folds under its arrow.
+  document.querySelectorAll<HTMLButtonElement>("[data-gets-toggle]").forEach((button) =>
+    button.addEventListener("click", () => {
+      const open = button.getAttribute("aria-expanded") !== "true";
+      button.setAttribute("aria-expanded", String(open));
+      button.closest("[data-gets]")?.classList.toggle("is-open", open);
+    }),
+  );
+
   const story = document.querySelector<HTMLElement>("[data-story]");
 
   if (story) {
@@ -239,6 +255,44 @@ const number = (i: number) => String(i + 1).padStart(2, "0");
   .gets li {
     padding-block: var(--space-3);
     border-top: 1px solid var(--border);
+  }
+  .gets-toggle {
+    display: none;
+  }
+
+  /* Phone: the label becomes a button with an arrow and the list folds under it, so each phase stays
+     short; a tap opens it, the arrow turns. */
+  @media (max-width: 47.99rem) {
+    .gets .label {
+      display: none;
+    }
+    .gets-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      justify-self: start;
+      min-height: 2.75rem;
+      padding: 0;
+      border: 0;
+      background: none;
+      color: var(--text-secondary);
+      font: inherit;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .gets-toggle:hover,
+    .gets-toggle[aria-expanded="true"] {
+      color: var(--foreground);
+    }
+    .gets-toggle svg {
+      transition: rotate var(--duration-fast) var(--ease-standard);
+    }
+    .gets-toggle[aria-expanded="true"] svg {
+      rotate: 180deg;
+    }
+    .gets:not(.is-open) ul {
+      display: none;
+    }
   }
 
   /* Tablet and desktop: the engraving pinned on the left, one phase per screen on the right. */

@@ -129,6 +129,15 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
         </div>
         {/* Loaded on the first draw only: phones never use it. */}
         <img class="hand" data-src="/img/hand-take.webp" alt="" width="1100" height="814" data-hand />
+        {/* Desktop only: step through the projects. "Previous" shows once past the first card. */}
+        <div class="steps">
+          <button type="button" class="step" aria-label={t.work.previous} data-step="previous" hidden>
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" set:html={`<path d="M19 12H5"/><path d="m12 19-7-7 7-7"/>`} />
+          </button>
+          <button type="button" class="step" aria-label={t.work.next} data-step="next">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" set:html={`<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>`} />
+          </button>
+        </div>
       </div>
 
       <div class="side">
@@ -226,6 +235,13 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
     let pending = 0;
     /** Phone: the top card's demo is playing (a tap starts and stops it). */
     let tapPlaying = false;
+    /** Desktop arrows: the cards drawn in a row, oldest first; "previous" walks back through them. */
+    const history: HTMLButtonElement[] = [];
+    const previousButton = section.querySelector<HTMLButtonElement>('[data-step="previous"]')!;
+    const nextButton = section.querySelector<HTMLButtonElement>('[data-step="next"]')!;
+    function steps() {
+      previousButton.hidden = history.length < 2;
+    }
 
     const width = () => cards[0].offsetWidth;
     const zOf = (index: number) => (spares + order.length - 1 - index) * GAP;
@@ -275,11 +291,23 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
 
     function enqueue(job: () => unknown) {
       pending++;
+      busy();
       queue = queue.then(async () => {
-        await job();
-        pending--;
+        try {
+          await job();
+        } finally {
+          pending--;
+          busy();
+        }
       });
       return queue;
+    }
+    // One move at a time: while a card is moving, the arrows are disabled and further presses (arrows
+    // or cards) are ignored, so hammering a button cannot stack animations.
+    function busy() {
+      const moving = pending > 0;
+      section.toggleAttribute("data-moving", moving);
+      section.querySelectorAll<HTMLButtonElement>("[data-step]").forEach((button) => (button.disabled = moving));
     }
 
     // ─── Phone: a pile standing under the thumb ───
@@ -445,6 +473,26 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
       await settle();
     }
 
+    // "Previous", with the deck's own moves: the drawn card goes back under the deck as a click puts it
+    // back; the card drawn before it (now just above it, at the bottom) slides out beside the deck, face
+    // down, comes onto the top and is drawn, turning face up as any top card does.
+    async function drawPrevious(previous: HTMLButtonElement) {
+      if (!drawn || !order.includes(previous) && previous !== drawn) return;
+      await putBack();
+      order.splice(order.indexOf(previous), 1);
+      const beside = -width() * 1.06;
+      const from = previous.style.transform || pose({ z: zOf(order.length), f: 180 });
+      previous.style.zIndex = "150";
+      await run(
+        previous,
+        [from, pose({ x: beside, z: zOf(order.length), f: 180 }), pose({ x: beside, z: zOf(-1) + GAP, f: 180 }), pose({ z: zOf(-1), f: 180 })],
+        ms(1000),
+      );
+      order.unshift(previous);
+      await settle(ms(700));
+      await draw(previous);
+    }
+
     // The hand comes down from the upper right, lays its fingers on the top card, takes it out of the
     // deck and lifts it up to face the reader, then lets go and leaves the way it came.
     async function draw(card: HTMLButtonElement) {
@@ -510,15 +558,39 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
           playing(tapPlaying ? card : null);
           return;
         }
+        if (pending) return;
         if (card === drawn) {
+          history.length = 0;
+          steps();
           enqueue(async () => {
             await putBack();
             showPanel(null);
             delete panelBox.dataset.picked;
           });
-        } else if (order[0] === card) enqueue(() => draw(card));
+        } else if (order[0] === card) {
+          history.push(card);
+          steps();
+          enqueue(() => draw(card));
+        }
       });
     }
+
+    // The arrows: next draws the top card (the drawn one goes back under the deck first, as always);
+    // previous brings back the card drawn before.
+    nextButton.addEventListener("click", () => {
+      if (pending) return;
+      const card = order[0];
+      history.push(card);
+      steps();
+      enqueue(() => draw(card));
+    });
+    previousButton.addEventListener("click", () => {
+      if (pending || history.length < 2) return;
+      history.pop();
+      const previous = history[history.length - 1];
+      steps();
+      enqueue(() => drawPrevious(previous));
+    });
     // Keeps a drawn card in place when the table changes size.
     window.addEventListener("resize", () => {
       if (drawn && !phone.matches) drawn.style.transform = pose(shown());
@@ -535,6 +607,8 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
         order.push(drawn);
         drawn = null;
       }
+      history.length = 0;
+      steps();
       hand.classList.remove("is-on");
       table.append(hand);
       tapPlaying = false;
@@ -706,6 +780,58 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
     height: min(78vw, 30rem);
     container-type: size;
     perspective: 1600px;
+  }
+  /* The arrows: desktop only, on the bare strip of table under the deck. */
+  .steps {
+    display: none;
+  }
+  .step {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    padding: 0;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-pill);
+    background: var(--surface);
+    color: var(--foreground);
+    cursor: pointer;
+    transition:
+      border-color var(--duration-fast) var(--ease-standard),
+      color var(--duration-fast) var(--ease-standard);
+  }
+  .step svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .step:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .step[hidden] {
+    display: none;
+  }
+  .step:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+  .step:disabled:hover {
+    border-color: var(--border-strong);
+    color: var(--foreground);
+  }
+  @media (min-width: 64rem) {
+    .deck-section[data-mode="deck"] .steps {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
+      z-index: 300;
+      display: flex;
+      gap: var(--space-3);
+      translate: -50% 0;
+    }
   }
   /* The deck lies flat, turned on the table, seen from above at an angle. */
   .deck {

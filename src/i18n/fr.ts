@@ -14,7 +14,7 @@ export const fr: Dict = {
     musicTitle: "La platine, Joel Codja",
     musicDescription: "Onze morceaux que Joel Codja écoute en codant, chacun sur son propre CD qui tourne.",
     picsTitle: "Photos, Joel Codja",
-    picsDescription: "Les photos de Joel Codja, bientôt ici.",
+    picsDescription: "Les photos de Joel Codja : ciels, couchers de soleil et lumière, en grille.",
     kojimaTitle: "Satoshi Kojima, une histoire racontée par Joel Codja",
     kojimaDescription:
       "La carrière de Satoshi Kojima en cinq chapitres : des camions chargés devant le dojo de la NJPW aux trois couronnes poids lourds du catch japonais.",
@@ -43,7 +43,7 @@ export const fr: Dict = {
     // Une phrase en deux tailles : le métier en grand, la spécialité dessous. Les [crochets] marquent
     // les deux spécialités, en terracotta.
     role: "Développeur backend,",
-    specialty: "spécialisé en [conception d'API] et en [architectures serverless edge].",
+    specialty: "orienté [conception d'API] et [architectures serverless edge].",
     line: "Originaire du {country}, basé à Cotonou.",
     primary: "M'écrire",
     secondary: "Télécharger mon CV",
@@ -109,6 +109,8 @@ export const fr: Dict = {
     hint: "Clique sur la carte du dessus pour la tirer, puis sur la carte tirée pour la remettre dans le paquet.",
     hintSwipe: "Balaie pour parcourir les cartes. Touche-en une pour lancer sa démo.",
     draw: "Tirer la carte",
+    previous: "Projet précédent",
+    next: "Projet suivant",
     deck: "Paquet de projets",
     items: {
       makisend: {
@@ -277,7 +279,7 @@ export const fr: Dict = {
   },
   footer: {
     elsewhere: "Ailleurs",
-    rights: "© 2026 Joel Codja",
+    rights: "© 2026 Joel CODJA",
     top: "Haut de page",
   },
   musicPage: {
@@ -300,7 +302,8 @@ export const fr: Dict = {
   kojima: kojimaFr,
   picsPage: {
     title: "Photos",
-    lede: "Les photos que je prends entre deux déploiements. Les premières arrivent bientôt.",
+    lede: "Je suis un grand fan de photographie.",
+    note: "Un carnet des photos que je prends, enrichi au fil des prises.",
     back: "Retour à l'accueil",
     backHref: "/fr/",
   },

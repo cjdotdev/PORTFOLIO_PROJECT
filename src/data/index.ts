@@ -13,6 +13,12 @@ export const SITE_URL = "https://joelcodja.pages.dev";
  */
 export const PROJECTS_PAGE = false;
 
+/**
+ * Whether /pics is shown. Hidden by Joel (2026-11-01) while it is being filled: no header link, and it
+ * asks search engines not to list it. Its files stay; set to true to bring it back.
+ */
+export const PICS_PAGE = false;
+
 export const PERSONAL = {
   name: "Joel Codja",
   surname: "Codja",
@@ -93,14 +99,6 @@ export const PROJECTS: Project[] = [
     video: { src: "/video/linkedin-scheduler.webm", poster: "/video/linkedin-scheduler-poster.webp" },
   },
   {
-    id: "contrasto",
-    logo: "/projects/contrasto.svg",
-    stack: ["nextjs", "react", "typescript", "tailwind", "next-intl"],
-    delivered: "2026-04",
-    repo: "https://github.com/cjdotdev/CHECKERCONTRASTOWCAG",
-    site: "https://codja.vercel.app",
-  },
-  {
     id: "zeroknowledge",
     logo: "/projects/zeroknowledge.svg",
     stack: ["workers", "hono", "typescript", "webcrypto", "d1", "durable-objects", "r2", "vitest"],
@@ -134,11 +132,11 @@ export const EXPERIENCE: Experience[] = [
 /**
  * The tools Joel works with, in four rows under "What I can do for you". Only what a shipped project
  * or his own code proves (MakiSend, linkedin-scheduler, this site): a recruiter will ask where.
- * PostgreSQL, Redis, GraphQL and Express stay out until Joel confirms he has used them.
+ * PostgreSQL is confirmed by Joel; Redis and Express he has not used (2026-11-01).
  */
 export const STACK: { id: "languages" | "apis" | "cloud" | "quality"; tools: TechId[] }[] = [
   { id: "languages", tools: ["typescript", "sql", "python"] },
   { id: "apis", tools: ["hono", "node", "rest", "openapi", "scalar", "zod"] },
-  { id: "cloud", tools: ["workers", "d1", "queues", "workflows", "drizzle", "sqlite"] },
+  { id: "cloud", tools: ["workers", "d1", "queues", "workflows", "drizzle", "sqlite", "postgresql"] },
   { id: "quality", tools: ["vitest", "github-actions", "docker"] },
 ];

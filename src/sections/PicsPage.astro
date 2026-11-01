@@ -1,4 +1,5 @@
 ---
+import { PICS } from "../data/pics";
 import type { Dict } from "../i18n";
 
 interface Props {
@@ -9,23 +10,50 @@ const { t } = Astro.props;
 const p = t.picsPage;
 ---
 
-<!-- Pics: a page held for Joel's photos. Until they arrive it says so, plainly, in one line. -->
+<!-- Pics: Joel's own photographs in a bento grid. Twelve columns on desktop; each photo takes 4, 6
+     or 8 of them, so wide and tall frames alternate and the rows pack dense. On tablets the grid
+     drops to three equal columns, on phones to two: the mix of 4:3 and 3:4 keeps the wall varied. -->
 <section class="pics container" aria-labelledby="pics-title">
-  <a class="back" href={p.backHref}>
-    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-    {p.back}
-  </a>
-  <h1 id="pics-title" class="display-lg">{p.title}</h1>
-  <p class="lede">{p.lede}</p>
+  <header class="head">
+    <a class="back" href={p.backHref}>
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      {p.back}
+    </a>
+    <h1 id="pics-title" class="display-lg">{p.title}</h1>
+    <p class="lede">{p.lede}</p>
+    <p class="note">{p.note}</p>
+  </header>
+
+  <div class="bento">
+    {
+      PICS.map((pic) => (
+        <figure class={`span-${pic.span}`} style={`--ratio:${pic.width}/${pic.height}`}>
+          <img
+            src={pic.src}
+            alt={pic.alt}
+            width={pic.width}
+            height={pic.height}
+            loading="lazy"
+            decoding="async"
+            draggable="false"
+          />
+        </figure>
+      ))
+    }
+  </div>
 </section>
 
 <style>
   .pics {
     display: grid;
     align-content: start;
-    gap: var(--space-4);
-    min-height: 60svh;
+    gap: var(--space-12);
     padding-block: var(--space-8) var(--section);
+  }
+  .head {
+    display: grid;
+    gap: var(--space-4);
+    max-width: 40rem;
   }
   .back {
     display: inline-flex;
@@ -42,7 +70,62 @@ const p = t.picsPage;
   .back:hover {
     color: var(--foreground);
   }
-  .lede {
-    max-width: 36rem;
+  .note {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+  }
+
+  /* ─── The bento: twelve columns, photos packed dense so no gap opens up ─── */
+  .bento {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-auto-flow: dense;
+    gap: var(--space-4);
+  }
+  .bento > * {
+    grid-column: span 4;
+    margin: 0;
+    border-radius: var(--radius-surface);
+    overflow: hidden;
+  }
+  .bento > .span-6 {
+    grid-column: span 6;
+  }
+  .bento > .span-8 {
+    grid-column: span 8;
+  }
+  .bento img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: var(--ratio);
+    object-fit: cover;
+    transition: scale var(--duration-standard) var(--ease-standard);
+  }
+  .bento > *:hover img {
+    scale: 1.03;
+  }
+
+  /* Tablet: three equal columns. Phone: two. The frames keep their own ratios, so the wall stays
+     varied without any spans. */
+  @media (max-width: 56rem) {
+    .bento {
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-3);
+    }
+    .bento > *,
+    .bento > .span-6,
+    .bento > .span-8 {
+      grid-column: span 1;
+    }
+  }
+  @media (max-width: 39.99rem) {
+    .bento {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-2);
+    }
+    .bento > * {
+      border-radius: var(--radius-panel);
+    }
   }
 </style>

@@ -13,7 +13,7 @@ export const en = {
     musicTitle: "The deck, Joel Codja",
     musicDescription: "Eleven songs Joel Codja plays while he codes, each one spinning on its own CD.",
     picsTitle: "Pics, Joel Codja",
-    picsDescription: "Photos by Joel Codja, coming soon.",
+    picsDescription: "Photos by Joel Codja: skylines, sunsets and light, in a grid.",
     kojimaTitle: "Satoshi Kojima, a story by Joel Codja",
     kojimaDescription:
       "The career of Satoshi Kojima told in five chapters: from loading trucks outside the NJPW dojo to all three heavyweight crowns of Japanese wrestling.",
@@ -42,7 +42,7 @@ export const en = {
     // One sentence in two sizes: the job large, the specialty under it. [Brackets] mark the two
     // specialties, set in terracotta.
     role: "Backend developer,",
-    specialty: "specialised in [API design] and [serverless edge architectures].",
+    specialty: "focused on [API design] and [serverless edge architectures].",
     line: "From {country}, based in Cotonou.",
     primary: "Email me",
     secondary: "Download my CV",
@@ -108,6 +108,8 @@ export const en = {
     hint: "Click the top card to draw it. Click the drawn card to put it back.",
     hintSwipe: "Swipe to go through the cards. Tap one to play its demo.",
     draw: "Draw the card",
+    previous: "Previous project",
+    next: "Next project",
     deck: "Deck of projects",
     items: {
       makisend: {
@@ -276,7 +278,7 @@ export const en = {
   },
   footer: {
     elsewhere: "Elsewhere",
-    rights: "© 2026 Joel Codja",
+    rights: "© 2026 Joel CODJA",
     top: "Back to top",
   },
   musicPage: {
@@ -299,7 +301,8 @@ export const en = {
   kojima: kojimaEn,
   picsPage: {
     title: "Pics",
-    lede: "Photos I take between two deploys. The first ones land here soon.",
+    lede: "I'm a huge fan of photography.",
+    note: "An account of the photos I take, added to as I go.",
     back: "Back to home",
     backHref: "/",
   },

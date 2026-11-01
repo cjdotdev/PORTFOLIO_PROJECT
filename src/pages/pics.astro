@@ -1,6 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import PicsPage from "../sections/PicsPage.astro";
+import { PICS_PAGE } from "../data";
 import { getDict } from "../i18n";
 
 const t = getDict("en");
@@ -13,6 +14,7 @@ const t = getDict("en");
   current="pics"
   title={t.meta.picsTitle}
   description={t.meta.picsDescription}
+  noindex={!PICS_PAGE}
 >
   <PicsPage t={t} />
 </Layout>

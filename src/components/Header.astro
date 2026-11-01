@@ -3,7 +3,7 @@ import Mark from "./Mark.astro";
 import LangSwitch from "./LangSwitch.astro";
 import SocialIcons from "./SocialIcons.astro";
 import { localePath, type Dict, type Locale } from "../i18n";
-import { PROJECTS_PAGE } from "../data";
+import { PICS_PAGE, PROJECTS_PAGE } from "../data";
 
 interface Props {
   t: Dict;
@@ -18,7 +18,7 @@ const home = localePath(locale, "/");
 const links = [
   ...(PROJECTS_PAGE ? [{ id: "work", label: t.nav.work, href: localePath(locale, "/projects/") }] : []),
   { id: "writing", label: t.nav.writing, href: localePath(locale, "/blog/") },
-  { id: "pics", label: t.nav.pics, href: localePath(locale, "/pics/") },
+  ...(PICS_PAGE ? [{ id: "pics", label: t.nav.pics, href: localePath(locale, "/pics/") }] : []),
   { id: "contact", label: t.nav.contact, href: `${home}#contact` },
 ];
 ---
@@ -76,7 +76,7 @@ const links = [
       </ul>
       <div class="sheet-actions">
         <LangSwitch t={t} locale={locale} href={switchHref} variant="list" />
-        <SocialIcons class="sheet-social" />
+        <SocialIcons class="sheet-social" buttons />
       </div>
     </div>
   </div>
@@ -338,9 +338,7 @@ const links = [
     gap: var(--space-3);
     margin-top: var(--space-5);
   }
-  .sheet-actions :global(.sheet-social) {
-    margin-left: calc(var(--space-3) * -1);
-  }
+
   @media (prefers-reduced-motion: no-preference) {
     .sheet:not([hidden]) {
       animation: drop var(--duration-standard) var(--ease-enter);

@@ -1,7 +1,8 @@
 ---
 /**
- * The back of every card in the project deck: the CJ mark over "Joel CODJA" signed as at the end of
- * the opening title (Joel in the display face, CODJA in Monoton), inside a thin terracotta frame.
+ * The back of every card in the project deck: the brand as the opening title ends, the CJ mark over
+ * "JOEL" (small, widely tracked, the display face) stacked over "CODJA" (Monoton), inside a thin
+ * terracotta frame.
  * Sized in container units, so one back serves any card size.
  */
 import Mark from "./Mark.astro";
@@ -10,7 +11,7 @@ import Mark from "./Mark.astro";
 {/* Spans only: the back also sits inside the project cards, which are buttons. */}
 <span class="back" aria-hidden="true">
   <span class="frame">
-    <Mark size="26cqw" />
+    <Mark size="22cqw" />
     <span class="sign"><span class="first">Joel</span> <span class="surname">CODJA</span></span>
   </span>
 </span>
@@ -38,16 +39,23 @@ import Mark from "./Mark.astro";
   }
   .sign {
     display: flex;
-    align-items: baseline;
-    gap: 0.35em;
-    font-size: 6.4cqw;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.22em;
+    font-size: 7.6cqw;
     line-height: 1;
     white-space: nowrap;
   }
+  /* As in the intro: the tracking also trails the last letter, so the same padding on the left keeps
+     the word centred. */
   .first {
+    padding-left: 0.32em;
+    color: color-mix(in srgb, var(--foreground) 72%, transparent);
     font-family: var(--font-display);
+    font-size: 0.34em;
     font-weight: 500;
-    letter-spacing: -0.01em;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
   }
   .surname {
     font-family: "Monoton", var(--font-display);

@@ -96,7 +96,8 @@ a client; nothing else (no technical layers, no request diagrams: both were reje
   the verb in terracotta, the situation, a short explanation, "What you get" as hairline rows). The
   current phase is computed from the scroll position (not an IntersectionObserver), so a jump or reload
   mid-page shows the right one. A new engraving wipes in from the left like ink.
-- Phone: **not designed yet** (each phase shows its engraving above its text for now).
+- Phone: each phase shows its engraving above its text; "What you get" folds behind its label with a
+  Lucide chevron (tap to open). The full phone design is still to do.
 - Engravings: build, Officina Plantiniana printer's mark (hand from a cloud with a compass, RP-P-OB-6971,
   c. 1636); take over, Michael Snijders drawing-book plate (hand gripping a cord, RP-P-2009-677); connect,
   emblem of the Geuzen (handshake, RP-P-1886-A-10913, 1626). No visible credits (Joel's choice).
@@ -127,8 +128,11 @@ picked by `matchMedia("(max-width: 39.99rem)")` and written to `data-mode`:
 - `deck` (tablet and desktop): cards lie in perspective (`.deck` is `translate(-50%,-50%) rotateX(55deg)
   rotateZ(-35deg)`). Clicking the top card brings `hand-take.webp` (Goltzius plate c. 1610, Rijksmuseum,
   CC0) that lifts it upright; its video plays and the side panel opens. Clicking the drawn card turns it
-  over slowly (its back shows), then slips it under the deck. Only clicks move the deck: no scroll
-  driving, no previous/next buttons (Joel rejected both). On desktop the table's empty bottom strip
+  over slowly (its back shows), then slips it under the deck. No scroll driving. Desktop only (≥64rem),
+  arrows under the deck (Joel asked for them on 2026-11-01, reversing his earlier no): → draws the next
+  card, ← (shown once past the first card) puts the drawn card back under the deck as usual and brings the
+  previous one onto the top beside the deck, then draws it (`drawPrevious()`). The card moves themselves
+  are the original ones (Joel rejected a rework, 2026-11-01). One move at a time (`busy()`). On desktop the table's empty bottom strip
   (6rem) overlaps the section padding, so the gap to the next section matches the others.
 - `phone`: a standing pile. A swipe either way sends the top card round to the back (it turns over on
   the way); a tap plays its demo; the panel always shows the top card. The hand is never downloaded.
@@ -150,7 +154,9 @@ picked by `matchMedia("(max-width: 39.99rem)")` and written to `data-mode`:
 city that follow `/api/where`, local time and weather; right, the Gabon map. Ntoum (Joel's town) is
 chosen first and pulses; hover previews, click, tap or keyboard chooses.
 
-**Header** (`Header.astro`, `LangSwitch.astro`, `SocialIcons.astro`): Writing, Pics, Contact on the
+**Pics** is hidden like /projects (`PICS_PAGE = false`): no header link, `noindex`; Joel is filling it.
+
+**Header** (`Header.astro`, `LangSwitch.astro`, `SocialIcons.astro`): Writing, (Pics), Contact on the
 left with a Lenis-style underline (draws in from the left, leaves to the right), CJ mark centred,
 GitHub and LinkedIn icons then the EN|FR switch on the right (in the phone sheet, under the switch).
 

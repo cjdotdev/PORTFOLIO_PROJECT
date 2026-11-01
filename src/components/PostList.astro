@@ -11,9 +11,11 @@ interface Props {
   level?: 2 | 3;
   /** /blog: topic filters over the list. */
   filters?: boolean;
+  /** Home: once the posts stack in one column (phone), only the newest shows; "All posts" leads on. */
+  compact?: boolean;
 }
 
-const { posts, t, locale, level = 3, filters = false } = Astro.props;
+const { posts, t, locale, level = 3, filters = false, compact = false } = Astro.props;
 const format = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
   year: "numeric",
   month: "short",
@@ -30,7 +32,7 @@ const topics = [...new Set(posts.flatMap((post) => post.tags))].sort();
   in a grid, each opened by a hairline, its date and topics at the foot like Sanity's author row. On
   /blog, topics filter the list. The whole post is the link's target; the title is the only link.
 -->
-<div class="writing" data-writing>
+<div class:list={["writing", { compact }]} data-writing>
   {
     filters && topics.length > 1 && (
       <div class="filters" role="group" aria-label={t.writing.filters}>
@@ -234,6 +236,12 @@ const topics = [...new Set(posts.flatMap((post) => post.tags))].sort();
     color: var(--text-secondary);
   }
 
+  /* One column (phone): the home page keeps the newest post only. */
+  @media (max-width: 39.99rem) {
+    .compact .post:not(:first-child) {
+      display: none;
+    }
+  }
   @media (min-width: 40rem) {
     .posts {
       grid-template-columns: repeat(2, minmax(0, 1fr));
