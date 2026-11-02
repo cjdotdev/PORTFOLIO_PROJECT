@@ -1,12 +1,13 @@
 ---
-# Sample post (draft: never built). It shows what readers see: copy the folder, rename it, write.
+# Sample post, published for now so Joel can see it deployed (2026-11-02): set draft: true again, or
+# delete the folder, once his real posts are in.
 title: "Making webhooks idempotent on Cloudflare Workers"
 subtitle: "Providers retry. Your handler runs twice. Here is how to make the second run do nothing, with one KV key per event."
 date: 2026-11-02
 tags: ["Cloudflare", "Webhooks", "TypeScript"]
 cover: ./cover.webp
 coverAlt: "An engraved hand coming out of a cloud, holding a compass over the world"
-draft: true
+draft: false
 ---
 
 A payment provider calls your webhook. Your handler times out after it has written to the database,
