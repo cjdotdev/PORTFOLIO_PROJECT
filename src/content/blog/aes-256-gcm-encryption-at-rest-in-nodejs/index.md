@@ -2,7 +2,7 @@
 title: "Implementing AES-256-GCM encryption at rest in Node.js"
 subtitle: "TLS stops protecting your data once it reaches the database. Here is how to encrypt sensitive fields yourself, with Node's native crypto module."
 date: 2026-07-15
-tags: ["Security", "Encryption", "Node.js"]
+tags: ["Security"]
 cover: ./cover.webp
 coverAlt: "A message reading Hello! is locked by a key into scrambled characters, then unlocked by the same key back into Hello!"
 draft: false

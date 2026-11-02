@@ -2,7 +2,7 @@
 title: "Implémenter le chiffrement au repos AES-256-GCM en Node.js"
 subtitle: "TLS cesse de protéger vos données dès qu'elles atteignent la base. Voici comment chiffrer vous-même les champs sensibles, avec le module crypto natif de Node."
 date: 2026-07-15
-tags: ["Sécurité", "Chiffrement", "Node.js"]
+tags: ["Sécurité"]
 cover: ./cover.webp
 coverAlt: "Un message « Hello! » est verrouillé par une clé en caractères brouillés, puis déverrouillé par la même clé en « Hello! »"
 draft: false

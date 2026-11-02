@@ -8,6 +8,9 @@ import { z } from "astro/zod";
  * `my-post/index.fr.md`, sharing the folder's images). The name is the URL: /blog/my-post/ and
  * /fr/blog/my-post/. Entries are keyed "en/my-post" and "fr/my-post" (src/lib/posts.ts pairs them).
  */
+/** The blog's sections, English then French: the topic filters on /blog. A new one is Joel's call. */
+const SECTIONS = ["Security", "TypeScript", "Backend", "Tools", "Sécurité", "Outils"] as const;
+
 const blog = defineCollection({
   loader: glob({
     pattern: "**/*.md",
@@ -26,7 +29,8 @@ const blog = defineCollection({
         date: z.coerce.date(),
         /** Set when a published post changes in substance. */
         updated: z.coerce.date().optional(),
-        tags: z.array(z.string()).default([]),
+        /** One or two of the blog's sections, in the post's language (Joel keeps them to four). */
+        tags: z.array(z.enum(SECTIONS)).max(2).default([]),
         /** A path relative to the post, e.g. ./cover.webp. About 1600x840 is best (1.9:1). */
         cover: image().optional(),
         coverAlt: z.string().optional(),

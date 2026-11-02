@@ -2,7 +2,7 @@
 title: "Validating API input with Zod in TypeScript"
 subtitle: "TypeScript checks nothing once your app is running. Here is how to validate request bodies, environment variables and API responses with one Zod schema that also gives you the type."
 date: 2026-09-18
-tags: ["TypeScript", "Validation", "Zod"]
+tags: ["TypeScript", "Backend"]
 cover: ./cover.webp
 coverAlt: "The Zod logo, a blue shield with a white Z, on a white background"
 draft: false

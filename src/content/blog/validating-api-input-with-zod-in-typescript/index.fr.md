@@ -2,7 +2,7 @@
 title: "Valider les entrées d'une API avec Zod en TypeScript"
 subtitle: "TypeScript ne vérifie plus rien une fois votre application lancée. Voici comment valider les corps de requête, les variables d'environnement et les réponses d'API avec un seul schéma Zod, qui vous donne aussi le type."
 date: 2026-09-18
-tags: ["TypeScript", "Validation", "Zod"]
+tags: ["TypeScript", "Backend"]
 cover: ./cover.webp
 coverAlt: "Le logo de Zod, un bouclier bleu marqué d'un Z blanc, sur fond blanc"
 draft: false

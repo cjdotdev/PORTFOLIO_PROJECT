@@ -200,7 +200,7 @@ a folder `my-post/index.md` with its images beside it; its French version is `my
 Entries are keyed `en/<slug>` and `fr/<slug>`; `getPosts(locale)` in `src/lib/posts.ts` pairs them and
 gives each language its version, or the other one when it is missing (the page then says "This post
 only exists in French" / "Cet article n'existe qu'en anglais" and its canonical is the existing
-version). Each version's tags are its own (Sécurité, Chiffrement...). The sitemap lists every version
+version). Tags are the blog's four sections (Joel, 2026-11-02), one or two per post, in the post's language: Security/Sécurité, TypeScript, Backend, Tools/Outils (`SECTIONS` in `src/content.config.ts` refuses any other). The sitemap lists every version
 with its twin; the RSS feed is the English list. Frontmatter: `title`,
 `subtitle` (lists and meta description), `date`, optional `updated`, `tags`, optional `cover` (relative
 path, about 1600x840) with `coverAlt` (required with a cover), `draft`. Drafts appear under `pnpm dev`
