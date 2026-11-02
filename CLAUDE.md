@@ -31,8 +31,6 @@ pnpm preview    # serves dist/ (use a port, e.g. `npx astro preview --port 4329`
   `main`**: lint, check, build, then `wrangler pages deploy`.
 - `redesign` is ahead of `main` with no divergence, so deploying is `git push origin redesign:main`
   (fast-forward). Pushing to `main` puts the site in production: ask Joel before doing it.
-- `functions/api/where.ts` is a Pages Function (`GET /api/where`). It does not exist under `astro dev`;
-  the page falls back to `LOCATION` and fetches the weather from Open-Meteo directly.
 - Joel often commits himself; check `git log` before offering to commit.
 
 ## Where things are
@@ -42,9 +40,8 @@ pnpm preview    # serves dist/ (use a port, e.g. `npx astro preview --port 4329`
 | `src/pages/*.astro`, `src/pages/fr/*.astro` | Thin routes; each renders a section with the locale's dictionary |
 | `src/sections/` | Page bodies: `Home`, `ProjectsPage`, `BlogPage`, `KojimaStory`, `MusicPage`, `PicsPage` |
 | `src/i18n/en.ts`, `fr.ts` | All copy. Every string exists in both; `Dict` is typed from `en.ts`. French uses "vous" |
-| `src/data/index.ts` | Facts: `PERSONAL` (incl. `cv`), `LOCATION`, `PROJECTS`, `EXPERIENCE`, `SITE_URL`, `PROJECTS_PAGE` |
+| `src/data/index.ts` | Facts: `PERSONAL` (incl. `cv`), `PROJECTS`, `EXPERIENCE`, `SITE_URL`, page switches (`PROJECTS_PAGE`, `PICS_PAGE`, `KOJIMA_PAGE`, `MUSIC_PAGE`) |
 | `src/data/tech.ts` | Generated one-colour SVG marks for the tech lists (Simple Icons, Lucide) |
-| `src/data/gabon.ts` | Generated Gabon map: 9 provinces (geoBoundaries, CC BY-SA 3.0) and 11 towns (Wikidata) |
 | `src/data/cj-mark.ts` | Geometry of the CJ mark |
 | `src/styles/global.css` | Tokens and base styles on top of `src/components/arc/foundation.css` (Arc UI) |
 | `public/video/` | Project demo loops, **WebM only**, 720p VP9, plus `*-poster.webp`. Cached for a year: a changed video gets a new name (`-v2`) |
@@ -52,8 +49,9 @@ pnpm preview    # serves dist/ (use a port, e.g. `npx astro preview --port 4329`
 | `public/img/` | `intro-hand-v1.webp` (quill hand), `hand-take.webp` (deck hand), `about-build/takeover/connect.webp` (About engravings) |
 | `public/cv/` | Does not exist yet: `TODO(Joel)` put `joel-codja-cv.pdf` there (the hero button links to it) |
 
-`src/components/ProjectsShowcase.astro` is the old staircase version of the projects section. It is no
-longer used (kept until Joel says to delete it).
+Deleted by Joel's request (2026-11-02), do not look for them: `ProjectsShowcase`, `WhereAmI`,
+`GabonMap`, `Passions`, `src/data/gabon.ts`, `LOCATION`, `functions/api/where.ts`, `src/lib/hashnode.ts`,
+and the old `DESIGN.md`.
 
 ## Design rules (pinned by Joel)
 
@@ -70,7 +68,6 @@ longer used (kept until Joel says to delete it).
 - Illustrations are engravings in one style: public-domain prints (Rijksmuseum, CC0) turned into sepia
   line work (`#E9C9A2`, i.e. 233 201 162) on a transparent ground, edges dissolving. No AI images, no
   hand-drawn SVG. Check each print's maker and date with the museum before writing a credit.
-- `DESIGN.md` is out of date (still describes Geist/Inter, light mode, the old c/J mark). Trust the code.
 - Never show Itaja. Shipped projects: MakiSend (built at Lixali Studio), linkedin-scheduler (Contrasto was
   removed). In progress, each with a concept trailer on its card (ids kept): `zeroknowledge` is
   **Supasecret** (1time.io-style one-time secret links, Hono on Cloudflare, blue, Nov 2026) and `pulse` is
@@ -85,8 +82,8 @@ longer used (kept until Joel says to delete it).
 ## The home page, top to bottom
 
 Hero → projects deck (`#work`) → What I can do for you (+ where I do it today) → Writing → Let's talk.
-Joel removed "Where I am right now" and "Off the clock" (Kojima) from the home page (2026-10-31); their
-components (`WhereAmI.astro`, `GabonMap.astro`, `Passions.astro`) and `/api/where` still exist, unused. Joel wants his work seen first.
+Joel removed "Where I am right now" and "Off the clock" (Kojima) from the home page (2026-10-31), then
+had their components deleted (2026-11-02). Joel wants his work seen first.
 
 **Hero** (`Hero.astro`): one sentence in two sizes, "Backend developer," large, then "specialised in
 API design and serverless edge architectures." with the two specialties in terracotta (`[brackets]` in
@@ -154,27 +151,28 @@ picked by `matchMedia("(max-width: 39.99rem)")` and written to `data-mode`:
   real centre), not from the deck's on-screen box, which the tilt skews.
 - In-progress projects (`status` in `PROJECTS`) get a CSS construction face, a Lucide status badge and
   "Planned for" instead of "Shipped".
-- `/projects` is **hidden, not deleted** (`PROJECTS_PAGE = false` in `src/data/index.ts`): it repeated
-  the deck. Nothing links to it, it is `noindex`, and the "All projects" button and the header's
-  "Projects" link are not rendered (the same switch brings them back). Joel may bring it back with case
-  studies; do not delete its files.
+- `/projects` is shown (`PROJECTS_PAGE = true`): every project of the deck as a long row (screenshot, or
+  the trailer for in-progress ones), with a "Home" link on top (`BackLink.astro`, also on `/blog`).
+  `false` hides it again (no links, `noindex`) without deleting it.
 
 **Tech lists** (`TechList.astro`): logo and name grid; on phones a list longer than six folds behind
 "See more (+n)".
 
-**Where I am right now** (`WhereAmI.astro`, `GabonMap.astro`): left, OpenStreetMap tiles of the current
-city that follow `/api/where`, local time and weather; right, the Gabon map. Ntoum (Joel's town) is
-chosen first and pulses; hover previews, click, tap or keyboard chooses.
+**Hidden pages**: `/pics` (`PICS_PAGE = false`, Joel is filling it), `/kojima` and `/music`
+(`KOJIMA_PAGE`, `MUSIC_PAGE`): online but linked from nowhere, `noindex`, out of the sitemap.
 
-**Pics** is hidden like /projects (`PICS_PAGE = false`): no header link, `noindex`; Joel is filling it.
+**404** (`src/sections/NotFound.astro`, `src/pages/404.astro`, `src/pages/fr/404.astro`): Cloudflare
+Pages serves the nearest `404.html` up the path; an integration in `astro.config.mjs` moves the French
+one from `fr/404/index.html` to `fr/404.html` after the build.
+
+**SEO**: `Layout.astro` writes title, description, canonical, hreflang (en, fr, x-default), Open Graph
+(`public/og.png`, made from `scripts/og.html`; a post uses its cover), Person JSON-LD (BlogPosting on a
+post), and the RSS link. `src/pages/sitemap.xml.ts` and `robots.txt.ts` are built from `SITE_URL`, the
+page switches and the published posts. `joelcodja.com` is bought (Porkbun, 2026-11-02) but not connected yet, so the site still uses `joelcodja.pages.dev`; once Joel says it is live on Cloudflare, switch `SITE_URL` and `site` in `astro.config.mjs` together.
 
 **Header** (`Header.astro`, `LangSwitch.astro`, `SocialIcons.astro`): Writing, (Pics), Contact on the
 left with a Lenis-style underline (draws in from the left, leaves to the right), CJ mark centred,
 GitHub and LinkedIn icons then the EN|FR switch on the right (in the phone sheet, under the switch).
-
-**Off the clock** (`Passions.astro`): wrestling only (Joel removed music and video games from the home
-page, 2026-10-31; `/music` and the passions data still exist). Kojima is framed as Joel's model of
-work discipline and consistency, with a link to `/kojima`.
 
 **Let's talk** (`Contact.astro`): the address (plain), then the form as an API request
 (`POST /joel/messages`, JSON keys as labels, `"subject"` = hire / project / hello, `//` comments in the
@@ -189,13 +187,23 @@ scroll motion, and the quill signing "Joel" once it is up: A, engraved Atlantic 
 Cotonou's ocean); B, engraved ridges of the Estuaire hills (Ntoum's province); C, layers of spreading ink,
 the quill writing CODJA itself. B was built and Joel preferred the old footer (CODJA band): kept as is.
 
-**Gabon map**: Ntoum carries a terracotta Lucide map-pin (`.home-pin`; `.pin` is taken by the deck).
-
 **Writing** (`PostList.astro`, home and `/blog`): laid out after sanity.io/blog without its boxes: the
 newest post featured full width (title large left, summary right), the rest in a 3/2/1-column grid,
 each opened by a hairline, date and topics in mono at the foot. `/blog` adds topic filters. Posts and
-tags are in English only, and the copy says so in both languages. The current posts are placeholders:
-Joel will write backend posts with Claude before launch.
+tags are in English only, and the copy says so in both languages.
+
+**Blog posts** (`src/content/blog`, `src/content.config.ts`, `src/lib/posts.ts`, `src/sections/Article.astro`):
+Joel writes Markdown on his computer and commits it; visitors only read. One post is `my-post.md`, or
+a folder `my-post/index.md` with its images beside it; the name is the URL (`/blog/my-post/`, also
+`/fr/blog/my-post/` with French chrome and a canonical to the English one). Frontmatter: `title`,
+`subtitle` (lists and meta description), `date`, optional `updated`, `tags`, optional `cover` (relative
+path, about 1600x840) with `coverAlt` (required with a cover), `draft`. Drafts appear under `pnpm dev`
+or a build with `SHOW_DRAFTS=true`, never in the deployed site. `sample-post` is a draft that shows
+every element (headings, code, image, quote, table): copy it to start a post. The post page, after
+Hashnode: cover, title, subtitle, avatar (`public/img/avatar-v1.webp`), date and reading time, table of
+contents (sticky on the right from 72rem, folded above the text below), Vesper-highlighted code with a
+language bar and a copy button, `#` links on headings, topics (link to `/blog/?topic=...`), share
+(copy link, X, LinkedIn), author box, previous and next post. `/rss.xml` lists the posts.
 
 **Spacing**: one gap between any two sections, `--section-space` (0.6 × `--section`) at the top and
 bottom of each; page heads use `.page-head`. Don't give a section its own padding-block.

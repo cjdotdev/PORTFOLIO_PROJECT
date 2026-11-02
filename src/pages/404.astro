@@ -1,0 +1,20 @@
+---
+import Layout from "../layouts/Layout.astro";
+import NotFound from "../sections/NotFound.astro";
+import { getDict } from "../i18n";
+
+// Cloudflare Pages serves the nearest 404.html up the path: /fr/404.html for /fr/..., /404.html elsewhere.
+const t = getDict("en");
+---
+
+<Layout
+  t={t}
+  locale="en"
+  alternate={{ en: "/", fr: "/fr/" }}
+  current="none"
+  title={t.meta.notFoundTitle}
+  description={t.notFound.lede}
+  noindex
+>
+  <NotFound t={t} locale="en" />
+</Layout>

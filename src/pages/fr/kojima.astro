@@ -1,6 +1,7 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import KojimaStory from "../../sections/KojimaStory.astro";
+import { KOJIMA_PAGE } from "../../data";
 import { getDict } from "../../i18n";
 
 const t = getDict("fr");
@@ -13,6 +14,7 @@ const t = getDict("fr");
   current="kojima"
   title={t.meta.kojimaTitle}
   description={t.meta.kojimaDescription}
+  noindex={!KOJIMA_PAGE}
 >
   <link slot="head" rel="preload" href="/fonts/noto-serif-jp-kojima-500.woff2" as="font" type="font/woff2" crossorigin />
   <KojimaStory t={t} />

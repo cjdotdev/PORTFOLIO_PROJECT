@@ -1,6 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import MusicPage from "../sections/MusicPage.astro";
+import { MUSIC_PAGE } from "../data";
 import { getDict } from "../i18n";
 
 const t = getDict("en");
@@ -13,6 +14,7 @@ const t = getDict("en");
   current="music"
   title={t.meta.musicTitle}
   description={t.meta.musicDescription}
+  noindex={!MUSIC_PAGE}
 >
   <link slot="head" rel="preconnect" href="https://audio-ssl.itunes.apple.com" crossorigin />
   <MusicPage t={t} />

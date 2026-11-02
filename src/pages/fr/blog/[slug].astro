@@ -1,0 +1,40 @@
+---
+import { getImage } from "astro:assets";
+import Layout from "../../../layouts/Layout.astro";
+import Article from "../../../sections/Article.astro";
+import { getDict } from "../../../i18n";
+import { getPosts, type Post } from "../../../lib/posts";
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  // Newest first: the previous post is the older one, the next post the newer one.
+  return posts.map((post, i) => ({
+    params: { slug: post.id },
+    props: { post, previous: posts[i + 1], next: posts[i - 1] },
+  }));
+}
+
+interface Props {
+  post: Post;
+  previous?: Post;
+  next?: Post;
+}
+
+const { post, previous, next } = Astro.props;
+const t = getDict("fr");
+const { data } = post;
+const share = data.cover ? await getImage({ src: data.cover, width: 1200, height: 630, format: "jpg", fit: "cover" }) : undefined;
+---
+
+<Layout
+  t={t}
+  locale="fr"
+  alternate={{ en: `/blog/${post.id}/`, fr: `/fr/blog/${post.id}/` }}
+  canonicalPath={`/blog/${post.id}/`}
+  current="writing"
+  title={`${data.title}, Joel Codja`}
+  description={data.subtitle}
+  article={{ image: share?.src, published: data.date, modified: data.updated, tags: data.tags }}
+>
+  <Article post={post} previous={previous} next={next} t={t} locale="fr" />
+</Layout>

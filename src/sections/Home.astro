@@ -6,7 +6,7 @@ import Stack from "../components/Stack.astro";
 import PostList from "../components/PostList.astro";
 import Contact from "../components/Contact.astro";
 import { EXPERIENCE } from "../data";
-import { getBlogPosts } from "../lib/hashnode";
+import { getPosts } from "../lib/posts";
 import { localePath, type Dict, type Locale } from "../i18n";
 
 interface Props {
@@ -16,7 +16,7 @@ interface Props {
 
 const { t, locale } = Astro.props;
 // The newest post featured, then up to three more in a row.
-const posts = getBlogPosts().slice(0, 4);
+const posts = (await getPosts()).slice(0, 4);
 const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
   month: "short",
   year: "numeric",

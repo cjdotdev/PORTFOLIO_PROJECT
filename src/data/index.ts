@@ -3,13 +3,12 @@
 
 import type { TechId } from "./tech";
 
-/** The site's public address. Change it here once the final domain is bought. */
+/** The site's public address; keep it equal to `site` in astro.config.mjs. joelcodja.com replaces it once connected. */
 export const SITE_URL = "https://joelcodja.pages.dev";
 
 /**
- * Whether /projects is shown. Hidden while it only repeats the home deck (Joel, 2026-10-31): nothing
- * links to it, it asks search engines not to list it, and "Projects" leads to the deck on the home
- * page instead. Set back to true once the page has something of its own (case studies).
+ * Whether /projects is shown (header link, "All projects" button, indexed). Back since 2026-11-01 with
+ * every project of the deck; false hides it again without deleting it.
  */
 export const PROJECTS_PAGE = true;
 
@@ -18,6 +17,13 @@ export const PROJECTS_PAGE = true;
  * asks search engines not to list it. Its files stay; set to true to bring it back.
  */
 export const PICS_PAGE = false;
+
+/**
+ * /kojima and /music: off the home page since 2026-10-31 and linked from nowhere. They stay online but
+ * ask search engines not to list them, and stay out of the sitemap (Joel, 2026-11-02).
+ */
+export const KOJIMA_PAGE = false;
+export const MUSIC_PAGE = false;
 
 export const PERSONAL = {
   name: "Joel Codja",
@@ -33,20 +39,6 @@ export const PERSONAL = {
   cv: "/cv/joel-codja-cv.pdf",
 };
 
-/**
- * Fallback for the "where I am" block, rendered into the HTML so the page never shows an empty box.
- * The live answer comes from GET /api/where (functions/api/where.ts), which reads the same fields
- * from the Pages project's environment and adds the weather. City level only: the coordinates are
- * the city centre, never anything finer.
- */
-export const LOCATION = {
-  city: "Cotonou",
-  country: "Benin",
-  from: "Gabon",
-  timezone: "Africa/Porto-Novo",
-  lat: 6.3654,
-  lon: 2.4183,
-};
 
 export interface Project {
   id: "makisend" | "linkedin-scheduler" | "contrasto" | "zeroknowledge" | "pulse";

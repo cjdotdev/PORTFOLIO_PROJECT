@@ -1,10 +1,10 @@
 ---
-import { PERSONAL } from "../data";
-import type { BlogPost } from "../lib/hashnode";
-import type { Dict, Locale } from "../i18n";
+import { Image } from "astro:assets";
+import { localePath, type Dict, type Locale } from "../i18n";
+import type { Post } from "../lib/posts";
 
 interface Props {
-  posts: BlogPost[];
+  posts: Post[];
   t: Dict;
   locale: Locale;
   /** h3 under a section heading on the home page, h2 on /blog. */
@@ -23,14 +23,15 @@ const format = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
   timeZone: "UTC",
 });
 const [featured, ...rest] = posts;
-const topics = [...new Set(posts.flatMap((post) => post.tags))].sort();
+const topics = [...new Set(posts.flatMap((post) => post.data.tags))].sort();
 ---
 
 <!--
   Writing, laid out after Sanity's blog without its boxes (no cards on this site): the newest post
   featured across the full width, its title large on the left and its summary on the right; the others
-  in a grid, each opened by a hairline, its date and topics at the foot like Sanity's author row. On
-  /blog, topics filter the list. The whole post is the link's target; the title is the only link.
+  in a grid, each opened by a hairline, its date and topics at the foot like Sanity's author row. A
+  post with a cover shows it on top (beside the text for the featured one, on desktop). On /blog,
+  topics filter the list. The whole post is the link's target; the title is the only link.
 -->
 <div class:list={["writing", { compact }]} data-writing>
   {
@@ -50,28 +51,37 @@ const topics = [...new Set(posts.flatMap((post) => post.tags))].sort();
   {
     featured ? (
       <ol class="posts" role="list">
-        {[featured, ...rest].map((post, i) => (
-          <li class:list={["post", { featured: i === 0 }]} data-tags={post.tags.join("|")}>
+        {[featured, ...rest].map(({ id, data }, i) => (
+          <li
+            class:list={["post", { featured: i === 0, "has-cover": data.cover }]}
+            data-tags={data.tags.join("|")}
+          >
+            {data.cover && (
+              <Image
+                class="cover"
+                src={data.cover}
+                alt=""
+                widths={[480, 800, 1200]}
+                sizes={i === 0 ? "(min-width: 64rem) 40rem, 92vw" : "(min-width: 64rem) 24rem, (min-width: 40rem) 46vw, 92vw"}
+                loading={i === 0 ? "eager" : "lazy"}
+              />
+            )}
             <div class="text" lang="en">
               {level === 2 ? (
                 <h2 class="title">
-                  <a href={post.url} target="_blank" rel="noopener noreferrer">
-                    {post.title}
-                  </a>
+                  <a href={localePath(locale, `/blog/${id}/`)}>{data.title}</a>
                 </h2>
               ) : (
                 <h3 class="title">
-                  <a href={post.url} target="_blank" rel="noopener noreferrer">
-                    {post.title}
-                  </a>
+                  <a href={localePath(locale, `/blog/${id}/`)}>{data.title}</a>
                 </h3>
               )}
-              <p class="brief">{post.brief}</p>
+              <p class="brief">{data.subtitle}</p>
             </div>
             <p class="meta mono">
-              <time datetime={post.date}>{format.format(new Date(post.date))}</time>
+              <time datetime={data.date.toISOString().slice(0, 10)}>{format.format(data.date)}</time>
               <span class="tags" lang="en">
-                {post.tags.map((tag) => (
+                {data.tags.map((tag) => (
                   <span>{tag}</span>
                 ))}
               </span>
@@ -80,12 +90,7 @@ const topics = [...new Set(posts.flatMap((post) => post.tags))].sort();
         ))}
       </ol>
     ) : (
-      <p class="empty">
-        {t.writing.empty}{" "}
-        <a class="link" href={PERSONAL.hashnode} target="_blank" rel="noopener noreferrer">
-          Hashnode
-        </a>
-      </p>
+      <p class="empty">{t.writing.empty}</p>
     )
   }
 </div>
@@ -109,6 +114,9 @@ const topics = [...new Set(posts.flatMap((post) => post.tags))].sort();
         }
       }),
     );
+    // A topic linked from a post (/blog/?topic=Cloudflare) opens the list already filtered.
+    const asked = new URLSearchParams(location.search).get("topic");
+    buttons.find((button) => asked && button.dataset.topic === asked)?.click();
   });
 </script>
 
@@ -158,7 +166,7 @@ const topics = [...new Set(posts.flatMap((post) => post.tags))].sort();
   .post {
     position: relative;
     display: grid;
-    grid-template-rows: 1fr auto;
+    grid-template-rows: auto 1fr auto;
     gap: var(--space-6);
     padding-top: var(--space-6);
     border-top: 1px solid var(--border);
@@ -166,6 +174,19 @@ const topics = [...new Set(posts.flatMap((post) => post.tags))].sort();
   /* A post filtered out: its display: grid would otherwise override the hidden attribute. */
   .post[hidden] {
     display: none;
+  }
+  /* The cover: decorative here (the title says what the post is), 1.9:1 like Hashnode's. */
+  .cover {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1.9;
+    object-fit: cover;
+    border-radius: var(--radius-control);
+    background: var(--surface);
+  }
+  .post:not(.has-cover) {
+    grid-template-rows: 1fr auto;
   }
   .text {
     display: grid;
@@ -275,6 +296,27 @@ const topics = [...new Set(posts.flatMap((post) => post.tags))].sort();
       grid-column: 2;
       grid-row: 2;
       align-self: end;
+    }
+    /* With a cover: the cover on the left, title, summary and meta stacked on the right. */
+    .featured.has-cover {
+      grid-template-rows: auto auto 1fr auto;
+      row-gap: var(--space-4);
+    }
+    .featured.has-cover .cover {
+      grid-column: 1;
+      grid-row: 1 / -1;
+      align-self: start;
+    }
+    .featured.has-cover .title {
+      grid-column: 2;
+      grid-row: 1;
+    }
+    .featured.has-cover .brief {
+      grid-column: 2;
+      grid-row: 2;
+    }
+    .featured.has-cover .meta {
+      grid-row: 4;
     }
   }
 </style>

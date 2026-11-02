@@ -1,7 +1,8 @@
 ---
 import PostList from "../components/PostList.astro";
-import { getBlogPosts } from "../lib/hashnode";
-import type { Dict, Locale } from "../i18n";
+import { getPosts } from "../lib/posts";
+import BackLink from "../components/BackLink.astro";
+import { localePath, type Dict, type Locale } from "../i18n";
 
 interface Props {
   t: Dict;
@@ -9,10 +10,11 @@ interface Props {
 }
 
 const { t, locale } = Astro.props;
-const posts = getBlogPosts();
+const posts = await getPosts();
 ---
 
 <header class="page-head container">
+  <BackLink href={localePath(locale, "/")} label={t.nav.backHome} />
   <h1 class="display-lg">{t.blogPage.title}</h1>
   <p class="lede">
     {t.writing.lede}

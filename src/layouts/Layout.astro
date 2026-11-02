@@ -11,26 +11,49 @@ interface Props {
   t: Dict;
   locale: Locale;
   alternate: { en: string; fr: string };
-  current: "home" | "work" | "writing" | "pics" | "music" | "kojima";
+  current: "home" | "work" | "writing" | "pics" | "music" | "kojima" | "none";
   title: string;
   description: string;
   /** Keeps the page out of search results (a page that is hidden for now). */
   noindex?: boolean;
+  /** A blog post: its cover for link previews (1200x630) and its dates for search engines. */
+  article?: { image?: string; published: Date; modified?: Date; tags: string[] };
+  /** Overrides the canonical URL (a post's French page points to the English one, the post's language). */
+  canonicalPath?: string;
 }
 
-const { t, locale, alternate, current, title, description, noindex = false } = Astro.props;
-const canonical = `${SITE_URL}${alternate[locale]}`;
-const ogImage = `${SITE_URL}/og.png`;
-const jsonLd = {
+const { t, locale, alternate, current, title, description, noindex = false, article, canonicalPath } = Astro.props;
+const canonical = `${SITE_URL}${canonicalPath ?? alternate[locale]}`;
+const ogImage = article?.image ? new URL(article.image, SITE_URL).href : `${SITE_URL}/og.png`;
+const person = {
   "@context": "https://schema.org",
   "@type": "Person",
   name: PERSONAL.name,
   jobTitle: locale === "fr" ? "Développeur backend" : "Backend developer",
+  description: t.meta.description,
+  knowsAbout: ["API design", "Serverless", "Edge computing", "Cloudflare Workers", "TypeScript", "Hono"],
+  nationality: { "@type": "Country", name: "Gabon" },
+  image: `${SITE_URL}/img/avatar-v1.webp`,
   url: SITE_URL,
   worksFor: { "@type": "Organization", name: "Lixali Studio", url: "https://lixalistudio.tech" },
   homeLocation: { "@type": "Place", name: "Cotonou, Benin" },
-  sameAs: [PERSONAL.github, PERSONAL.linkedin, PERSONAL.twitter, PERSONAL.hashnode],
+  sameAs: [PERSONAL.github, PERSONAL.linkedin, PERSONAL.twitter],
 };
+const jsonLd = article
+  ? {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      headline: title,
+      description,
+      image: ogImage,
+      datePublished: article.published.toISOString(),
+      dateModified: (article.modified ?? article.published).toISOString(),
+      inLanguage: "en",
+      keywords: article.tags.join(", "),
+      mainEntityOfPage: canonical,
+      author: { "@type": "Person", name: PERSONAL.name, url: SITE_URL },
+    }
+  : person;
 ---
 
 <!doctype html>
@@ -65,8 +88,20 @@ const jsonLd = {
     <link rel="alternate" hreflang="en" href={`${SITE_URL}${alternate.en}`} />
     <link rel="alternate" hreflang="fr" href={`${SITE_URL}${alternate.fr}`} />
     <link rel="alternate" hreflang="x-default" href={`${SITE_URL}${alternate.en}`} />
+    <link rel="alternate" type="application/rss+xml" title={t.meta.siteName} href="/rss.xml" />
 
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={article ? "article" : "website"} />
+    {
+      article && (
+        <>
+          <meta property="article:published_time" content={article.published.toISOString()} />
+          {article.modified && <meta property="article:modified_time" content={article.modified.toISOString()} />}
+          {article.tags.map((tag) => (
+            <meta property="article:tag" content={tag} />
+          ))}
+        </>
+      )
+    }
     <meta property="og:locale" content={locale === "fr" ? "fr_FR" : "en_US"} />
     <meta property="og:url" content={canonical} />
     <meta property="og:title" content={title} />

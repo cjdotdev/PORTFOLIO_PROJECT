@@ -1,7 +1,8 @@
 ---
 import WorkItem from "../components/WorkItem.astro";
 import { PROJECTS } from "../data";
-import type { Dict, Locale } from "../i18n";
+import BackLink from "../components/BackLink.astro";
+import { localePath, type Dict, type Locale } from "../i18n";
 
 interface Props {
   t: Dict;
@@ -12,6 +13,7 @@ const { t, locale } = Astro.props;
 ---
 
 <header class="page-head container">
+  <BackLink href={localePath(locale, "/")} label={t.nav.backHome} />
   <h1 class="display-lg">{t.projectsPage.title}</h1>
   <p class="lede">{t.projectsPage.lede}</p>
 </header>

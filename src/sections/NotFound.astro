@@ -1,0 +1,38 @@
+---
+import { PROJECTS_PAGE } from "../data";
+import { localePath, type Dict, type Locale } from "../i18n";
+
+interface Props {
+  t: Dict;
+  locale: Locale;
+}
+
+const { t, locale } = Astro.props;
+---
+
+<!-- A wrong address: say so plainly and offer the way back, with the main pages beside it. -->
+<section class="page-head container lost">
+  <h1 class="display-lg">{t.notFound.title}</h1>
+  <p class="lede">{t.notFound.lede}</p>
+  <div class="actions">
+    <a class="btn btn-primary" href={localePath(locale, "/")}>{t.notFound.home}</a>
+    {PROJECTS_PAGE && <a class="btn btn-secondary" href={localePath(locale, "/projects/")}>{t.nav.work}</a>}
+    <a class="btn btn-secondary" href={localePath(locale, "/blog/")}>{t.nav.writing}</a>
+  </div>
+</section>
+
+<style>
+  .lost {
+    display: grid;
+    gap: var(--space-4);
+    min-height: 50vh;
+    align-content: center;
+    padding-bottom: var(--section-space);
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+  }
+</style>
