@@ -1,0 +1,59 @@
+% Joel Codja's resume, English. Built by cv/build.sh into public/cv/joel-codja-cv.pdf.
+% One page, one column, standard headings: applicant tracking systems read it as text.
+\documentclass[10pt]{article}
+
+\input{cv/style}
+
+\begin{document}
+
+\cvheader{Backend developer}{Cotonou, Benin}
+
+\cvsection{Summary}
+Backend developer, focused on API design and serverless edge architectures.
+Open to full-time backend roles and freelance work.
+
+\cvsection{Experience}
+\cventry{Lixali Studio}{\href{https://lixalistudio.tech}{lixalistudio.tech}}{Backend developer}{Apr 2026 -- Present}
+\cvproject{MakiSend}{\href{https://github.com/lixalistudio-oss/makisend}{github.com/lixalistudio-oss/makisend}}
+Open-source transactional email API that runs on the client's own Cloudflare account and sends
+through their SMTP provider. Main backend developer (156 of 224 commits).
+\begin{cvitems}
+  \item Designed the asynchronous sending pipeline: the API answers \texttt{202} at once, then a
+        durable Cloudflare Workflow delivers over SMTP with 3 retries 30\,s apart and a dead-letter
+        queue. 300 to 400\,ms per send at best.
+  \item Encrypted credentials, recipients, bodies and attachments with AES-256-GCM before they reach
+        the database, and built key rotation that re-encrypts stored values by key id.
+  \item Built the REST API in Hono with Zod validation, idempotency keys, per-key send quotas and an
+        OpenAPI 3.1 reference generated from the same Zod schemas.
+  \item Covered it with 400+ Vitest unit, integration and end-to-end tests, including a real SMTP
+        server, run by GitHub Actions on every pull request.
+\end{cvitems}
+\cvstack{TypeScript, Hono, Cloudflare Workers, D1, Queues, Workflows, Drizzle, Zod, Better Auth, Vitest}
+
+\cvsection{Projects}
+\cvproject{linkedin-scheduler}{\href{https://github.com/cjdotdev/linkedin-scheduler}{github.com/cjdotdev/linkedin-scheduler}}
+Open-source tool that publishes LinkedIn posts written in advance as Markdown files, through
+LinkedIn's official API. No server and no web interface: a folder, two scripts and a cron line.
+\begin{cvitems}
+  \item Never posts twice: a ledger, a publishing state and a lock between runs; \texttt{-{}-check}
+        proves the token and \texttt{-{}-dry-run} shows what would go out.
+  \item Renders 1080$\times$1350 image cards from an HTML template, with highlighted code samples.
+\end{cvitems}
+\cvstack{Python, cron, LinkedIn API, Node.js, Playwright, Shiki}
+
+\cvproject{Technical writing}{\href{https://joelcodja.com/blog/}{joelcodja.com/blog}}
+Articles in English and French: AES-256-GCM encryption at rest in Node.js, validating API input with
+Zod, Drizzle ORM for TypeScript backends.
+
+\cvsection{Skills}
+\begin{cvskills}
+  Languages & TypeScript, SQL, Python \\
+  APIs & Hono, Node.js, REST, OpenAPI, Scalar, Zod \\
+  Cloud and data & Cloudflare Workers, D1, Queues, Workflows, Drizzle, SQLite, PostgreSQL \\
+  Quality and delivery & Vitest, GitHub Actions, Docker \\
+\end{cvskills}
+
+\cvsection{Languages}
+French (native), English (C1)
+
+\end{document}

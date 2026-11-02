@@ -1,0 +1,60 @@
+% Le CV de Joel Codja, en français. Construit par cv/build.sh dans public/cv/joel-codja-cv-fr.pdf.
+% Une page, une colonne, des titres standard : les logiciels de recrutement le lisent comme du texte.
+\documentclass[10pt]{article}
+
+\input{cv/style}
+
+\begin{document}
+
+\cvheader{Développeur backend}{Cotonou, Bénin}
+
+\cvsection{Profil}
+Développeur backend, orienté conception d'API et architectures serverless edge.
+Ouvert à un poste backend à temps plein comme aux missions en freelance.
+
+\cvsection{Expérience}
+\cventry{Lixali Studio}{\href{https://lixalistudio.tech}{lixalistudio.tech}}{Développeur backend}{Avr. 2026 -- Aujourd'hui}
+\cvproject{MakiSend}{\href{https://github.com/lixalistudio-oss/makisend}{github.com/lixalistudio-oss/makisend}}
+API open source d'emails transactionnels qui tourne sur le compte Cloudflare du client et envoie via
+son propre fournisseur SMTP. Développeur backend principal (156 commits sur 224).
+\begin{cvitems}
+  \item Conception du pipeline d'envoi asynchrone : l'API répond \texttt{202} tout de suite, puis un
+        Workflow Cloudflare durable livre en SMTP, avec 3 nouvelles tentatives à 30\,s d'intervalle et
+        une dead-letter queue. 300 à 400\,ms par envoi au mieux.
+  \item Chiffrement des identifiants, destinataires, contenus et pièces jointes en AES-256-GCM avant
+        leur arrivée en base, et rotation des clés qui rechiffre les valeurs stockées par
+        identifiant de clé.
+  \item Construction de l'API REST avec Hono : validation Zod, clés d'idempotence, quotas d'envoi par clé
+        et une référence OpenAPI 3.1 générée depuis les mêmes schémas Zod.
+  \item Plus de 400 tests Vitest unitaires, d'intégration et end-to-end, dont un
+        vrai serveur SMTP, lancés par GitHub Actions à chaque pull request.
+\end{cvitems}
+\cvstack{TypeScript, Hono, Cloudflare Workers, D1, Queues, Workflows, Drizzle, Zod, Better Auth, Vitest}
+
+\cvsection{Projets}
+\cvproject{linkedin-scheduler}{\href{https://github.com/cjdotdev/linkedin-scheduler}{github.com/cjdotdev/linkedin-scheduler}}
+Outil open source qui publie des posts LinkedIn écrits à l'avance en fichiers Markdown, via l'API
+officielle de LinkedIn. Ni serveur ni interface web : un dossier, deux scripts et une ligne cron.
+\begin{cvitems}
+  \item Ne publie jamais deux fois : un registre, un état de publication et un verrou entre les
+        exécutions ; \texttt{-{}-check} vérifie le jeton et \texttt{-{}-dry-run} montre ce qui partirait.
+  \item Génère des visuels 1080$\times$1350 depuis un template HTML, avec des extraits de code colorés.
+\end{cvitems}
+\cvstack{Python, cron, API LinkedIn, Node.js, Playwright, Shiki}
+
+\cvproject{Articles techniques}{\href{https://joelcodja.com/fr/blog/}{joelcodja.com/fr/blog}}
+Articles en français et en anglais : le chiffrement au repos AES-256-GCM en Node.js, la validation
+des entrées d'une API avec Zod, Drizzle ORM pour les backends TypeScript.
+
+\cvsection{Compétences}
+\begin{cvskills}
+  Langages & TypeScript, SQL, Python \\
+  API & Hono, Node.js, REST, OpenAPI, Scalar, Zod \\
+  Cloud et données & Cloudflare Workers, D1, Queues, Workflows, Drizzle, SQLite, PostgreSQL \\
+  Qualité et livraison & Vitest, GitHub Actions, Docker \\
+\end{cvskills}
+
+\cvsection{Langues}
+Français (langue maternelle), anglais (C1)
+
+\end{document}

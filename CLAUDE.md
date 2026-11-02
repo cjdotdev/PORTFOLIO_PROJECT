@@ -47,7 +47,7 @@ pnpm preview    # serves dist/ (use a port, e.g. `npx astro preview --port 4329`
 | `public/video/` | Project demo loops, **WebM only**, 720p VP9, plus `*-poster.webp`. Cached for a year: a changed video gets a new name (`-v2`) |
 | `public/projects/` | Project logos (square SVGs) |
 | `public/img/` | `intro-hand-v1.webp` (quill hand), `hand-take.webp` (deck hand), `about-build/takeover/connect.webp` (About engravings) |
-| `public/cv/` | Does not exist yet: `TODO(Joel)` put `joel-codja-cv.pdf` there (the hero button links to it) |
+| `cv/` | The resume in LaTeX, one page: `joel-codja-cv.tex` (EN), `joel-codja-cv-fr.tex` (FR), shared `style.tex`. `bash cv/build.sh` writes both PDFs to `public/cv/` (commit them); the hero button links the page's language |
 
 Deleted by Joel's request (2026-11-02), do not look for them: `ProjectsShowcase`, `WhereAmI`,
 `GabonMap`, `Passions`, `src/data/gabon.ts`, `LOCATION`, `functions/api/where.ts`, `src/lib/hashnode.ts`,
@@ -88,7 +88,7 @@ had their components deleted (2026-11-02). Joel wants his work seen first.
 **Hero** (`Hero.astro`): one sentence in two sizes, "Backend developer," large, then "specialised in
 API design and serverless edge architectures." with the two specialties in terracotta (`[brackets]` in
 the copy). No nickname, no slogan, no Lixali (it has its own row lower down). Line "From Gabon, based in
-Cotonou.", buttons "Email me" and "Download my CV" (`PERSONAL.cv`, the PDF is still missing).
+Cotonou.", buttons "Email me" and "Download my CV" (`PERSONAL.cv[locale]`).
 
 **What I can do for you** (`Home.astro`, `AboutStory.astro`): Joel's offer is exactly three phases,
 **build** your backend from scratch, **take over** one that is slow, fragile or undocumented, **connect**

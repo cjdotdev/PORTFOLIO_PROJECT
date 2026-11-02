@@ -9,7 +9,7 @@ interface Props {
   locale: Locale;
 }
 
-const { t } = Astro.props;
+const { t, locale } = Astro.props;
 // The headline is the job and the specialty; the line under it gives the country (with its flag),
 // where the template's {country} placeholder sits.
 const lineParts = t.hero.line.split(/(\{\w+\})/).filter(Boolean);
@@ -46,7 +46,7 @@ const specialtyParts = t.hero.specialty.split(/(\[[^\]]+\])/).filter(Boolean);
       </p>
       <div class="actions">
         <a class="btn btn-primary" href={`mailto:${PERSONAL.email}`}>{t.hero.primary}</a>
-        <a class="btn btn-secondary" href={PERSONAL.cv} download="Joel-Codja-CV.pdf">
+        <a class="btn btn-secondary" href={PERSONAL.cv[locale]} download={locale === "fr" ? "Joel-Codja-CV-FR.pdf" : "Joel-Codja-CV.pdf"}>
           {/* Lucide "download" */}
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 15V3" />

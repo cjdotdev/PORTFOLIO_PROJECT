@@ -1,0 +1,56 @@
+% Shared layout of both resumes (cv/joel-codja-cv.tex, cv/joel-codja-cv-fr.tex).
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{charter}
+\usepackage[a4paper,margin=1.6cm,top=1.4cm,bottom=1.4cm]{geometry}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+% Real text in the PDF, so applicant tracking systems can read and copy it.
+\input{glyphtounicode}
+\pdfgentounicode=1
+
+% The site's terracotta, darkened to print well on white.
+\definecolor{accent}{HTML}{B4532F}
+\definecolor{muted}{HTML}{5A5A5A}
+
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+\linespread{1.06}
+\raggedright
+
+% Section: a terracotta label over a hairline (plain case: small caps split the text for ATS).
+\titleformat{\section}{\large\bfseries\color{accent}}{}{0pt}{}[\vspace{-6pt}\color{muted!40}\rule{\linewidth}{0.4pt}]
+\titlespacing*{\section}{0pt}{11pt}{6pt}
+\newcommand{\cvsection}[1]{\section*{#1}}
+
+\setlist[itemize]{leftmargin=1.1em,itemsep=1.5pt,topsep=3pt,parsep=0pt,label={\color{muted}\textbullet}}
+\newenvironment{cvitems}{\begin{itemize}}{\end{itemize}}
+
+% Name, title, then one line of contacts as plain text links: {title}{location}
+\newcommand{\cvheader}[2]{%
+  {\Huge Joel Codja}\par\vspace{3pt}
+  {\large\color{accent}#1}\par\vspace{5pt}
+  {\small\color{muted}#2 \,\textbar\, +229 01 63 04 15 88 \,\textbar\,
+  \href{mailto:gide749@gmail.com}{gide749@gmail.com}\\
+  \href{https://joelcodja.com}{joelcodja.com} \,\textbar\,
+  \href{https://github.com/cjdotdev}{github.com/cjdotdev} \,\textbar\,
+  \href{https://www.linkedin.com/in/joel-codja-4356a2361/}{linkedin.com/in/joel-codja-4356a2361}}\par
+}
+
+% {company}{link}{role}{dates}
+\newcommand{\cventry}[4]{%
+  {\bfseries #1} \,{\small\color{muted}#2}\hfill{\small #4}\par
+  {\itshape #3}\par\vspace{4pt}
+}
+% {name}{link}
+\newcommand{\cvproject}[2]{%
+  \vspace{2pt}{\bfseries #1} \,{\small\color{muted}#2}\par\vspace{1pt}
+}
+\newcommand{\cvstack}[1]{\vspace{1pt}{\small\color{muted}#1}\par\vspace{5pt}}
+
+\newenvironment{cvskills}{\tabularx{\linewidth}{@{}>{\bfseries}p{3.6cm}X@{}}}{\endtabularx}

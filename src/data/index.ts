@@ -34,9 +34,8 @@ export const PERSONAL = {
   linkedin: "https://www.linkedin.com/in/joel-codja-4356a2361/",
   twitter: "https://x.com/Gide749Gide",
   hashnode: "https://blog-cjdevcom.hashnode.dev",
-  // TODO(Joel): the CV is not in the repo yet. Put the PDF at public/cv/joel-codja-cv.pdf; until then
-  // the hero's "Download my CV" button leads to a 404.
-  cv: "/cv/joel-codja-cv.pdf",
+  // The resume per language, built from cv/*.tex by `bash cv/build.sh`.
+  cv: { en: "/cv/joel-codja-cv.pdf", fr: "/cv/joel-codja-cv-fr.pdf" },
 };
 
 
@@ -56,7 +55,6 @@ export interface Project {
   video?: { src: string; poster: string };
 }
 
-// TODO(Joel): the delivered dates are placeholders from git history, replace them with the real ones.
 export const PROJECTS: Project[] = [
   {
     id: "makisend",
@@ -85,7 +83,7 @@ export const PROJECTS: Project[] = [
     id: "linkedin-scheduler",
     logo: "/projects/linkedin-scheduler.svg",
     stack: ["python", "linkedin", "cron", "node", "playwright", "shiki", "markdown"],
-    delivered: "2026-10",
+    delivered: "2026-09",
     repo: "https://github.com/cjdotdev/linkedin-scheduler",
     site: "https://linkedin-scheduler.makisend-poc.workers.dev",
     video: { src: "/video/linkedin-scheduler.webm", poster: "/video/linkedin-scheduler-poster.webp" },
