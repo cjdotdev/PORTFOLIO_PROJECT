@@ -1,10 +1,10 @@
 ---
 import { Image } from "astro:assets";
-import { localePath, type Dict, type Locale } from "../i18n";
-import type { Post } from "../lib/posts";
+import type { Dict, Locale } from "../i18n";
+import { postPath, type LocalPost } from "../lib/posts";
 
 interface Props {
-  posts: Post[];
+  posts: LocalPost[];
   t: Dict;
   locale: Locale;
   /** h3 under a section heading on the home page, h2 on /blog. */
@@ -23,7 +23,7 @@ const format = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
   timeZone: "UTC",
 });
 const [featured, ...rest] = posts;
-const topics = [...new Set(posts.flatMap((post) => post.data.tags))].sort();
+const topics = [...new Set(posts.flatMap((post) => post.entry.data.tags))].sort();
 ---
 
 <!--
@@ -31,7 +31,8 @@ const topics = [...new Set(posts.flatMap((post) => post.data.tags))].sort();
   featured across the full width, its title large on the left and its summary on the right; the others
   in a grid, each opened by a hairline, its date and topics at the foot like Sanity's author row. A
   post with a cover shows it on top (beside the text for the featured one, on desktop). On /blog,
-  topics filter the list. The whole post is the link's target; the title is the only link.
+  topics filter the list. The whole post is the link's target; the title is the only link. A post with
+  no version in the page's language shows in the other one, marked as such.
 -->
 <div class:list={["writing", { compact }]} data-writing>
   {
@@ -41,7 +42,7 @@ const topics = [...new Set(posts.flatMap((post) => post.data.tags))].sort();
           {t.writing.allTopics}
         </button>
         {topics.map((topic) => (
-          <button type="button" aria-pressed="false" data-topic={topic} lang="en">
+          <button type="button" aria-pressed="false" data-topic={topic}>
             {topic}
           </button>
         ))}
@@ -51,7 +52,7 @@ const topics = [...new Set(posts.flatMap((post) => post.data.tags))].sort();
   {
     featured ? (
       <ol class="posts" role="list">
-        {[featured, ...rest].map(({ id, data }, i) => (
+        {[featured, ...rest].map(({ slug, lang, entry: { data } }, i) => (
           <li
             class:list={["post", { featured: i === 0, "has-cover": data.cover }]}
             data-tags={data.tags.join("|")}
@@ -66,21 +67,24 @@ const topics = [...new Set(posts.flatMap((post) => post.data.tags))].sort();
                 loading={i === 0 ? "eager" : "lazy"}
               />
             )}
-            <div class="text" lang="en">
+            <div class="text" lang={lang}>
               {level === 2 ? (
                 <h2 class="title">
-                  <a href={localePath(locale, `/blog/${id}/`)}>{data.title}</a>
+                  <a href={postPath(locale, slug)}>{data.title}</a>
                 </h2>
               ) : (
                 <h3 class="title">
-                  <a href={localePath(locale, `/blog/${id}/`)}>{data.title}</a>
+                  <a href={postPath(locale, slug)}>{data.title}</a>
                 </h3>
               )}
               <p class="brief">{data.subtitle}</p>
             </div>
             <p class="meta mono">
-              <time datetime={data.date.toISOString().slice(0, 10)}>{format.format(data.date)}</time>
-              <span class="tags" lang="en">
+              <span class="when">
+                <time datetime={data.date.toISOString().slice(0, 10)}>{format.format(data.date)}</time>
+                {lang !== locale && <span class="other">{t.writing.otherLanguage}</span>}
+              </span>
+              <span class="tags" lang={lang}>
                 {data.tags.map((tag) => (
                   <span>{tag}</span>
                 ))}
@@ -233,6 +237,15 @@ const topics = [...new Set(posts.flatMap((post) => post.data.tags))].sort();
     justify-content: space-between;
     gap: var(--space-2) var(--space-4);
     color: var(--text-secondary);
+  }
+  .when {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+  /* "In French" / "En anglais": the post is not in the page's language. */
+  .other {
+    color: var(--accent);
   }
   .tags {
     display: flex;

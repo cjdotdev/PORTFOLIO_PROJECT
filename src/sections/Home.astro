@@ -16,7 +16,7 @@ interface Props {
 
 const { t, locale } = Astro.props;
 // The newest post featured, then up to three more in a row.
-const posts = (await getPosts()).slice(0, 4);
+const posts = (await getPosts(locale)).slice(0, 4);
 const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
   month: "short",
   year: "numeric",
@@ -63,10 +63,7 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
   <div class="head">
     <div class="head-text">
       <h2 id="writing-title" class="display">{t.writing.title}</h2>
-      <p class="lede">
-        {t.writing.lede}
-        {t.writing.englishNote && <> {t.writing.englishNote}</>}
-      </p>
+      <p class="lede">{t.writing.lede}</p>
     </div>
   </div>
   <PostList posts={posts} t={t} locale={locale} compact />

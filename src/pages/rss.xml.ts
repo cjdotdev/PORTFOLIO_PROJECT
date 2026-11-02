@@ -1,16 +1,17 @@
 import type { APIRoute } from "astro";
 import { PERSONAL, SITE_URL } from "../data";
-import { getPosts } from "../lib/posts";
+import { getPosts, postPath } from "../lib/posts";
 
 const escape = (text: string) =>
   text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 /** The posts as an RSS feed, for readers who follow blogs in a feed reader. */
 export const GET: APIRoute = async () => {
-  const posts = await getPosts();
+  // The English feed: each post in English, or in French when it only exists in French.
+  const posts = await getPosts("en");
   const items = posts
-    .map(({ id, data }) => {
-      const url = `${SITE_URL}/blog/${id}/`;
+    .map(({ slug, lang, entry: { data } }) => {
+      const url = `${SITE_URL}${postPath(lang, slug)}`;
       return `    <item>
       <title>${escape(data.title)}</title>
       <link>${url}</link>

@@ -16,9 +16,9 @@ interface Props {
   description: string;
   /** Keeps the page out of search results (a page that is hidden for now). */
   noindex?: boolean;
-  /** A blog post: its cover for link previews (1200x630) and its dates for search engines. */
-  article?: { image?: string; published: Date; modified?: Date; tags: string[] };
-  /** Overrides the canonical URL (a post's French page points to the English one, the post's language). */
+  /** A blog post: its cover for link previews (1200x630), its dates and language for search engines. */
+  article?: { image?: string; published: Date; modified?: Date; tags: string[]; lang: Locale };
+  /** Overrides the canonical URL (a post shown in the other language points to that version's page). */
   canonicalPath?: string;
 }
 
@@ -48,7 +48,7 @@ const jsonLd = article
       image: ogImage,
       datePublished: article.published.toISOString(),
       dateModified: (article.modified ?? article.published).toISOString(),
-      inLanguage: "en",
+      inLanguage: article.lang,
       keywords: article.tags.join(", "),
       mainEntityOfPage: canonical,
       author: { "@type": "Person", name: PERSONAL.name, url: SITE_URL },

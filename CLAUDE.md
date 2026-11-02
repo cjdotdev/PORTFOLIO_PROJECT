@@ -189,17 +189,24 @@ the quill writing CODJA itself. B was built and Joel preferred the old footer (C
 
 **Writing** (`PostList.astro`, home and `/blog`): laid out after sanity.io/blog without its boxes: the
 newest post featured full width (title large left, summary right), the rest in a 3/2/1-column grid,
-each opened by a hairline, date and topics in mono at the foot. `/blog` adds topic filters. Posts and
-tags are in English only, and the copy says so in both languages.
+each opened by a hairline, date and topics in mono at the foot. `/blog` adds topic filters. Posts are
+bilingual since 2026-11-02 (below); a post shown in the other language is marked "In French" /
+"En anglais" in terracotta.
 
 **Blog posts** (`src/content/blog`, `src/content.config.ts`, `src/lib/posts.ts`, `src/sections/Article.astro`):
 Joel writes Markdown on his computer and commits it; visitors only read. One post is `my-post.md`, or
-a folder `my-post/index.md` with its images beside it; the name is the URL (`/blog/my-post/`, also
-`/fr/blog/my-post/` with French chrome and a canonical to the English one). Frontmatter: `title`,
+a folder `my-post/index.md` with its images beside it; its French version is `my-post.fr.md` or
+`my-post/index.fr.md` (same images). The name is the URL: `/blog/my-post/` and `/fr/blog/my-post/`.
+Entries are keyed `en/<slug>` and `fr/<slug>`; `getPosts(locale)` in `src/lib/posts.ts` pairs them and
+gives each language its version, or the other one when it is missing (the page then says "This post
+only exists in French" / "Cet article n'existe qu'en anglais" and its canonical is the existing
+version). Each version's tags are its own (Sécurité, Chiffrement...). The sitemap lists every version
+with its twin; the RSS feed is the English list. Frontmatter: `title`,
 `subtitle` (lists and meta description), `date`, optional `updated`, `tags`, optional `cover` (relative
 path, about 1600x840) with `coverAlt` (required with a cover), `draft`. Drafts appear under `pnpm dev`
-or a build with `SHOW_DRAFTS=true`, never in the deployed site. `sample-post` is a draft that shows
-every element (headings, code, image, quote, table): copy it to start a post. The post page, after
+or a build with `SHOW_DRAFTS=true`, never in the deployed site. The first real post is
+`aes-256-gcm-encryption-at-rest-in-nodejs` (the sample post was deleted, 2026-11-02): copy its frontmatter
+to start one; `##` and `###` make the table of contents, `####` stays out of it. The post page, after
 Hashnode: cover, title, subtitle, avatar (`public/img/avatar-v1.webp`), date and reading time, table of
 contents (sticky on the right from 72rem, folded above the text below), Vesper-highlighted code with a
 language bar and a copy button, `#` links on headings, topics (link to `/blog/?topic=...`), share
@@ -207,6 +214,17 @@ language bar and a copy button, `#` links on headings, topics (link to `/blog/?t
 
 **Spacing**: one gap between any two sections, `--section-space` (0.6 × `--section`) at the top and
 bottom of each; page heads use `.page-head`. Don't give a section its own padding-block.
+
+**GitHub profile README** (repo `cjdotdev/cjdotdev`, cloned at `../cjdotdev`): the site's style as four
+images in `assets/` (banner with the engraved portrait, the three phases, the project deck, the tools,
+the CODJA band, and the link buttons drawn like the site's `.btn`), made from `scripts/github-profile.html`
+by `node scripts/render-shots.mjs <playwright-core> scripts/github-profile.html ../cjdotdev/assets`.
+The LinkedIn banner (EN and FR, 1584x396 at 2x) comes from `scripts/linkedin-banner.html` the same way
+(page width 1584): the hero sentence in the middle (from x 540, clear of the profile photo, which covers
+x < 500 from y 180 on desktop and phone), and Joel's engraved face on
+the right in the engravings' sepia ink (an SVG colour-matrix filter on the hero engraving). Joel chose
+the face over the quill hand with JOEL/CODJA (2026-11-02).
+Freelance only (Joel, 2026-11-02). Update its links and the band's address when the domain goes live.
 
 ## Gotchas already paid for
 

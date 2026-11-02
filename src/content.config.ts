@@ -3,12 +3,20 @@ import { glob } from "astro/loaders";
 import { z } from "astro/zod";
 
 /**
- * Blog posts: one Markdown file per post in src/content/blog, either `my-post.md` or, when the post has
- * images, a folder `my-post/index.md` with its images next to it. The file or folder name is the URL
- * (/blog/my-post/). Posts are written in English, whatever the page's language.
+ * Blog posts: one Markdown file per post and language in src/content/blog. English is `my-post.md` (or
+ * `my-post/index.md` in a folder with its images), French sits beside it as `my-post.fr.md` (or
+ * `my-post/index.fr.md`, sharing the folder's images). The name is the URL: /blog/my-post/ and
+ * /fr/blog/my-post/. Entries are keyed "en/my-post" and "fr/my-post" (src/lib/posts.ts pairs them).
  */
 const blog = defineCollection({
-  loader: glob({ pattern: "**/*.md", base: "./src/content/blog" }),
+  loader: glob({
+    pattern: "**/*.md",
+    base: "./src/content/blog",
+    generateId: ({ entry }) => {
+      const [, slug, fr] = /^(.*?)(?:\/index)?(\.fr)?\.md$/.exec(entry.replaceAll("\\", "/")) ?? [];
+      return `${fr ? "fr" : "en"}/${slug}`;
+    },
+  }),
   schema: ({ image }) =>
     z
       .object({

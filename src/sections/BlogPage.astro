@@ -10,16 +10,13 @@ interface Props {
 }
 
 const { t, locale } = Astro.props;
-const posts = await getPosts();
+const posts = await getPosts(locale);
 ---
 
 <header class="page-head container">
   <BackLink href={localePath(locale, "/")} label={t.nav.backHome} />
   <h1 class="display-lg">{t.blogPage.title}</h1>
-  <p class="lede">
-    {t.writing.lede}
-    {t.writing.englishNote && <> {t.writing.englishNote}</>}
-  </p>
+  <p class="lede">{t.writing.lede}</p>
 </header>
 
 <div class="container list">

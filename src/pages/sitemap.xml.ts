@@ -1,10 +1,10 @@
 import type { APIRoute } from "astro";
 import { KOJIMA_PAGE, MUSIC_PAGE, PICS_PAGE, PROJECTS_PAGE, SITE_URL } from "../data";
-import { getPosts } from "../lib/posts";
+import { getPosts, postPath } from "../lib/posts";
 
 /**
  * The pages search engines should list, each with its French twin (hreflang). Hidden pages stay out,
- * like drafts. A post is listed once, in English: its French page points to it as canonical.
+ * like drafts. A post is listed in each language it is written in, each version naming the other.
  */
 export const GET: APIRoute = async () => {
   const pages = [
@@ -24,10 +24,16 @@ export const GET: APIRoute = async () => {
       `  <url>\n    <loc>${SITE_URL}${path}</loc>${twin(path)}\n  </url>`,
       `  <url>\n    <loc>${SITE_URL}/fr${path}</loc>${twin(path)}\n  </url>`,
     ]),
-    ...(await getPosts()).map(
-      ({ id, data }) =>
-        `  <url>\n    <loc>${SITE_URL}/blog/${id}/</loc>\n    <lastmod>${(data.updated ?? data.date).toISOString().slice(0, 10)}</lastmod>\n  </url>`,
-    ),
+    ...(await getPosts("en")).flatMap(({ slug, langs, entry: { data } }) => {
+      const lastmod = (data.updated ?? data.date).toISOString().slice(0, 10);
+      const twins =
+        langs.length > 1
+          ? langs.map((lang) => `\n    <xhtml:link rel="alternate" hreflang="${lang}" href="${SITE_URL}${postPath(lang, slug)}"/>`).join("")
+          : "";
+      return langs.map(
+        (lang) => `  <url>\n    <loc>${SITE_URL}${postPath(lang, slug)}</loc>${twins}\n    <lastmod>${lastmod}</lastmod>\n  </url>`,
+      );
+    }),
   ];
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
