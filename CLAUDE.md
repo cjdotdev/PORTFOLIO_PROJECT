@@ -168,7 +168,7 @@ one from `fr/404/index.html` to `fr/404.html` after the build.
 **SEO**: `Layout.astro` writes title, description, canonical, hreflang (en, fr, x-default), Open Graph
 (`public/og.png`, made from `scripts/og.html`; a post uses its cover), Person JSON-LD (BlogPosting on a
 post), and the RSS link. `src/pages/sitemap.xml.ts` and `robots.txt.ts` are built from `SITE_URL`, the
-page switches and the published posts. `joelcodja.com` is bought (Porkbun, 2026-11-02) but not connected yet, so the site still uses `joelcodja.pages.dev`; once Joel says it is live on Cloudflare, switch `SITE_URL` and `site` in `astro.config.mjs` together.
+page switches and the published posts. The site lives at `joelcodja.com` (Porkbun, nameservers on Cloudflare since 2026-11-02, custom domain of the Pages project); `SITE_URL` and `site` in `astro.config.mjs` must stay equal.
 
 **Header** (`Header.astro`, `LangSwitch.astro`, `SocialIcons.astro`): Writing, (Pics), Contact on the
 left with a Lenis-style underline (draws in from the left, leaves to the right), CJ mark centred,

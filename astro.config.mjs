@@ -18,7 +18,7 @@ const frenchNotFound = {
 
 export default defineConfig({
   // joelcodja.com is bought (2026-11-02) but not connected yet: switch here and in SITE_URL once it is.
-  site: "https://joelcodja.pages.dev",
+  site: "https://joelcodja.com",
   integrations: [react(), frenchNotFound],
   // Blog posts (src/content/blog): code is highlighted at build time. Vesper is dark with warm orange
   // accents, close to the site's terracotta.

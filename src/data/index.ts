@@ -4,7 +4,7 @@
 import type { TechId } from "./tech";
 
 /** The site's public address; keep it equal to `site` in astro.config.mjs. joelcodja.com replaces it once connected. */
-export const SITE_URL = "https://joelcodja.pages.dev";
+export const SITE_URL = "https://joelcodja.com";
 
 /**
  * Whether /projects is shown (header link, "All projects" button, indexed). Back since 2026-11-01 with
@@ -29,7 +29,7 @@ export const PERSONAL = {
   name: "Joel Codja",
   surname: "Codja",
   pronunciation: "/ko.dʒa/",
-  email: "gide749@gmail.com",
+  email: "contact@joelcodja.com",
   github: "https://github.com/cjdotdev",
   linkedin: "https://www.linkedin.com/in/joel-codja-4356a2361/",
   twitter: "https://x.com/Gide749Gide",
