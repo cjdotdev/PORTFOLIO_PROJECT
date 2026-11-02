@@ -5,7 +5,7 @@ date: 2026-09-18
 tags: ["TypeScript", "Validation", "Zod"]
 cover: ./cover.webp
 coverAlt: "The Zod logo, a blue shield with a white Z, on a white background"
-draft: true
+draft: false
 ---
 
 TypeScript catches a large class of bugs before the code ever runs. It checks that functions receive the arguments they expect, that objects have the properties we read, and that we do not pass a string where a number belongs. However, this protection ends at compile time. Once the code is compiled to JavaScript, the types are gone.

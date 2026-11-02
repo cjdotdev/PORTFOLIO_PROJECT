@@ -5,7 +5,7 @@ date: 2026-09-18
 tags: ["TypeScript", "Validation", "Zod"]
 cover: ./cover.webp
 coverAlt: "Le logo de Zod, un bouclier bleu marqué d'un Z blanc, sur fond blanc"
-draft: true
+draft: false
 ---
 
 TypeScript détecte une grande partie des bugs avant même que le code ne s'exécute. Il vérifie que les fonctions reçoivent les arguments attendus, que les objets possèdent les propriétés que nous lisons, et que nous ne passons pas une chaîne là où un nombre est attendu. Mais cette protection s'arrête à la compilation. Une fois le code compilé en JavaScript, les types ont disparu.
