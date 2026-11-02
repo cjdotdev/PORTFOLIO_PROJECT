@@ -4,7 +4,7 @@ export const en = {
   meta: {
     title: "Joel Codja, backend developer: API design and serverless edge",
     description:
-      "Joel Codja is a backend developer from Gabon, based in Cotonou, focused on API design and serverless edge architectures. He builds MakiSend and linkedin-scheduler.",
+      "Joel Codja is a backend developer from Gabon, based in Cotonou, focused on API design and serverless edge architectures.",
     projectsTitle: "Projects, Joel Codja",
     projectsDescription:
       "MakiSend and linkedin-scheduler, shipped, and Supasecret and Voctra, under way: the projects of Joel Codja.",
@@ -46,6 +46,7 @@ export const en = {
     specialty: "focused on [API design] and [serverless edge architectures].",
     line: "From {country}, based in Cotonou.",
     primary: "Email me",
+    copied: "Email copied",
     secondary: "Download my CV",
     say: "say ko-ja",
     portraitAlt: "Ink engraving of Joel Codja among palm trees",

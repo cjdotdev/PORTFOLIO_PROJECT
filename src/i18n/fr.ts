@@ -5,7 +5,7 @@ export const fr: Dict = {
   meta: {
     title: "Joel Codja, développeur backend : conception d'API et serverless edge",
     description:
-      "Joel Codja est développeur backend, originaire du Gabon et basé à Cotonou, orienté conception d'API et architectures serverless edge. Il construit MakiSend et linkedin-scheduler.",
+      "Joel Codja est développeur backend, originaire du Gabon et basé à Cotonou, orienté conception d'API et architectures serverless edge.",
     projectsTitle: "Projets, Joel Codja",
     projectsDescription:
       "MakiSend et linkedin-scheduler, livrés, Supasecret et Voctra, en cours : les projets de Joel Codja.",
@@ -47,6 +47,7 @@ export const fr: Dict = {
     specialty: "orienté [conception d'API] et [architectures serverless edge].",
     line: "Originaire du {country}, basé à Cotonou.",
     primary: "M'écrire",
+    copied: "Adresse copiée",
     secondary: "Télécharger mon CV",
     say: "se dit ko-ja",
     portraitAlt: "Gravure à l'encre de Joel Codja entouré de palmiers",
