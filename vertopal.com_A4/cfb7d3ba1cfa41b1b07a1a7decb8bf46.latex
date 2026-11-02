@@ -1,0 +1,1142 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage{longtable,booktabs,array}
+\usepackage{multirow}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\usepackage[normalem]{ulem}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\author{}
+\date{}
+
+\begin{document}
+
+Comparison of low complexity demapper algorithms applied to rotated
+constellation in DVB-T2
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.3333}}@{}}
+\toprule()
+\begin{minipage}[b]{\linewidth}\raggedright
+Anne-Carole Honfoga
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Michel Dossou
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Véronique Moeyaert
+\end{minipage} \\
+\midrule()
+\endhead
+Electromagnetism and Telecommunications & LETIA (of Polytech. Sch. &
+Electromagnetism and Telecommunications \\
+Department & of Abomey-Calavi) & Department \\
+University of Mons & University of Abomey-Calavi & University of Mons \\
+Mons, Belgium & Calavi, Benin & Mons, Belgium \\
+anne-carole.honfoga@umons.ac.be & michel.dossou@epac.uac.bj &
+veronique.moeyaert@umons.ac.be \\
+\bottomrule()
+\end{longtable}
+
+\textbf{\emph{Abstract}---Signal Space Diversity (SSD) technique was
+adopted in Digital Video Broadcasting-Terrestrial, second generation
+(DVB-T2) standard ten years ago in order to increase system performance
+over fading channels. This technique consists in rotated and cyclic
+Q-delayed} \emph{M}\textbf{-Quadrature Amplitude Modu-lation (QAM) and
+has been proposed without taking into account the complexity induced by
+the demapper. Due to the complexity of the hardware implementation, the
+features of this technique have not been effectively exploited for
+network deployment. Therefore, several low complexity algorithms have
+been proposed during the last decade in the scientific literature in
+order to reduce the number of metrics and operators used in the
+demapping process. This paper proposes an exhaustive overview of all the
+nine DVB-T2 demapping algorithms existing up to now in the literature by
+comparing them in terms of parameters, performance and percentage of
+reduction obtained.}
+
+\textbf{\emph{Index Terms}---DVB-T2, rotated constellation, cyclic Q
+delay, fading channel, Signal Space Diversity (SSD).}
+
+I. INTRODUCTION
+
+\begin{quote}
+The demand of high data transmissions over fading channel
+\end{quote}
+
+has been the subject of many wireless communications sys-
+
+tems during the last two decades. In order to overcome these
+
+challenges, several signal processing techniques like Forward
+
+Error Correction (FEC) codes, geometrical and probabilistic
+
+constellations, diversity and interleaving techniques have been
+
+recently proposed in modern communications systems such
+
+as: DVB-T2 {[}1{]} and Advanced Television Systems Commitee,
+
+third generation (ATSC 3.0) {[}2{]}. Indeed, DVB-T2 provides a
+
+minimum capacity increase of thirty per cent when compared
+
+to DVB-T and a flexible robustness for transmitted service.
+
+DVB-T2 is the European terrestrial digital broadcasting system
+
+second generation standard published by European Telecom-
+
+munications Standards Institute (ETSI) in 2009 {[}3{]}. Due to
+
+Bit Interleaved Coding Modulation (BICM) {[}3{]} scheme and
+
+new techniques like FEC coding or SSD {[}4{]} included in this
+
+system, its performance is greater than DVB-T one {[}3{]}.
+
+\begin{quote}
+BICM is the coded modulation scheme whose principle
+\end{quote}
+
+and performance have been described by Zehavi {[}4{]} over
+
+fading channel. SSD technique has been firstly introduced in
+
+{[}5{]}, {[}6{]} and proposed for DVB-T2 transmissions in order to
+
+increase the diversity order of BICM scheme and the signal
+
+robustness while maintaining the system spectral efficiency.
+
+\begin{quote}
+This technique gives maximum gain when used with low constellation sizes
+(4-QAM) and higher Code Rates (CRs) (CR=4\emph{/}5 and CR=5\emph{/}6).
+Conversely, the gain is more reduced for high constellation sizes
+(256-QAM) and lower code rates {[}3{]}. The performance gain obtained
+using (4-QAM, CR=1\emph{/}2) and (16-QAM, CR=1\emph{/}2) are
+respectively 3\emph{.}4 dB and 2\emph{.}8 dB in Single Frequency Network
+(SFN) environment {[}7{]}.
+
+SSD technique consists in the rectangular QAM constella-tion rotation
+and the cyclic Q delay. The constellation rotation induces a correlation
+between I and Q components of each QAM symbol and the cyclic Q delay
+insertion introduces the independence between I and Q channel
+coefficients. Although the SSD technique increases the robustness of the
+transmitted signal, the demapper complexity increases. Indeed, during
+the demapping process, euclidean distance computed between constellation
+symbols and received symbols, must include I and Q channel coefficients.
+This requires the computation of two dimensional euclidean distance
+(2D-demapper) and induces the increase of the complexity detection
+process when compared to the detection process using classical QAM
+con-stellation (1D-demapper). Furthermore, iterative decoding has been
+the demapper proposed in DVB-T2 {[}3{]} standard as the alternative to
+the common used method Max-Log demapper in order to increase the rotated
+constellation performance. But this algorithm is more complex for
+hardware implementation {[}8{]} and is used for software implementation
+{[}9{]}.
+
+However, many detection process algorithms have been proposed in the
+literature in order to deal with the hardware complexity induced by the
+common used method Max-Log detection. These algorithms are based on two
+kinds of com-plexity reduction. While, some algorithms are based on the
+reduction of the number of euclidean distance computed in the Logarithm
+Likelyhood Ratio (LLR) bit computation {[}10{]}, {[}11{]}, {[}12{]},
+some focused on complexity of euclidean distance {[}15{]} and the others
+focused on both complexity reduction of the euclidean distance
+computation and number of euclidean distance to compute {[}13{]},
+{[}14{]}, {[}16{]}, {[}17{]}, {[}18{]}. Indeed, this comparison does not
+exist in the scientific literature.
+
+In this paper, low complexity demappers proposed for DVB-T2 are compared
+in terms of number of metrics and operators used and percentage of
+reduction obtained. Therefore, DVB-
+\end{quote}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.5000}}@{}}
+\toprule()
+\begin{minipage}[b]{\linewidth}\raggedright
+\begin{quote}
+978-1-7281-6646-9/20/\$31.00 ©2020 IEEE
+\end{quote}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+509
+\end{minipage} \\
+\midrule()
+\endhead
+\bottomrule()
+\end{longtable}
+
+T2 system has been explained (section II). This is followed by SSD
+techniques presentation and the 2D-demapper relevance (section III).
+Demapper algorithms are compared (section IV), followed by the
+discussion (section V) and the paper ended up by the conclusion (section
+VI).
+
+\begin{quote}
+II. DVB-T2 SYSTEM DESCRIPTION
+\end{quote}
+
+\emph{A. DVB-T2 blocks diagram}
+
+DVB-T2 system is based on many blocks such as: Physical Layer Pipe (PLP)
+multiplexing, Bose-Chaudhuri-Hocquenghem (BCH) and Low Density Parity
+Check (LDPC) codings, QAM, rotated constellation, Cyclic Q delay,
+interleav-ing techniques, Orthogonal Frequency Division Multiplexing
+(OFDM) modulation (Fast Fourier Transform (FFT) operation and Cyclic
+Prefix (CP) insertion) and Multiple Input Signal Output (MISO). Ref
+{[}1{]} and {[}3{]} defines the DVB-T2 modem architectures which
+parameters are given in table I. The per-formance are evaluated after
+QAM demapping, LDPC decoder and BCH decoder using Bit Error Rate (BER)
+which computes the number of binary errors transmitted to the total
+number of transmitted bits. Also, Modulation Error Ratio (MER) which is
+used to indicate the modulation quality of the received signal can be
+computed before the QAM demapper {[}19{]}.
+
+\begin{quote}
+TABLE I\\
+DVB-T2 SYSTEM PARAMETERS
+\end{quote}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.5000}}@{}}
+\toprule()
+\begin{minipage}[b]{\linewidth}\raggedright
+FFT mode
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+1K, 2K, 4K, ((8, 16, 32)K and ext)
+\end{minipage} \\
+\midrule()
+\endhead
+Modulation & 4, 16, 64, 256-QAM \\
+FEC frame & long (64800 bits), short (16200 bits) \\
+CR LDPC & 1/2, 3/5, 2/3, 3/4, 4/5, 5/6 \\
+Bandwidth & 1.7, 5, 6, 7, 8, 10 MHz \\
+CP & 1/128, 1/32, 1/16, 19/256, 1/8, 19/128, 1/4 \\
+\bottomrule()
+\end{longtable}
+
+\emph{B. Channel models}
+
+DVB-T2 standard defines many generic simulation fading channel models
+such as Rician, Rayleigh, Rayleigh with erasure, Typical Urban 6 and 0dB
+echo channels {[}3{]}. Among all of these channels listed above,
+Rayleigh channels with and without erasure and 0dB echo channel are
+usually used. In the following section, SSD technique will be presented
+in detail.
+
+\begin{quote}
+III. SSD TECHNIQUE DESCRIPTION
+\end{quote}
+
+\emph{A. Rotated constellation concept}
+
+The constellation rotation concept has been introduced in the DVB-T2
+standard in order to improve the performance of the system. Before the
+adoption of this concept in DVB-T2, some works have been done and prove
+the performance of the joint use of constellation rotation and FEC
+techniques (Turbo and LDPC codes) {[}20{]}. Moreover, the performance of
+the joint use of SSD technique and BICM modulation in broadcasting
+systems have been proven while showing the advantage of SSD technique as
+being a repeating code and defining the criteria for the choice of
+rotation angle {[}21{]}.
+
+Indeed, QAM symbols are constructed using Gray mapping. After that, a
+rotation technique is applied to the classical
+
+\begin{quote}
+constellation and creates a correlation between I and Q com-ponents.
+When, this operation is followed by a cyclic Q delay addition, channel
+coefficients applied to transmitted symbols become independent. Fig. 1
+presents the rotated constellation. As noticed on this figure, a
+rotation angle Φ is applied to the
+\end{quote}
+
+\includegraphics[width=1.74444in,height=1.475in]{vertopal_cfb7d3ba1cfa41b1b07a1a7decb8bf46/media/image1.png}
+
+\begin{quote}
+Fig. 1. Classical QAM and rotated constellation (adapted from {[}12{]})
+
+classical symbols (red color) and each rotated constellation symbol
+(blue color) includes the unique I and Q components. If \emph{S}
+represents a complex symbol from a classical QAM, \emph{Is} and
+\emph{Qs} denote respectively the In-phase and Quadrature symbols
+components.
+
+\emph{S} = \emph{Is} + \emph{j.Qs} (1)
+
+During the rotation, \emph{S} is multiplied by \emph{ej}Φand becomes
+\emph{Z}.
+
+\emph{Z} = \emph{Iz}+\emph{j.Qz} = (\emph{Is}+\emph{j.Qs})\emph{.ej}Φ=
+(\emph{Is}+\emph{j.Qs})(\emph{sin}Φ+\emph{j.cos}Φ)
+
+\emph{Iz} = \emph{Is.cos}Φ \emph{−Qs.sin}Φ; \emph{Qz} = \emph{Is.sin}Φ +
+\emph{Qs.cos}ΦThe addition of a cyclic Q delay consists in performing a
+time delay of \emph{Qz} components of all transmitted symbols. This
+operation is carried out on the scale of one LDPC frame and consists in
+inserting a delay of a QAM symbol duration on Q components of all the
+symbols. For example, if \emph{Z}1, \emph{Z}2, \emph{Z}3, \emph{Z}4
+denote the symbols after constellation rotation and we suppose that the
+LDPC frame length is 4.
+\end{quote}
+
+\emph{Z}1 = \emph{Iz}1 + \emph{j.Qz}1; \emph{Z}2 = \emph{Iz}2 +
+\emph{j.Qz}2
+
+\emph{Z}3 = \emph{Iz}3 + \emph{j.Qz}3; \emph{Z}4 = \emph{Iz}4 +
+\emph{j.Qz}4
+
+\begin{quote}
+After cyclic delay, \emph{Z}1, \emph{Z}2, \emph{Z}3, \emph{Z}4 become
+\emph{X}1, \emph{X}2, \emph{X}3, \emph{X}4.
+\end{quote}
+
+\emph{X}1 = \emph{Iz}1 + \emph{j.Qz}4; \emph{X}2 = \emph{Iz}2 +
+\emph{j.Qz}1
+
+\emph{X}3 = \emph{Iz}3 + \emph{j.Qz}2; \emph{X}4 = \emph{Iz}4 +
+\emph{j.Qz}3
+
+\begin{quote}
+By this way, complex symbols which undergo OFDM modu-lation do not
+contain their own Q components. Indeed, I and Q components go through
+different subcarriers. Therefore, the fact that these two subcarriers
+carry the same information on the channel leads to consider the SSD
+technique as a repeating code. When one of the subcarriers is attenuated
+or erased, the information contained in this subcarrier can be recovered
+be-cause the same information is found on the second subcarrier. On the
+receiver side, the channel coefficients of components I and Q of each
+transmitted symbol are independent.
+\end{quote}
+
+510
+
+\emph{B. 2D-Demapper relevance}
+
+In the previous section, SSD technique advantages and principles have
+been presented. It is shown that the use of the channel coefficients
+becomes mandatory when computing euclidean distance in the LLR
+expression as Zero Forcing (ZF) or Minimum Mean Square Error (MMSE)
+equalizers can not be done before the demapping process. Then, a
+2D-demapper is needeed when constellation rotation is used. In this
+section, the 1D and 2D demappers.
+
+1) Complexity analysis of 1D and 2D demapper
+
+Let us consider a 16-QAM including the constellation diagram and binary
+data (\emph{b}0\emph{b}1\emph{b}2\emph{b}3) presented on fig. 2.(a). As
+noticed on this figure, the I and Q components (blue color) projected on
+the real and imaginary axes follow the gray mapping. The bits with even
+index contain the I component and the bits with odd index contain the Q
+component. The hamming distance between adjacent I or Q components is
+equal to 1. In order to compute the LLR for each bit, euclidean distance
+is computed between I components or Q components. This means that when
+constellation rotation is not applied, the LLR computation takes into
+account only the component (I or Q) on which the half of the symbols
+bits is represented {[}3{]}. This means that the euclidean distance is
+1D distance. Fig. 2.(b) presents the 1D-demapper where \emph{k} and
+\emph{l} represent
+
+\includegraphics[width=3.48611in,height=1.4625in]{vertopal_cfb7d3ba1cfa41b1b07a1a7decb8bf46/media/image2.png}
+
+\begin{quote}
+Fig. 2. Classical QAM symbols and 1D-demapper
+\end{quote}
+
+respectively the even and odd index. The number of candidate points
+needed for euclidean distance computation is 2(\emph{\sout{m}} 2+1)
+
+with \emph{m} the number of bits per symbol.
+
+\includegraphics[width=1.39444in,height=0.85139in]{vertopal_cfb7d3ba1cfa41b1b07a1a7decb8bf46/media/image3.png}
+
+\begin{quote}
+Fig. 3. 2D-demapper (adapted from {[}3{]})
+\end{quote}
+
+When rotated constellation is used, instead of the use of only one
+component in LLR bit computation, both I, Q components and their
+respective channel coefficients are needed for LLR bit computation and
+then the euclidean distance. This leads to the use of 2D-demapper (fig.
+3). The number of euclidean distance is 2\emph{m}. When compared to the
+number needed for 1D-demapper, the complexity increases by 2 2 {[}13{]}.
+
+\emph{m}
+
+\begin{quote}
+2) Exact LLR computation and Max-Log demapper
+
+Let us consider:
+
+\emph{•} X, the transmitted symbol with components \emph{Ix} and
+\emph{Qx}.\emph{•} R, the received symbol with components \emph{Ir} and
+\emph{Qr} and without channel equalization.
+
+\emph{• ρI} et \emph{ρQ}, fading channel coefficients respectively for I
+and Q components.
+
+\emph{• bi}, the bit on which the LLR is computed.
+
+\emph{i}, the set of constellation points for which the\emph{• C}0
+\emph{i}and \emph{C}1\\
+\emph{ith}bit can take 0 or 1 values.
+
+\emph{• σ}2the power of Additive White Gaussian Noise (AWGN) One can
+compute 2D euclidean distance using equation (2).
+\end{quote}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.5000}}@{}}
+\toprule()
+\begin{minipage}[b]{\linewidth}\raggedright
+\begin{quote}
+\emph{Dist}2= (\emph{Ir −ρIIx})2+ (\emph{Qr −ρQQx})2
+\emph{LLR}(\emph{bi}) = ln( \emph{e−\uline{Dist}}2 2\emph{σ}\uline{2})
+\emph{−}ln( \emph{e−\uline{Dist}}2 2\emph{σ}\uline{2})
+
+\emph{x∈C}1 \emph{x∈C}0
+\end{quote}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\begin{quote}
+(2) (3)
+\end{quote}
+\end{minipage} \\
+\midrule()
+\endhead
+\multicolumn{2}{@{}>{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{1.0000} + 2\tabcolsep}@{}}{%
+\begin{minipage}[t]{\linewidth}\raggedright
+And one can compute LLR bit with equation (3). As noticed on this
+equation, exponential operator is used and is more complex to realize in
+hardware implementation. Also, the calculation of the LLR uses all the
+points of the constellation since \emph{C}0 \emph{i}and \emph{C}1
+\emph{i}are subsets of dimension 2 2 . In order to deal \emph{m}
+
+\begin{quote}
+with exponential operator, Max-Log approximation presented in equation
+(4) is used.
+\end{quote}
+\end{minipage}} \\
+\begin{minipage}[t]{\linewidth}\raggedright
+\begin{quote}
+ln (\emph{ea}1+ \emph{...} + \emph{eak}) \emph{≈}= max
+\emph{j}=1\emph{...kaj}; \emph{aj} = \emph{Dist}2 2\emph{σ}2
+\end{quote}
+\end{minipage} & (4) \\
+\bottomrule()
+\end{longtable}
+
+\begin{quote}
+By inserting this equation in expression (3), the LLR formula becomes
+equation (5).
+\end{quote}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.3333}}@{}}
+\toprule()
+\begin{minipage}[b]{\linewidth}\raggedright
+\begin{quote}
+\emph{LLR}(\emph{bi}) =
+\end{quote}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\begin{quote}
+1\\
+2\emph{σ}2 {[}\emph{minx∈C}0 \emph{iDist}2 \emph{−minx∈C}1
+\emph{iDist}2{]}
+\end{quote}\strut
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+(5)
+\end{minipage} \\
+\midrule()
+\endhead
+\bottomrule()
+\end{longtable}
+
+\begin{quote}
+This expression allows to avoid an exponential operator. However, the
+number of candidate points used is still the same. The more the size of
+the constellation increases, the more the complexity increases. For
+example, when 256 constellation size is used, the number of euclidean
+distance is also 256. In order to reduce the complexity of computation,
+many low complexity demappers are proposed in the scientific literature.
+All of them reduce the Max-Log demapper algorithm com-plexity by
+reducing the number of metrics or the complexity of the euclidean
+distance expression. The following section compares these algorithms.
+
+IV. LOW COMPLEXITY DEMAPPER ALGORITHMS
+
+The Max-Log demapper algorithm is proposed in DVB-T2 standard for
+hardware implementation and algorithms proposed in the literature
+focused on the demapper complexity reduction. When some algorithms
+reduce only the QAM demapper complexity, the last algorithm presented in
+this paper (cf IV.C.5) reduces the demapping complexity and in-creases
+the signal robustness and then the system performance. This section
+presents firstly those algorithms that reduce the number of euclidean
+distance, secondly those which reduce the complexity of computation of
+euclidean distance and lastly the algorithms for both reductions.
+Nevertheless, it is useful to first compute the Max-Log complexity.
+\end{quote}
+
+511
+
+Indeed, the complexity of euclidean distance presented in equation (2)
+is computed in term of number of real multiplica-tions (RM) and real
+sums (RS). As noticed on this equation, 4 RM and 3 RS are needed. For
+the sake of simplicity, we denote the number of candidate points which
+represents the number of euclidean distances or metrics. The LLR bit
+computation for symbol of constellation size 256 using equation (5)
+induces (4 \emph{∗}256 + 8) = 1032 RM, (3 \emph{∗}256 + 8) = 776 RS and
+(256 \emph{∗}8) = 2048 real comparisons (RC). Indeed, the real
+comparison operator is used due to the presence of the \emph{min}
+operator in the equation. This operator induces the comparison between
+all the euclidean distances computed between the received symbol and the
+symbols of the individual subset \emph{C}0 \emph{i} and \emph{C}1
+\emph{i}in order to choose the small distance for the two subsets.
+
+\emph{A. Algorithms based on number of candidate points reduction}
+
+1) Demapper proposed by Perez Calderon et al, 2011 {[}10{]}
+
+These authors proposed the choice of constellation quadrants which are
+taken into account depending on the quadrant on which the received
+symbols belong to. Indeed, there are four quadrants on QAM
+constellation. Depending on the quadrant in which the received symbol is
+located, the 2D euclidean distance can be computed on a reduced subset
+of constellation points instead of all the constellation points. These
+subset of constellation points are carefully determined by computing the
+histogram of minimum 2D distance and then identifying the received
+symbols which are more likely to be at the minimum distance for a
+specific quadrant. The constellation points with a greatest occurrence
+probability are grouped into a subset for this particular quadrant. By
+using histogram of minimum distance, authors conclude that in the case
+where the received symbol belongs to quadrant 2 (Q2), the candidate
+points must belong to Q2 and the neighboring quadrants Q1 and Q3. This
+means that the number of candidate points decreases by 25\%.
+Furthermore, some points of Q1 and Q3 could be removed. This induces
+also the decrease of the number of candidates points by 6\%,
+12\emph{.}5\%, 19\% and 25\%. However, the more the number candidate
+points decreases, the more the system performance decreases. For all the
+foregoing, the subset of candidate points which reduced the points by
+25\% + 6\% = 31\emph{.}25\% is the selected subset with negligible
+impact (loss \textless{} 0\emph{.}2 dB) on system performance for
+constellation size of 256.
+
+2) Demapper proposed by Stefano Tomasin et al, 2012 {[}11{]}
+
+These authors proposed an algorithm which consists in iden-tifying the
+constellation points whose euclidean distance is very close to the
+received symbol. Indeed, it consists in the separation of the
+constellation diagram into different sectors of \emph{\uline{m}}\\
+size (2\emph{.}2 2 ) delimited by real values \emph{Mc}. After this
+separation, it will be necessary to identify the real value \emph{Mc}
+close to the real part of the symbol received. Once this value is
+identified, the constellation points on which euclidean distance will be
+computed is between the two values of \emph{Mc} close to the \emph{Mc}
+value previously identified. This region includes 2(\emph{\sout{m}} 2)
+
+\begin{quote}
+constellation points. This algorithm reduces the number of candidate
+points by 93\emph{.}75\% with negligible performance loss for
+constellation size of 256. When compared to the algorithm proposed by
+Perez Calderon in 2011, this algorithm further reduces the complexity
+than the previous presented (cf IV.A.1).
+
+3) Demapper proposed by Perez Calderon et al, 2013 {[}12{]}
+
+These authors proposed a complexity reduction algorithm based on
+sub-quadrants identification instead of quadrants in {[}10{]}. It is
+based on the selection of the sub-quadrants among the four quadrants of
+the constellation. Instead of computing the distance between the symbol
+received and all the other constellation points, they first compute the
+probability of appearance of the received symbols of a sub-quadrant in
+the other sub-quadrants. Then, the constellation points with a high
+probability of occurrence is maintained. The choice of the subset of
+candidate points has a significant impact on the system performance.
+These candidate points are likely to be at a minimum distance from the
+received symbol. This algorithm reduces the number of candidate points
+by 78\% with a negligible performance loss for constellation size of
+256. When compared to the quadrant demapping algorithm firstly presented
+(cf IV.A.1), this algorithm further reduces the number of candidate
+points lying on the subset which induces a better percentage of
+complexity reduction.
+
+\emph{B. Algorithm based on the euclidean distance complexity reduction}
+
+The research group of Perez Calderon authors proposed in 2014 the
+Manhattan approximation as an alternative to the euclidean distance in
+the LLR expression {[}15{]} in order to reduce the hardware
+implementation complexity. As noticed on the 2D euclidean distance
+formula, the RM operator is more complex to realise than the RS. By
+reducing the number of RM, the demapper complexity is further reduced.
+This algorithm focuses on the number of RM reduction and then presents
+better performance algorithms than previously pre-sented. Indeed,
+Manhattan distance means equation (6) instead of equation (7).
+\end{quote}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.5000}}@{}}
+\toprule()
+\begin{minipage}[b]{\linewidth}\raggedright
+\begin{quote}
+\emph{DistManhattan} = (\emph{Ir −ρIIx}) + (\emph{Qr −ρQQx})
+\end{quote}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+(6)
+\end{minipage} \\
+\midrule()
+\endhead
+\multicolumn{2}{@{}>{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{1.0000} + 2\tabcolsep}@{}}{%
+\begin{minipage}[t]{\linewidth}\raggedright
+\begin{quote}
+\emph{Disteuclidean} = (\emph{Ir −ρIIx})2+ (\emph{Qr −ρQQx})2 (7)
+
+The use of Manhattan distance allows to reduce the number of RM by
+99\emph{.}2\% with a negligible performance loss. Instead of
+2\emph{m}+1RM, only 4 RM are used.
+\end{quote}
+\end{minipage}} \\
+\bottomrule()
+\end{longtable}
+
+\begin{quote}
+\emph{C. Algorithms based on the number of candidate points and
+euclidean distance complexity reduction}
+
+In the previous subsection, algorithms based on only eu-clidean distance
+number have been presented. In this part, algorithms which reduce both
+the number of candidate points and euclidean distance computation are
+presented.
+
+1) Demapper proposed by Meng Li et al, 2009 {[}14{]}
+
+These authors proposed a sub-region demapping algorithm and presented
+the FPGA design and prototyping. This algorithm reduces the number of
+Euclidean distances by breaking down
+\end{quote}
+
+512
+
+the constellation into 2D sub-regions and simplifies the al-gorithm of
+euclidean distance computation. This reduces the complexity by
+decreasing the number of RM.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}@{}}
+\toprule()
+\multicolumn{4}{@{}>{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{1.0000} + 6\tabcolsep}@{}}{%
+\begin{minipage}[b]{\linewidth}\raggedright
+Indeed, depending on the signs of \emph{Ir} and \emph{Qr}, four
+sub-regions have been identified. Each sub-region includes a quadrant
+and the constellation points which are closer to the quadrant. This
+method reduces the number of euclidean distances by 60\% and 69\%
+respectively for constellation sizes of 64 and 256. Instead of 64 and
+256 candidate points used to compute euclidean distances, respectively
+25 and 81 is used. Moreover, a linear approximation of euclidean
+distance presented in equations (8), (9) and (10) are used is order to
+exploit real comparisons instead of RM in equation (2) which decreases
+again the complexity with a negligible performance loss. Let us consider
+\emph{a} = \emph{Ir −ρIIx}; \emph{b} = \emph{Qr −ρQQx} and suppose that
+\emph{a} and \emph{b} are positives. The euclidean distance between two
+points is defined as\emph{√a}2+ \emph{b}2= \emph{a}\\
+1 + (\emph{b/a})2. By supposing that a is the maximum of the two values,
+the ratio b/a is smaller than one. A linear approximation of the
+Euclidean distance can be performed using these equations.\strut
+\end{minipage}} \\
+\midrule()
+\endhead
+\emph{Dist} = &
+\multicolumn{2}{>{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.5000} + 2\tabcolsep}}{%
+\begin{minipage}[t]{\linewidth}\raggedright
+\begin{quote}
+\emph{a}2+ \emph{b}2
+\end{quote}
+\end{minipage}} & (8) \\
+\multicolumn{2}{@{}>{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.5000} + 2\tabcolsep}}{%
+\begin{minipage}[t]{\linewidth}\raggedright
+\begin{quote}
+\emph{if,} (\emph{min}(\emph{a, b}) \emph{≤max}(\emph{a, b})
+\end{quote}
+\end{minipage}} & \begin{minipage}[t]{\linewidth}\raggedright
+\begin{quote}
+)\emph{, Dist} = \emph{max}(\emph{a, b})
+\end{quote}
+\end{minipage} & (9) \\
+\bottomrule()
+\end{longtable}
+
+\emph{else, dist} = \emph{max}(\emph{a, b})+(\emph{min}(\emph{a,
+b})\emph{−max}(\emph{a, b})\emph{/}4)\emph{/}2) (10)
+
+2) Demapper proposed by Kitaek et al, 2012 {[}13{]}
+
+These authors proposed a complexity reduction algorithm which computes
+the LLR by using a key observation for 2D LLR contours of bits as a
+function of channel coefficients \emph{ρI} and \emph{ρQ} under AWGN and
+Rayleigh channels. When compared to the algorithm previously presented,
+this algorithm reduces the demapper complexity without performance loss.
+When only AWGN channel is used, it is supposed that \emph{ρI} =
+\emph{ρQ} and the LLR contours appear as rotated, like the rotated
+constellation. The demapping process is done in two steps. In the first
+stage, when Rayleigh channel is used, according to the channel
+coefficients values (\emph{ρI \textless{} ρQ} or \emph{ρI \textgreater{}
+ρQ}), the LLR of bits from the high channel coefficient between I and Q
+is determined firstly using a LLR lookup table whose values are obtained
+using a shift. The other LLRs are computed in the second stage using the
+sub-region of 2 2 candidates \emph{m}
+
+points. This algorithm reduces the complexity by 87\emph{.}5\% for
+constellation size of 64 without performance loss. Indeed, this
+performance loss is equal to 0 when the performance of the proposed
+algorithm is compared to the Max-Log demapper performance and the
+difference in terms the ratio between the binary energy and the noise at
+a BER of 10\emph{−}2after QAM demapping using parameters such as a
+64-QAM, rayleigh channel with 5\% of erasure event has not been noticed.
+
+3) First demapper proposed by Jianxiao Yang et al, 2015 {[}16{]}
+
+These authors proposed a soft demapping algorithm derived and
+implemented over a FPGA platform. It reduces the number of candidate
+points from 2\emph{m}to 2(\emph{\sout{m}} 2+1). This induces 75\% and
+87\emph{.}5\% of complexity reduction respectively for constellation
+
+\begin{quote}
+sizes of 64 and 256. Also, euclidean distance complexity has been
+reduced by using a low complexity approximation (equation (11)).
+\end{quote}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.5000}}@{}}
+\toprule()
+\begin{minipage}[b]{\linewidth}\raggedright
+\begin{quote}
+\emph{Dist} = \emph{max}(\emph{\textbar a\textbar,
+\textbar b\textbar{}}) + (1 2 + 1 16 + 1
+32)\emph{.min}(\emph{\textbar a\textbar, \textbar b\textbar{}})
+\end{quote}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\begin{quote}
+(11)
+\end{quote}
+\end{minipage} \\
+\midrule()
+\endhead
+\bottomrule()
+\end{longtable}
+
+\begin{quote}
+\emph{a} = \emph{Ir −ρIIx}; \emph{b} = \emph{Qr −ρQQx}\\
+Using this equation, the 2 main RM and 1 RS in equation 7 are replaced
+by 1 RM and 3 RS. This allows to further reduce the complexity.
+
+4) Second demapper proposed by Jianxiao Yang et al, 2015 {[}17{]}
+\end{quote}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 0\tabcolsep) * \real{1.0000}}@{}}
+\toprule()
+\begin{minipage}[b]{\linewidth}\raggedright
+These authors proposed a sphere demapping algorithm which induces the
+computation of 2 2 euclidean distances instead \emph{m}
+
+\begin{quote}
+of 2\emph{m}for the Max-Log demapper. Moreover, they proposed new
+rotation angles Φ different from angles proposed in DVB-T2 standard.
+These angles are \emph{α} = \emph{arctan}( 2 1 \emph{m} 2) with \emph{m}
+= 2\emph{,} 4\emph{,} 6\emph{,} 8. These angles have some properties
+which allow to reduce the complexity of euclidean distance computation
+and then to increase DVB-T2 system performance. Indeed, based on the
+structural properties of the rotated QAM constel-lations, a dedicated
+low complexity Max-Log called "sphere-demapper" is designed and its
+radius implies the exact amount of involved constellation points. This
+algorithm achieves a complexity reduction by more than 60\%.
+\end{quote}
+\end{minipage} \\
+\midrule()
+\endhead
+\bottomrule()
+\end{longtable}
+
+\begin{quote}
+5) Demapper proposed by Tarak Arbi et al, 2018 {[}18{]}
+
+These authors complete the work previously done in {[}17{]} (IV.C.4) by
+studying properties of these angles when Rayleigh channel with erasure
+is used. Furthermore, they proposed a reduced version of the sphere
+decoding algorithm well suited to the channel with erasure event (when
+one of the received symbol component (I or Q) has been completely lost).
+Using this algorithm the hardware implementation complexity is reduced
+and a performance gain is obtained. Indeed, using the rotation angles
+proposed, the constellation points are uniformly projected on I and Q
+axis. This confers some properties to the constellation. This algorithm
+is proposed using the angle properties and allows to increase the signal
+robustness. Using this algorithm, the complexity is reduced by 60\%.
+Moreover, using Rayleigh channel with erasure event of 15\%, a
+performance gain obtained at a BER of 10\emph{−}6respectively 0.1 dB,
+0.5 dB and 0.75 dB for 4, 16 and 64-QAM.
+\end{quote}
+
+V. DISCUSSION AND ANALYSIS
+
+\begin{quote}
+For all the foregoing, we can notice that many low com-plexity demapper
+algorithms have been proposed in order to have a low cost receiver and a
+high autonomy. Nevertheless, these algorithms proposed different
+reduction methods. For algorithms which are presented by the same group
+of research, the method proposed always outperforms the first version.
+This is the case of the research group of Perez Calderon which last
+algorithm (Perez-Calderon et al, 2014) outperforms the previous
+(Perez-Calderon et al, 2013) by the percentage of the complexity
+reduction of 21\emph{.}2\% and which in turn outperforms the first
+(Perez-Calderon et al, 2011) by 46\emph{.}75\%.
+\end{quote}
+
+513
+
+Moreover, the last algorithm of all of the presented algorithms (cf
+IV.C.5) reduces the complexity and increases the signal robustness
+allowing to get a gain of 0\emph{.}75\emph{dB} at a BER of 10\emph{−}6
+for 64-QAM and in the worse reception condition (Rayleigh with erasure
+event). This algorithm could be the better than the other as the other
+algorithms do not increase the signal robustness but only decrease the
+demapping complexity.
+
+\begin{quote}
+TABLE II\\
+COMPARATIVE TABLE OF DEMAPPING ALGORITHMS
+\end{quote}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 0\tabcolsep) * \real{1.0000}}@{}}
+\toprule()
+\begin{minipage}[b]{\linewidth}\raggedright
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}@{}}
+\toprule()
+\begin{minipage}[b]{\linewidth}\raggedright
+Authors
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Channels
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Const
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Percent
+\end{minipage} \\
+\midrule()
+\endhead
+\multicolumn{4}{@{}>{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{1.0000} + 6\tabcolsep}@{}}{%
+\textbf{Algorithms based on number of candidate points reduction}} \\
+\multirow{2}{*}{\begin{minipage}[t]{\linewidth}\raggedright
+\begin{quote}
+Perez-Calderon et al, 2011 {[}10{]}
+\end{quote}
+\end{minipage}} &
+\multirow{2}{*}{\begin{minipage}[t]{\linewidth}\raggedright
+\begin{quote}
+Rayleigh with erasure of 15\%
+\end{quote}
+\end{minipage}} & 256 & 31.25\% \\
+& & -- & -- \\
+\multirow{2}{*}{\begin{minipage}[t]{\linewidth}\raggedright
+\begin{quote}
+Stefano Tomasin et al, 2012 {[}11{]}
+\end{quote}
+\end{minipage}} &
+\multirow{2}{*}{\begin{minipage}[t]{\linewidth}\raggedright
+\begin{quote}
+Rayleigh without and with erasure of 20\%
+\end{quote}
+\end{minipage}} & 64 & 87.5\% \\
+& & 256 & 93.75\% \\
+\multirow{2}{*}{Perez-Calderon {[}12{]} et al, 2013} &
+\multirow{2}{*}{\begin{minipage}[t]{\linewidth}\raggedright
+\begin{quote}
+P1, 0dB echo, Rayleigh with erasure of 15\%
+\end{quote}
+\end{minipage}} & 256 & 78\% \\
+& & -- & -- \\
+\multicolumn{4}{@{}>{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{1.0000} + 6\tabcolsep}@{}}{%
+\textbf{Algorithm based on the euclidean distance complexity
+reduction}} \\
+\multirow{2}{*}{Perez-Calderon {[}15{]} et al, 2014} &
+\multirow{2}{*}{\begin{minipage}[t]{\linewidth}\raggedright
+AWGN, P1, 0dB echo\\
+Ray with erasure of 15\%\strut
+\end{minipage}} & 256 & 99.2\% \\
+& & 64 & 99.2\% \\
+\multicolumn{4}{@{}>{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{1.0000} + 6\tabcolsep}@{}}{%
+\begin{minipage}[t]{\linewidth}\raggedright
+\begin{quote}
+\textbf{Algorithms Based on the number of candidate points and the
+computation of the euclidean distance}
+\end{quote}
+\end{minipage}} \\
+\multirow{2}{*}{\begin{minipage}[t]{\linewidth}\raggedright
+\begin{quote}
+Meng Li\\
+et al, 2009 {[}14{]}
+\end{quote}\strut
+\end{minipage}} &
+\multirow{2}{*}{\begin{minipage}[t]{\linewidth}\raggedright
+\begin{quote}
+Rayleigh without and with erasure of 15\%
+\end{quote}
+\end{minipage}} & 64 & \emph{≥}60\% \\
+& & 256 & \emph{≥}69\% \\
+\multirow{2}{*}{\begin{minipage}[t]{\linewidth}\raggedright
+\begin{quote}
+Kitaek Bae {[}13{]} et al, 2012
+\end{quote}
+\end{minipage}} &
+\multirow{2}{*}{\begin{minipage}[t]{\linewidth}\raggedright
+\begin{quote}
+AWGN and Rayleigh with erasure of 5\%
+\end{quote}
+\end{minipage}} & 64 & 87.5\% \\
+& & -- & -- \\
+\multirow{2}{*}{\begin{minipage}[t]{\linewidth}\raggedright
+\begin{quote}
+Jianxiao Yang {[}16{]} et al, 2015
+\end{quote}
+\end{minipage}} & \multirow{2}{*}{Rayleigh} & 256 &
+\emph{≥}87\emph{.}5\% \\
+& & 64 & 75\% \\
+\multirow{2}{*}{\begin{minipage}[t]{\linewidth}\raggedright
+\begin{quote}
+Jianxiao Yang {[}17{]} et al, 2015
+\end{quote}
+\end{minipage}} &
+\multirow{2}{*}{\begin{minipage}[t]{\linewidth}\raggedright
+\begin{quote}
+Rayleigh without and with erasure of 15\%
+\end{quote}
+\end{minipage}} & 256 & \emph{≥}60\% \\
+& & 64 & \emph{≥}60\% \\
+\multirow{2}{*}{\begin{minipage}[t]{\linewidth}\raggedright
+\begin{quote}
+Tarak Arbi {[}18{]} et al, 2018
+\end{quote}
+\end{minipage}} & \multirow{2}{*}{Rayleigh without, with erasure of 5 \%
+and 15\%} & 256 & \emph{≥}60\% \\
+& & 256 & \\
+\bottomrule()
+\end{longtable}
+
+\emph{≥}96\%\strut
+\end{minipage} \\
+\midrule()
+\endhead
+\bottomrule()
+\end{longtable}
+
+VI. CONCLUSION
+
+In this work, we presented the SSD technique used in DVB-T2 and compared
+low complexity algorithms proposed for hardware implementation of the
+demapper. These algorithms have been characterized by the kind of
+complexity reduction obtained. We can conclude that recently proposed
+algorithms present better performance in terms of percentage reduction
+and gain when Rayleigh channel with erasure is used. Table II gives a
+summary of all of these algorithms.
+
+This paper gives a deep comparison of algorithms allowing the
+manufacturer to have a broadband complete view and to make a good choice
+for the hardware implementation. More-over, it gives a compliant detail
+about rotated constellation and the kind of demapper needed when it is
+used. As this technique allows to increase the frequency diversity and
+the signal robustness, its use in DVB-T2 could allow broadcasters to
+optimize their network by using receivers which include a reduced
+complexity demapping algorithm.
+
+In future works, these algorithms could be presented by comparing their
+performance using the same parameters and in unified reception condition
+using BER, Error Vector Mag-nitude (EVM) and MER and the number of
+operators used.
+
+ACKNOWLEDGMENT
+
+This work has been carried out under support from the ARES-CCD within
+the framework of the PHORAN PFS project.
+
+REFERENCES
+
+\begin{quote}
+{[}1{]} A-C Honfoga, T. T. Nguyen, M. Dossou and V. Moeyaert,
+``Application of FBMC to DVB-T2: a comparison vs classical OFDM
+transmissions,''IEEE GlobalSIP conference, 2019..
+
+{[}2{]} Advanced Television Systems Committee, ATSC Physical Layer
+Pro-tocol, "Next generation broadcasting system to handheld," Document
+A/322, Washington, January 2020.
+
+{[}3{]} European Broadcasting Union, ``Digital Video Broadcasting (DVB);
+implementation guidelines for a second generation digital terrestrial
+television broadcasting system (DVB-T2),'' ETSI TS 102 831 V1.2.1, 2012.
+
+{[}4{]} E. Zehavi, "8-PSK trellis codes for a Rayleigh channels," IEEE
+Trans-action on Communication., vol. 40, No. 5, pp. 873-884, May 1992.
+
+{[}5{]} B. Joseph and V. Emanuele, "Signal space diversity: a power-and
+bandwidth-efficient diversity technique for the Rayleigh fading
+chan-nel,", Vol. 44, No. 4, pp. 1453-1467, July 1998.
+
+{[}6{]} X. Giraud, E. Boutillon, and J C. Belfiore, "Algebraic tools to
+build modulation schemes for fading channels", IEEE Transaction on
+Infor-mation Theory, Vol. 43 , No.3 , pp. 938-952, May 1997.
+
+{[}7{]} L. Polak and T. Kratochvil, ``Performance of the rotated
+constellation in DVB-T2,'' In proceedings of the 7th International
+Conference on Digital Telecommunications, p84 - 87, 2012.
+
+{[}8{]} M. Slimani, J. Robert, and P. Schlegel, U. H. Reimers, R. Burow,
+F.
+
+Kattanek, R. Pfeffer, and L. Stadelmeier, ``Results of the DVB-T2 Field
+Trial in Germany,'' IEEE Transaction on Broadcasting, Vol. 61, No. 2,
+June 2015.
+
+{[}9{]} O. Haffenden, ``The common simulation platform,'' BBC Research
+White Paper 196, May 2011.
+
+{[}10{]} D. Pérez-Calderon, V. Baena-Lecuyer, A. C. Oria, P. Lopez, and
+J. G.
+
+Doblado, ``Rotated constellation demapper for DVB-T2,'' Electron. Lett.,
+vol. 47, pp. 31--32, Jan. 2011.
+
+{[}11{]} M. Butussi, and S. Tomasin, ``Low Complexity Demapping of
+Rotated and Cyclic Q Delayed Constellations for DVB-T2,'' IEEE Wireless
+Commun. Lett., vol.1, pp.81-84, Apr. 2012.
+
+{[}12{]} D. Pérez-Calderon, V. Baena-Lecuyer, A. C. Oria, P. Lopez, and
+J.
+
+G. Doblado, "Simplified rotated constellation demapper for second
+generation terrestrial digital video broadcasting," IEEE Transactions on
+Broadcasting, vol. 59, pp. 160-167, 2013.
+
+{[}13{]} B. Kitaek, K. Kyeongyeon and Y. Ho, "Low complexity two-stage
+soft demapper for rotated constellation in DVB-T2,", IEEE International
+Conference on Consumer Electronics (ICCE), pp. 618-619, 2012.
+
+{[}14{]} M. Li, C. Abdel Nour, C. Jégo, and C. Douillard, ``Design of
+rotated QAM mapper/demapper for the DVB-T2 standard,'' in Proc. of IEEE
+SIPS 2009, pp. 18-23, Oct. 2009\\
+{[}15{]} D. Pérez-Calderon, V. Baena-Lecuyer, A. C. Oria, P. Lopez, and
+J. G.
+
+Doblado, "Simplified Metrics Calculation for Soft Bit Detection in
+DVB-T2," Radioengineering, vol. 23, No. 1 p. 399-404, 2014.
+
+{[}16{]} J. Yang, M. Li, C.A. Nour, C. Douillard, B. Geller, ``Max Log
+Demap-per Architecture Design for DVB T2 Rotated QAM
+Constellations,''Proceedings of IEEE SIPS, Hangzhou, October 2015.
+
+{[}17{]} J. Yang, K. Wan, B. Geller, C. Abdel Nour, O. Rioul, and C.
+Douillard,``A low-complexity 2D signal space diversity solution for
+future broad-casting systems'', in Proc. IEEE Inter. Conf. on Comm., ICC
+2015, pp. 2762-2767, June 2015.
+
+{[}18{]} T. Arbi, B. Geller, J. Yang, K. Wan, C. Abdel Nour, O. Rioul,
+and C. Douillard, ``Uniformly Projected RCQD QAM: A Low-Complexity
+Signal Space Diversity Solution over Fading Channels With or Without
+Erasures '', IEEE Transactions on Broadcasting, vol. 64, No. 4, pp.
+803-815, 2008.
+
+{[}19{]} N. Suwansukho and S. Promwong, Evaluation of Rotated
+Constellation in DVB-T2 Based on Measurement Data, 5th International
+Conference on Engineering, Applied Sciences and Technology (ICEAST),
+2019.
+
+{[}20{]} C. Abdel Nour and C. Douillard, ``On lowering the error floor
+of high order turbo BICM schemes over fading channels,'' in IEEE Global
+Commun. Conf., GLOBECOM'06, San Francisco, USA, pp. 1--5, Nov. 2006.
+
+{[}21{]} C. Abdel Nour and C. Douillard , "Improving BICM performance of
+QAM constellations for broadcasting applications," 50\emph{th} Int.
+Symp. on Turbo Codes and Related Topics, Lausanne, Switzerland, pp.
+55-60, Sep.2008.
+\end{quote}
+
+514
+
+\end{document}

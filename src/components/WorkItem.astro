@@ -7,27 +7,29 @@ import scheduler from "../assets/work/linkedin-scheduler.webp";
 import contrasto from "../assets/work/contrasto.webp";
 import TechList from "./TechList.astro";
 import type { Project } from "../data";
-import type { Dict } from "../i18n";
+import type { Dict, Locale } from "../i18n";
 
 interface Props {
   project: Project;
   t: Dict;
+  locale: Locale;
   /** h3 under a section heading on the home page, h2 on /projects. */
   level?: 2 | 3;
 }
 
-const { project, t, level = 3 } = Astro.props;
+const { project, t, locale, level = 3 } = Astro.props;
 const copy = t.work.items[project.id];
 const headingId = `work-${project.id}`;
 
-// One shot per theme where the product has both (MakiSend's dashboard), chosen by data-theme.
-// Only shipped projects are listed with a screenshot; the ones still under way have none yet.
+// One shot per theme where the product has both (MakiSend's dashboard), chosen by data-theme. Projects
+// still under way have no screenshot: their concept trailer plays in its place.
 const SHOTS: Partial<Record<Project["id"], { light: ImageMetadata; dark?: ImageMetadata }>> = {
   makisend: { light: makisendLight, dark: makisendDark },
   "linkedin-scheduler": { light: scheduler },
   contrasto: { light: contrasto },
 };
-const shot = SHOTS[project.id]!;
+const shot = SHOTS[project.id];
+const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", { month: "short", year: "numeric", timeZone: "UTC" });
 const sizes = "(min-width: 64rem) 42rem, 100vw";
 ---
 
@@ -48,7 +50,10 @@ const sizes = "(min-width: 64rem) 42rem, 100vw";
       )
     }
     <p class="lede">{copy.line}</p>
-    <p class="role">{copy.role}</p>
+    <p class="role">
+      {project.status ? t.work.due : t.work.delivered}{" "}
+      <time datetime={project.delivered}>{month.format(new Date(`${project.delivered}-01`))}</time> · {copy.role}
+    </p>
     {
       copy.facts.length > 0 && (
         <ul class="facts" role="list">
@@ -81,7 +86,14 @@ const sizes = "(min-width: 64rem) 42rem, 100vw";
     </p>
   </div>
 
-  <figure class:list={["shot", { zoom: project.id === "makisend" }]}>
+  {
+    !shot && project.video && (
+      <figure class="shot">
+        <video src={project.video.src} poster={project.video.poster} muted loop playsinline controls preload="none" aria-label={copy.name} />
+      </figure>
+    )
+  }
+  {shot && (<figure class:list={["shot", { zoom: project.id === "makisend" }]}>
     <Image
       class:list={{ "shot-light": !!shot.dark }}
       src={shot.light}
@@ -108,7 +120,7 @@ const sizes = "(min-width: 64rem) 42rem, 100vw";
         />
       )
     }
-  </figure>
+  </figure>)}
 </article>
 
 <style>
@@ -176,7 +188,9 @@ const sizes = "(min-width: 64rem) 42rem, 100vw";
     border-radius: var(--radius-surface);
     background: var(--surface-muted);
   }
-  .shot :global(img) {
+  .shot :global(img),
+  .shot video {
+    display: block;
     width: 100%;
     height: auto;
   }

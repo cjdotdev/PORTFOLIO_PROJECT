@@ -1,13 +1,14 @@
 ---
 import WorkItem from "../components/WorkItem.astro";
 import { PROJECTS } from "../data";
-import type { Dict } from "../i18n";
+import type { Dict, Locale } from "../i18n";
 
 interface Props {
   t: Dict;
+  locale: Locale;
 }
 
-const { t } = Astro.props;
+const { t, locale } = Astro.props;
 ---
 
 <header class="page-head container">
@@ -17,9 +18,9 @@ const { t } = Astro.props;
 
 <div class="list container">
   {
-    PROJECTS.filter((project) => !project.status).map((project) => (
+    PROJECTS.map((project) => (
       <div class="reveal">
-        <WorkItem project={project} t={t} level={2} />
+        <WorkItem project={project} t={t} locale={locale} level={2} />
       </div>
     ))
   }

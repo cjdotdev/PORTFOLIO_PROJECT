@@ -85,17 +85,18 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
                   aria-controls={`panel-${project.id}`}
                   aria-label={`${t.work.draw}: ${name}`}
                 >
-                  <span class:list={["face", { "is-wip": project.status }]}>
-                    {project.status ? (
-                      // Not built yet: a construction face, all CSS, with the project's own icon.
+                  <span class:list={["face", { "is-wip": project.status && !project.video }]}>
+                    {project.video ? (
+                      // A demo loop; a project under way can have one too (a concept trailer), its status badge stays.
+                      <video muted loop playsinline preload="none" poster={project.video.poster} aria-hidden="true">
+                        <source src={project.video.src} type="video/webm" />
+                      </video>
+                    ) : project.status ? (
+                      // Not built yet and nothing to show: a construction face, all CSS, with the project's own icon.
                       <span class="wip">
                         <img class="wip-icon" src={project.logo} alt="" width="64" height="64" draggable="false" />
                         <span class="wip-name">{name}</span>
                       </span>
-                    ) : project.video ? (
-                      <video muted loop playsinline preload="none" poster={project.video.poster} aria-hidden="true">
-                        <source src={project.video.src} type="video/webm" />
-                      </video>
                     ) : (
                       <Image
                         src={contrastoShot}
@@ -114,12 +115,6 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
                       {name}
                     </span>
                     {project.video && <span class="play" aria-hidden="true" />}
-                    {project.status && (
-                      <span class="badge">
-                        <svg viewBox="0 0 24 24" aria-hidden="true" set:html={STATUS_ICON[project.status]} />
-                        {t.work[project.status]}
-                      </span>
-                    )}
                   </span>
                   <CardBack />
                 </button>
@@ -129,9 +124,9 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
         </div>
         {/* Loaded on the first draw only: phones never use it. */}
         <img class="hand" data-src="/img/hand-take.webp" alt="" width="1100" height="814" data-hand />
-        {/* Desktop only: step through the projects. "Previous" shows once past the first card. */}
+        {/* Wider screens: step through the pile, both ways. */}
         <div class="steps">
-          <button type="button" class="step" aria-label={t.work.previous} data-step="previous" hidden>
+          <button type="button" class="step" aria-label={t.work.previous} data-step="previous">
             <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" set:html={`<path d="M19 12H5"/><path d="m12 19-7-7 7-7"/>`} />
           </button>
           <button type="button" class="step" aria-label={t.work.next} data-step="next">
@@ -225,7 +220,11 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
     const panelBox = section.querySelector<HTMLElement>("[data-panels]")!;
     const spares = section.querySelectorAll(".spare").length;
     const still = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const phone = window.matchMedia("(max-width: 39.99rem)");
+    // Every width now uses the standing pile (Joel, 2026-11-01): phones swipe it, wider screens step
+    // through it with the arrows. The table deck drawn by the hand below is kept but no longer used.
+    const phone = window.matchMedia("all");
+    /** Swiping is for touch-sized screens; wider ones step with the arrows only. */
+    const swipeable = window.matchMedia("(max-width: 39.99rem)");
     const spareCards = [...section.querySelectorAll<HTMLElement>(".spare")];
 
     /** The deck from the top down; the drawn card is out of it. */
@@ -235,13 +234,8 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
     let pending = 0;
     /** Phone: the top card's demo is playing (a tap starts and stops it). */
     let tapPlaying = false;
-    /** Desktop arrows: the cards drawn in a row, oldest first; "previous" walks back through them. */
-    const history: HTMLButtonElement[] = [];
     const previousButton = section.querySelector<HTMLButtonElement>('[data-step="previous"]')!;
     const nextButton = section.querySelector<HTMLButtonElement>('[data-step="next"]')!;
-    function steps() {
-      previousButton.hidden = history.length < 2;
-    }
 
     const width = () => cards[0].offsetWidth;
     const zOf = (index: number) => (spares + order.length - 1 - index) * GAP;
@@ -341,17 +335,30 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
       const away = { x: side * width() * 1.05, y: -6, r: side * 10 };
       // It turns towards the side it flies to; -180 and 180 look the same, so it is then written as 180,
       // the side every card in the pile rests on, and never spins round again on the way in.
-      await run(card, [card.style.transform, flat({ ...away, f: -side * 180 })], ms(460));
+      await run(card, [card.style.transform, flat({ ...away, f: -side * 180 })], ms(600));
       card.style.transform = flat({ ...away, f: 180 });
       order.push(order.shift()!);
-      await stack(ms(560));
+      await stack(ms(720));
+    }
+
+    // The reverse ("previous"): the card at the back slides out on that side from behind the pile, face
+    // down, then comes onto the top turning face up as the others step down.
+    async function bringBack(side: -1 | 1) {
+      if (order.length < 2) return;
+      const card = order[order.length - 1];
+      const away = { x: side * width() * 1.05, y: -6, r: side * 10 };
+      card.style.zIndex = "1";
+      await run(card, [card.style.transform, flat({ ...away, f: 180 })], ms(600));
+      order.unshift(order.pop()!);
+      card.style.zIndex = "200";
+      await stack(ms(720));
     }
 
     // The top card follows the finger sideways; the page keeps its vertical scroll (touch-action).
     let drag: { id: number; x: number; t: number; dx: number } | null = null;
     let dragged = false;
     deck.addEventListener("pointerdown", (event) => {
-      if (!phone.matches || pending || !order[0].contains(event.target as Node)) return;
+      if (!swipeable.matches || pending || !order[0].contains(event.target as Node)) return;
       drag = { id: event.pointerId, x: event.clientX, t: event.timeStamp, dx: 0 };
       dragged = false;
     });
@@ -405,6 +412,7 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
     function showPanel(id: string | null) {
       panels.forEach((panel) => panel.classList.toggle("is-active", panel.dataset.panel === id));
       if (id && !phone.matches) panelBox.dataset.picked = "";
+      if (id) section.dataset.top = id;
     }
 
     function playing(card: HTMLElement | null) {
@@ -473,25 +481,6 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
       await settle();
     }
 
-    // "Previous", with the deck's own moves: the drawn card goes back under the deck as a click puts it
-    // back; the card drawn before it (now just above it, at the bottom) slides out beside the deck, face
-    // down, comes onto the top and is drawn, turning face up as any top card does.
-    async function drawPrevious(previous: HTMLButtonElement) {
-      if (!drawn || !order.includes(previous) && previous !== drawn) return;
-      await putBack();
-      order.splice(order.indexOf(previous), 1);
-      const beside = -width() * 1.06;
-      const from = previous.style.transform || pose({ z: zOf(order.length), f: 180 });
-      previous.style.zIndex = "150";
-      await run(
-        previous,
-        [from, pose({ x: beside, z: zOf(order.length), f: 180 }), pose({ x: beside, z: zOf(-1) + GAP, f: 180 }), pose({ z: zOf(-1), f: 180 })],
-        ms(1000),
-      );
-      order.unshift(previous);
-      await settle(ms(700));
-      await draw(previous);
-    }
 
     // The hand comes down from the upper right, lays its fingers on the top card, takes it out of the
     // deck and lifts it up to face the reader, then lets go and leaves the way it came.
@@ -560,37 +549,27 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
         }
         if (pending) return;
         if (card === drawn) {
-          history.length = 0;
-          steps();
           enqueue(async () => {
             await putBack();
             showPanel(null);
             delete panelBox.dataset.picked;
           });
         } else if (order[0] === card) {
-          history.push(card);
-          steps();
           enqueue(() => draw(card));
         }
       });
     }
 
-    // The arrows: next draws the top card (the drawn one goes back under the deck first, as always);
-    // previous brings back the card drawn before.
-    nextButton.addEventListener("click", () => {
+    // The arrows (wider screens): next sends the top card behind the pile, previous brings the last
+    // one back to the top. One move at a time.
+    function stepTo(move: () => Promise<void>) {
       if (pending) return;
-      const card = order[0];
-      history.push(card);
-      steps();
-      enqueue(() => draw(card));
-    });
-    previousButton.addEventListener("click", () => {
-      if (pending || history.length < 2) return;
-      history.pop();
-      const previous = history[history.length - 1];
-      steps();
-      enqueue(() => drawPrevious(previous));
-    });
+      tapPlaying = false;
+      playing(null);
+      enqueue(move);
+    }
+    nextButton.addEventListener("click", () => stepTo(() => sendBack(-1)));
+    previousButton.addEventListener("click", () => stepTo(() => bringBack(-1)));
     // Keeps a drawn card in place when the table changes size.
     window.addEventListener("resize", () => {
       if (drawn && !phone.matches) drawn.style.transform = pose(shown());
@@ -607,8 +586,6 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
         order.push(drawn);
         drawn = null;
       }
-      history.length = 0;
-      steps();
       hand.classList.remove("is-on");
       table.append(hand);
       tapPlaying = false;
@@ -822,15 +799,19 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
     border-color: var(--border-strong);
     color: var(--foreground);
   }
-  @media (min-width: 64rem) {
-    .deck-section[data-mode="deck"] .steps {
-      position: absolute;
-      bottom: 2.5rem;
-      left: 50%;
-      z-index: 300;
+  @media (min-width: 40rem) {
+    /* Wider screens: the arrows' hint, not the swipe's. */
+    .deck-section[data-mode="phone"] .hint-phone {
+      display: none;
+    }
+    .deck-section[data-mode="phone"] .hint-deck {
+      display: inline;
+    }
+    .deck-section[data-mode="phone"] .steps {
       display: flex;
+      justify-content: center;
       gap: var(--space-3);
-      translate: -50% 0;
+      padding-top: var(--space-10);
     }
   }
   /* The deck lies flat, turned on the table, seen from above at an angle. */
@@ -1117,14 +1098,17 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
     /* Tall enough for the drawn card to stand, but the tilted deck leaves about 6rem of bare table
        under it: that strip runs into the section's bottom padding instead of adding to it. */
     .table {
-      height: 38rem;
-      margin-bottom: -6rem;
+      height: auto;
     }
   }
 
 
   /* ─── Phone: the cards stand as a pile under the thumb ─── */
   .deck-section[data-mode="phone"] {
+    .deck {
+      max-width: 46rem;
+      margin-inline: auto;
+    }
     .table {
       height: auto;
       padding-bottom: 2.25rem;

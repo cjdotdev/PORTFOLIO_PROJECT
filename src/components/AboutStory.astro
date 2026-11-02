@@ -262,7 +262,11 @@ const number = (i: number) => String(i + 1).padStart(2, "0");
 
   /* Phone: the label becomes a button with an arrow and the list folds under it, so each phase stays
      short; a tap opens it, the arrow turns. */
+  /* Phone: "What you get" is left out entirely, to keep each phase short. */
   @media (max-width: 47.99rem) {
+    .gets {
+      display: none;
+    }
     .gets .label {
       display: none;
     }

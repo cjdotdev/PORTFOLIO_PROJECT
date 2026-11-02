@@ -11,7 +11,7 @@ export const SITE_URL = "https://joelcodja.pages.dev";
  * links to it, it asks search engines not to list it, and "Projects" leads to the deck on the home
  * page instead. Set back to true once the page has something of its own (case studies).
  */
-export const PROJECTS_PAGE = false;
+export const PROJECTS_PAGE = true;
 
 /**
  * Whether /pics is shown. Hidden by Joel (2026-11-01) while it is being filled: no header link, and it
@@ -101,18 +101,25 @@ export const PROJECTS: Project[] = [
   {
     id: "zeroknowledge",
     logo: "/projects/zeroknowledge.svg",
-    stack: ["workers", "hono", "typescript", "webcrypto", "d1", "durable-objects", "r2", "vitest"],
+    // Supasecret (Backend/supasecret: DESIGN.md, brand/; spec in Backend/zeroknowledge-poc). The id stays.
+    stack: ["workers", "hono", "typescript", "webcrypto", "durable-objects", "vitest"],
     status: "building",
-    // TODO(Joel): planned month is a placeholder.
-    delivered: "2027-01",
+    // Planned for the end of November 2026 (Joel).
+    delivered: "2026-11",
+    // The concept trailer (Backend/supasecret-trailer, Remotion): there is no app to film yet.
+    // -v2: the first cut (rendered for a full screen) was replaced; a new name so no cache serves the old one.
+    video: { src: "/video/supasecret-v2.webm", poster: "/video/supasecret-poster-v2.webp" },
   },
   {
-    // TODO(Joel): a made-up project to fill the deck; replace it with a real one.
+    // Voctra (Backend/voctra: DESIGN.md, brand/), a Thunder Client-style VS Code extension. The id stays.
     id: "pulse",
     logo: "/projects/pulse.svg",
-    stack: ["workers", "hono", "typescript", "d1", "cron", "astro"],
-    status: "planned",
-    delivered: "2027-04",
+    stack: ["typescript", "vscode-api", "node", "esbuild", "vitest"],
+    status: "building",
+    // Planned for December 2026 (Joel).
+    delivered: "2026-12",
+    // The concept trailer (Backend/voctra-trailer, Remotion): the extension is not built yet.
+    video: { src: "/video/voctra.webm", poster: "/video/voctra-poster.webp" },
   },
 ];
 

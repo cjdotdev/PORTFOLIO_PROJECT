@@ -47,7 +47,7 @@ pnpm preview    # serves dist/ (use a port, e.g. `npx astro preview --port 4329`
 | `src/data/gabon.ts` | Generated Gabon map: 9 provinces (geoBoundaries, CC BY-SA 3.0) and 11 towns (Wikidata) |
 | `src/data/cj-mark.ts` | Geometry of the CJ mark |
 | `src/styles/global.css` | Tokens and base styles on top of `src/components/arc/foundation.css` (Arc UI) |
-| `public/video/` | Project demo loops, **WebM only**, 720p VP9, plus `*-poster.webp` |
+| `public/video/` | Project demo loops, **WebM only**, 720p VP9, plus `*-poster.webp`. Cached for a year: a changed video gets a new name (`-v2`) |
 | `public/projects/` | Project logos (square SVGs) |
 | `public/img/` | `intro-hand-v1.webp` (quill hand), `hand-take.webp` (deck hand), `about-build/takeover/connect.webp` (About engravings) |
 | `public/cv/` | Does not exist yet: `TODO(Joel)` put `joel-codja-cv.pdf` there (the hero button links to it) |
@@ -71,8 +71,14 @@ longer used (kept until Joel says to delete it).
   line work (`#E9C9A2`, i.e. 233 201 162) on a transparent ground, edges dissolving. No AI images, no
   hand-drawn SVG. Check each print's maker and date with the museum before writing a credit.
 - `DESIGN.md` is out of date (still describes Geist/Inter, light mode, the old c/J mark). Trust the code.
-- Never show Itaja. Shipped projects: MakiSend (built at Lixali Studio), linkedin-scheduler, Contrasto.
-  In progress: zeroknowledge (a 1time.io-style one-time secret link) and `pulse` (a made-up placeholder).
+- Never show Itaja. Shipped projects: MakiSend (built at Lixali Studio), linkedin-scheduler (Contrasto was
+  removed). In progress, each with a concept trailer on its card (ids kept): `zeroknowledge` is
+  **Supasecret** (1time.io-style one-time secret links, Hono on Cloudflare, blue, Nov 2026) and `pulse` is
+  **Voctra** (a simple Thunder Client-style VS Code extension, TypeScript, no Hono or Cloudflare, red,
+  Dec 2026). Their DESIGN.md and logos live in `../../../Backend/supasecret` and `../../../Backend/voctra`,
+  their Remotion trailers in `Backend/supasecret-trailer` and `Backend/voctra-trailer` (node_modules is a
+  link to linkedin-scheduler-trailer's). The card WebM comes from the `TrailerCard` composition (1440x810,
+  so the scenes fill a small card), scaled to 1280x720.
 - Copy Joel will read as his voice: propose several phrasings and let him choose. Keep it short (he
   finds long text heavy on phones). Placeholder facts are marked `TODO(Joel)` in `src/data/index.ts`.
 
@@ -122,6 +128,12 @@ light, the hand writes the C, the J drops, the shadow builds, "JOEL" (small, tra
   it landed beside the header mark on phones.
 - The hand is an `<img>` moved by Web Animations keyframes sampled from the same SVG paths, easings and
   start time as the ink, so it runs off the main thread.
+
+**Projects deck, since 2026-11-01:** every width uses the standing pile (`data-mode="phone"`, the phone
+version). Phones swipe; from 40rem two arrows sit under the pile, both always shown: → `sendBack(-1)`
+(top card flies off turning over, slips behind), ← `bringBack(-1)` (the last card comes back on top
+turning face up). The panel on the right always shows the top card (MakiSend first). One move at a
+time (`busy()`). The table deck with the hand below is no longer used (its code is still there).
 
 **Projects deck** (`ProjectDeck.astro`, `CardBack.astro`): one component, one DOM, two arrangements
 picked by `matchMedia("(max-width: 39.99rem)")` and written to `data-mode`:

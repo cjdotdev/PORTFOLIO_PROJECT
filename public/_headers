@@ -4,3 +4,6 @@
   Cache-Control: public, max-age=31536000, immutable
 /img/*
   Cache-Control: public, max-age=31536000, immutable
+# Videos too: a changed video gets a new name (-v2), never the same URL.
+/video/*
+  Cache-Control: public, max-age=31536000, immutable
