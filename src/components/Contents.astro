@@ -1,0 +1,48 @@
+---
+import type { MarkdownHeading } from "astro";
+
+interface Props {
+  /** The ## and ### headings of the text (#### stays out). */
+  headings: MarkdownHeading[];
+  /** "On this page" in the page's language. */
+  label: string;
+  /** The language the text is written in. */
+  lang: string;
+}
+
+const { headings, label, lang } = Astro.props;
+---
+
+<!--
+  A long read's table of contents, twice: folded above the text (a row that opens on tap), and beside
+  it from 72rem, sticky, marking the section being read (src/lib/prose.ts). Styles: src/styles/prose.css.
+-->
+<details class="contents contents-fold">
+  <summary>
+    {label}
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+  </summary>
+  <ol role="list" lang={lang}>
+    {
+      headings.map((heading) => (
+        <li class:list={{ sub: heading.depth === 3 }}>
+          <a href={`#${heading.slug}`}>{heading.text}</a>
+        </li>
+      ))
+    }
+  </ol>
+</details>
+<nav class="contents contents-side" aria-label={label}>
+  <p class="mono">{label}</p>
+  <ol role="list" lang={lang}>
+    {
+      headings.map((heading) => (
+        <li class:list={{ sub: heading.depth === 3 }}>
+          <a href={`#${heading.slug}`} data-to={heading.slug}>
+            {heading.text}
+          </a>
+        </li>
+      ))
+    }
+  </ol>
+</nav>

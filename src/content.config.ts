@@ -43,4 +43,31 @@ const blog = defineCollection({
       }),
 });
 
-export const collections = { blog };
+/**
+ * Case studies: one Markdown file per shipped project and language in src/content/work, named after the
+ * project's id in PROJECTS (src/data/index.ts): `makisend.md` and `makisend.fr.md` (or a folder with
+ * `index.md`, `index.fr.md` and the images). The page is /projects/makisend/ and /fr/projects/makisend/.
+ * The project's name, logo, stack, links, demo and dates come from PROJECTS; the file holds the story.
+ */
+const work = defineCollection({
+  loader: glob({
+    pattern: "**/*.md",
+    base: "./src/content/work",
+    generateId: ({ entry }) => {
+      const [, slug, fr] = /^(.*?)(?:\/index)?(\.fr)?\.md$/.exec(entry.replaceAll("\\", "/")) ?? [];
+      return `${fr ? "fr" : "en"}/${slug}`;
+    },
+  }),
+  schema: z.object({
+    /** One or two sentences: under the name, and as the page's description. */
+    subtitle: z.string(),
+    /** One line on Joel's part in it. */
+    role: z.string(),
+    /** Set when the case study changes in substance. */
+    updated: z.coerce.date().optional(),
+    /** Shown under `astro dev` only; left out of the built site. */
+    draft: z.boolean().default(false),
+  }),
+});
+
+export const collections = { blog, work };

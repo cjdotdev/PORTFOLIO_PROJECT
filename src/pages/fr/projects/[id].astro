@@ -1,0 +1,38 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+import CaseStudy from "../../../sections/CaseStudy.astro";
+import { getDict } from "../../../i18n";
+import { PROJECTS_PAGE } from "../../../data";
+import { casePath, getCaseStudies, type CaseStudy as Study } from "../../../lib/work";
+
+export async function getStaticPaths() {
+  const studies = await getCaseStudies("fr");
+  return studies.map((study, i) => ({
+    params: { id: study.project.id },
+    props: { study, next: studies.length > 1 ? studies[(i + 1) % studies.length] : undefined },
+  }));
+}
+
+interface Props {
+  study: Study;
+  next?: Study;
+}
+
+const { study, next } = Astro.props;
+const t = getDict("fr");
+const { id } = study.project;
+---
+
+<!-- A case study missing in this language shows in the other one; its canonical is then that version's page. -->
+<Layout
+  t={t}
+  locale="fr"
+  alternate={{ en: casePath("en", id), fr: casePath("fr", id) }}
+  canonicalPath={casePath(study.lang, id)}
+  current="work"
+  title={t.caseStudy.metaTitle.replace("{name}", t.work.items[id].name)}
+  description={study.entry.data.subtitle}
+  noindex={!PROJECTS_PAGE}
+>
+  <CaseStudy study={study} next={next} t={t} locale="fr" />
+</Layout>

@@ -1,0 +1,370 @@
+/*
+ * Long reads: blog posts (Article.astro) and case studies (CaseStudy.astro). A centred text column
+ * (.read-body), the table of contents (Contents.astro: folded above the text, beside it from 72rem)
+ * and the Markdown text itself (.prose), with code blocks (bars added by src/lib/prose.ts), tables and
+ * the step diagrams case studies draw with <figure class="flow">.
+ */
+/* Text column, centred; on wide screens the table of contents sits in the right margin. */
+.read-body {
+  display: grid;
+  grid-template-columns: minmax(0, 44rem);
+  justify-content: center;
+  gap: var(--space-8);
+  max-width: calc(68rem + 2 * var(--gutter));
+  padding-top: var(--space-8);
+}
+
+.contents ol {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.contents a {
+  display: block;
+  padding: var(--space-2) 0;
+  color: var(--text-secondary);
+  text-decoration: none;
+  line-height: 1.35;
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+.contents a:hover,
+.contents a[aria-current] {
+  color: var(--foreground);
+}
+.contents .sub a {
+  padding-left: var(--space-4);
+}
+
+/* Folded above the text, right under the byline's hairline: a row that opens on tap. */
+.contents-fold {
+  margin-top: calc(-1 * var(--space-8));
+  border-bottom: 1px solid var(--border);
+}
+.contents-fold summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 3rem;
+  font-weight: 500;
+  list-style: none;
+  cursor: pointer;
+}
+.contents-fold summary::-webkit-details-marker {
+  display: none;
+}
+.contents-fold summary svg {
+  transition: rotate var(--duration-fast) var(--ease-standard);
+}
+.contents-fold[open] summary svg {
+  rotate: 180deg;
+}
+.contents-fold ol {
+  padding-bottom: var(--space-3);
+}
+.contents-side {
+  display: none;
+}
+
+@media (min-width: 72rem) {
+  .read-body.with-contents {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 44rem) minmax(0, 1fr);
+    column-gap: var(--space-12);
+  }
+  .with-contents > * {
+    grid-column: 2;
+  }
+  .contents-fold {
+    display: none;
+  }
+  .with-contents .contents-side {
+    display: block;
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    align-self: start;
+    position: sticky;
+    top: calc(4rem + var(--space-8));
+    max-height: calc(100dvh - 4rem - var(--space-16));
+    overflow-y: auto;
+    font-size: var(--text-sm);
+  }
+  .contents-side p {
+    margin: 0 0 var(--space-2);
+    color: var(--text-secondary);
+  }
+  /* The section being read: terracotta hairline on its left. */
+  .contents-side li {
+    border-left: 1px solid var(--border);
+  }
+  .contents-side a {
+    padding-left: var(--space-4);
+    margin-left: -1px;
+    border-left: 1px solid transparent;
+  }
+  .contents-side .sub a {
+    padding-left: var(--space-8);
+  }
+  .contents-side a[aria-current] {
+    border-left-color: var(--accent);
+  }
+}
+
+/* The post's text, written in Markdown: styled from here (it is not part of this template). */
+.prose {
+  font-size: var(--text-lg);
+  line-height: 1.7;
+  overflow-wrap: break-word;
+}
+.prose > * + * {
+  margin-top: var(--space-5);
+}
+.prose > :first-child {
+  margin-top: 0;
+}
+.prose h2,
+.prose h3 {
+  position: relative;
+  margin-bottom: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: var(--tracking-display);
+  line-height: 1.2;
+  text-wrap: balance;
+  scroll-margin-top: calc(4rem + var(--space-6));
+}
+.prose h2 {
+  margin-top: var(--space-12);
+  font-size: clamp(1.5rem, 1.25rem + 1vw, 2rem);
+}
+.prose h3 {
+  margin-top: var(--space-8);
+  font-size: clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);
+}
+/* A smaller step inside a section (Advantages, Limitations...): body size, medium weight, kept out of
+   the table of contents. */
+.prose h4 {
+  margin-top: var(--space-6);
+  margin-bottom: 0;
+  font-size: var(--text-lg);
+  font-weight: 500;
+  line-height: 1.4;
+}
+.prose h2 + *,
+.prose h3 + *,
+.prose h4 + * {
+  margin-top: var(--space-3);
+}
+.prose .anchor {
+  margin-left: 0.35em;
+  color: var(--text-muted);
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+.prose h2:hover .anchor,
+.prose h3:hover .anchor,
+.prose .anchor:focus-visible {
+  opacity: 1;
+}
+.prose .anchor:hover {
+  color: var(--accent);
+}
+.prose p,
+.prose li {
+  text-wrap: pretty;
+}
+.prose a:not(.anchor) {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+}
+.prose a:not(.anchor):hover {
+  text-decoration-color: currentColor;
+}
+.prose strong {
+  font-weight: 500;
+  color: var(--foreground);
+}
+.prose ul,
+.prose ol {
+  display: grid;
+  gap: var(--space-2);
+  padding-left: 1.4em;
+}
+.prose li::marker {
+  color: var(--text-muted);
+}
+.prose blockquote {
+  margin-inline: 0;
+  padding-left: var(--space-5);
+  border-left: 2px solid var(--accent);
+  color: var(--text-secondary);
+}
+.prose hr {
+  margin-block: var(--space-12);
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+.prose img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-control);
+}
+.prose :not(pre) > code {
+  padding: 0.1em 0.35em;
+  border-radius: 0.35em;
+  background: var(--surface-muted);
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
+
+/* Code blocks: language and copy button on a bar above the code. */
+.prose .code {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: #101010;
+}
+.prose .code-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 2.5rem;
+  padding: 0 var(--space-2) 0 var(--space-4);
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+}
+.prose .code-bar button {
+  min-height: 2.25rem;
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: 0.6rem;
+  background: none;
+  color: var(--text-secondary);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    color var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard);
+}
+.prose .code-bar button:hover {
+  background: var(--surface-muted);
+  color: var(--foreground);
+}
+.prose pre {
+  margin: 0;
+  padding: var(--space-4) var(--space-5);
+  overflow-x: auto;
+  background: #101010 !important;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.7;
+  tab-size: 2;
+}
+.prose pre code {
+  font-family: inherit;
+}
+
+/* Tables: hairline rows, scrolling sideways on their own when too wide. */
+.prose table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: var(--text-base);
+}
+.prose th,
+.prose td {
+  padding: var(--space-3) var(--space-6) var(--space-3) 0;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+.prose th {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* A step diagram, written in the Markdown as raw HTML:
+     <figure class="flow"><ol>
+       <li><strong>Your app</strong> calls <code>POST /send-email</code></li>
+       <li class="aside"><strong>Dead-letter queue</strong> when every try failed</li>
+     </ol><figcaption>…</figcaption></figure>
+   The steps hang on one terracotta line, a dot at each; an "aside" step is a branch off the main path
+   (dashed, grey). */
+.prose .flow {
+  margin-inline: 0;
+  padding: var(--space-6) 0 var(--space-2);
+}
+.prose .flow ol {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.prose .flow li {
+  position: relative;
+  padding: 0 0 var(--space-6) var(--space-8);
+  color: var(--text-secondary);
+  font-size: var(--text-base);
+  line-height: 1.55;
+}
+/* The line: from this step's dot down to the next one. */
+.prose .flow li::before {
+  content: "";
+  position: absolute;
+  top: 0.8em;
+  bottom: -0.8em;
+  left: 0.3125rem;
+  border-left: 1px solid var(--accent);
+}
+.prose .flow li:last-child {
+  padding-bottom: 0;
+}
+.prose .flow li:last-child::before {
+  display: none;
+}
+/* The dot. */
+.prose .flow li::after {
+  content: "";
+  position: absolute;
+  top: 0.45em;
+  left: 0;
+  width: 0.6875rem;
+  height: 0.6875rem;
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+  background: var(--background);
+}
+.prose .flow strong {
+  display: block;
+  color: var(--foreground);
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 500;
+  letter-spacing: var(--tracking-display);
+}
+.prose .flow .aside::after {
+  border-color: var(--border-strong);
+  border-style: dashed;
+}
+.prose .flow .aside strong {
+  color: var(--text-secondary);
+}
+/* The line leading into a branch is dashed too. */
+.prose .flow li:has(+ .aside)::before,
+.prose .flow .aside::before {
+  border-left-style: dashed;
+  border-left-color: var(--border-strong);
+}
+.prose .flow figcaption {
+  margin-top: var(--space-5);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}

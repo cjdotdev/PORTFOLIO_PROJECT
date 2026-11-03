@@ -197,6 +197,20 @@ export const en = {
     title: "Projects",
     lede: "What I have built and what I am building, with what each one does and how.",
   },
+  /** A project's case study (src/content/work, src/sections/CaseStudy.astro). */
+  caseStudy: {
+    back: "All projects",
+    metaTitle: "{name}, a case study by Joel Codja",
+    read: "Read the case study",
+    short: "Case study",
+    role: "My part",
+    links: "Links",
+    onlyIn: "This case study only exists in French.",
+    next: "Next project",
+    talkTitle: "Need a backend like this one?",
+    talkLine: "I build backends from scratch, take over existing ones and connect them to the services you use.",
+    talk: "Email me",
+  },
   blogPage: {
     title: "Writing",
   },

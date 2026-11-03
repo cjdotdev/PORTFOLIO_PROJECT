@@ -3,6 +3,7 @@ import WorkItem from "../components/WorkItem.astro";
 import { PROJECTS } from "../data";
 import BackLink from "../components/BackLink.astro";
 import { localePath, type Dict, type Locale } from "../i18n";
+import { casePath, getCaseStudies } from "../lib/work";
 
 interface Props {
   t: Dict;
@@ -10,6 +11,7 @@ interface Props {
 }
 
 const { t, locale } = Astro.props;
+const studies = new Set((await getCaseStudies(locale)).map((study) => study.project.id));
 ---
 
 <header class="page-head container">
@@ -22,7 +24,7 @@ const { t, locale } = Astro.props;
   {
     PROJECTS.map((project) => (
       <div class="reveal">
-        <WorkItem project={project} t={t} locale={locale} level={2} />
+        <WorkItem project={project} t={t} locale={locale} level={2} caseHref={studies.has(project.id) ? casePath(locale, project.id) : undefined} />
       </div>
     ))
   }

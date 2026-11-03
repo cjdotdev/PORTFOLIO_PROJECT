@@ -206,11 +206,11 @@ const specialtyParts = t.hero.specialty.split(/(\[[^\]]+\])/).filter(Boolean);
 </script>
 
 <style>
-  /* Vertical rhythm follows the viewport height so the surname still closes a laptop's first screen. */
+  /* Fixed vertical rhythm: nothing here follows the window's height, which differs between browsers. */
   .hero {
     display: grid;
-    gap: clamp(2rem, 6svh - 1rem, 4rem);
-    padding-top: clamp(0.5rem, 4svh - 1rem, 2.5rem);
+    gap: 2.5rem;
+    padding-top: 1.25rem;
     padding-bottom: var(--section-space);
   }
   .top {
@@ -221,7 +221,7 @@ const specialtyParts = t.hero.specialty.split(/(\[[^\]]+\])/).filter(Boolean);
   }
   .copy {
     display: grid;
-    gap: clamp(var(--space-4), 3svh, var(--space-6));
+    gap: var(--space-6);
     max-width: 34rem;
     padding-bottom: var(--space-8);
   }
@@ -317,9 +317,8 @@ const specialtyParts = t.hero.specialty.split(/(\[[^\]]+\])/).filter(Boolean);
     }
   }
 
-  /* The engraving is ink on paper: in light mode the paper melts into the page (multiply) and the
-     edges dissolve, so the drawing sits on the site itself rather than in a frame. In dark mode the
-     ink inverts to light lines on the dark ground. */
+  /* The engraving is ink on paper, inverted to light lines on the dark ground (the site is dark
+     only), its edges dissolving so the drawing sits on the site itself rather than in a frame. */
   .portrait {
     display: grid;
     gap: var(--space-3);
@@ -381,16 +380,21 @@ const specialtyParts = t.hero.specialty.split(/(\[[^\]]+\])/).filter(Boolean);
     filter: brightness(0.82) contrast(1.05);
   }
 
-  /* The surname must close a laptop's first screen. It keeps the full width, so the engraving gives
-     way: its width follows what the viewport height leaves once the bar, the gaps and the letters (0.225 of the container's width tall) are counted, at the drawing's 1.62 ratio. */
+  /* Side by side, sized from the width only: the window's height differs from browser to browser
+     (toolbars, bookmarks bar, zoom), and a portrait sized from it moved the whole hero. The copy
+     keeps a fixed column, wide enough for "Backend developer," on one line at full size; the
+     engraving takes the rest at its own ratio. */
   @media (min-width: 48rem) {
-    .hero {
-      --monument-h: calc(min(100vw - 2 * var(--gutter), var(--page-max) - 2 * var(--gutter)) * 0.225);
+    .top {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     }
     .portrait {
-      width: clamp(21rem, calc((100svh - 11.5rem - var(--monument-h)) * 1.62), 54rem);
-      /* The headline keeps at least 27rem beside it. */
-      max-width: min(66vw, calc(100vw - 2 * var(--gutter) - 27rem), calc(var(--page-max) - 2 * var(--gutter) - 27rem));
+      width: 100%;
+    }
+  }
+  @media (min-width: 64rem) {
+    .top {
+      grid-template-columns: minmax(0, 28rem) minmax(0, 1fr);
     }
   }
 

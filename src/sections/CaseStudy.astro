@@ -1,0 +1,306 @@
+---
+import { render } from "astro:content";
+import BackLink from "../components/BackLink.astro";
+import Contents from "../components/Contents.astro";
+import TechList from "../components/TechList.astro";
+import { PERSONAL } from "../data";
+import { localePath, type Dict, type Locale } from "../i18n";
+import { casePath, type CaseStudy } from "../lib/work";
+import "../styles/prose.css";
+
+interface Props {
+  study: CaseStudy;
+  /** The case study after this one (wrapping round), if there is more than one. */
+  next?: CaseStudy;
+  t: Dict;
+  locale: Locale;
+}
+
+const { study, next, t, locale } = Astro.props;
+const { project, lang } = study;
+const { data } = study.entry;
+const copy = t.work.items[project.id];
+const { Content, headings } = await render(study.entry);
+const contents = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
+const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", { month: "long", year: "numeric", timeZone: "UTC" });
+---
+
+<!--
+  A project told end to end. The head gives the facts at a glance (name, what it is, my part, when,
+  stack, links), the demo loop plays under it, then the story in the blog's reading layout (shared
+  styles in src/styles/prose.css), and it closes on the next project and an invitation to write.
+  Name, logo, stack, links, demo and date come from PROJECTS; the story from src/content/work.
+-->
+<article class="case" data-article>
+  <div class="container intro">
+    <BackLink href={localePath(locale, "/projects/")} label={t.caseStudy.back} />
+    <div class="top">
+      <header class="head">
+        <h1 class="title">
+          <img src={project.logo} alt="" width="56" height="56" />
+          {copy.name}
+        </h1>
+        <p class="subtitle" lang={lang}>{data.subtitle}</p>
+      </header>
+      <dl class="facts">
+        <div>
+          <dt>{t.caseStudy.role}</dt>
+          <dd lang={lang}>{data.role}</dd>
+        </div>
+        <div>
+          <dt>{t.work.delivered}</dt>
+          <dd><time datetime={project.delivered}>{month.format(new Date(`${project.delivered}-01`))}</time></dd>
+        </div>
+        {
+          (project.site || project.repo) && (
+            <div>
+              <dt>{t.caseStudy.links}</dt>
+              <dd class="links">
+                {project.site && (
+                  <a class="link" href={project.site} target="_blank" rel="noopener noreferrer">
+                    {t.work.site}
+                  </a>
+                )}
+                {project.repo && (
+                  <a class="link" href={project.repo} target="_blank" rel="noopener noreferrer">
+                    {t.work.repo}
+                  </a>
+                )}
+              </dd>
+            </div>
+          )
+        }
+        <div class="stack">
+          <dt class="sr-only">{t.work.stack}</dt>
+          <dd><TechList stack={project.stack} label={t.work.stack} more={t.work.more} less={t.work.less} /></dd>
+        </div>
+      </dl>
+    </div>
+    {lang !== locale && <p class="only-in">{t.caseStudy.onlyIn}</p>}
+  </div>
+
+  {
+    project.video && (
+      <figure class="container demo">
+        <video
+          src={project.video.src}
+          poster={project.video.poster}
+          muted
+          loop
+          playsinline
+          controls
+          preload="metadata"
+          aria-label={copy.name}
+          data-demo
+        />
+      </figure>
+    )
+  }
+
+  <div class:list={["container read-body", { "with-contents": contents.length > 1 }]}>
+    {contents.length > 1 && <Contents headings={contents} label={t.post.contents} lang={lang} />}
+
+    <div class="prose" lang={lang} data-prose data-copy={t.post.copyCode} data-copied={t.post.copiedCode} data-anchor={t.post.headingLink}>
+      <Content />
+    </div>
+
+    <footer class="end">
+      <div class="talk">
+        <h2>{t.caseStudy.talkTitle}</h2>
+        <p>{t.caseStudy.talkLine}</p>
+        <p><a class="btn btn-primary" href={`mailto:${PERSONAL.email}`}>{t.caseStudy.talk}</a></p>
+      </div>
+      {
+        next && (
+          <a class="next" href={casePath(locale, next.project.id)}>
+            <span class="mono">{t.caseStudy.next}</span>
+            <span class="next-name">
+              <img src={next.project.logo} alt="" width="32" height="32" />
+              {t.work.items[next.project.id].name}
+            </span>
+          </a>
+        )
+      }
+    </footer>
+  </div>
+</article>
+
+<script>
+  import { enhanceLongRead } from "../lib/prose";
+
+  const root = document.querySelector<HTMLElement>("[data-article]");
+  if (root) enhanceLongRead(root);
+
+  // The demo plays on its own while it is on screen, unless the visitor asked for less motion (then
+  // its controls start it).
+  const demo = document.querySelector<HTMLVideoElement>("[data-demo]");
+  if (demo && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) demo.play().catch(() => {});
+      else demo.pause();
+    }, { threshold: 0.4 }).observe(demo);
+  }
+</script>
+
+<style>
+  .case {
+    padding-bottom: var(--section-space);
+  }
+  .intro {
+    display: grid;
+    gap: var(--space-8);
+    max-width: calc(68rem + 2 * var(--gutter));
+    padding-top: var(--space-8);
+  }
+  .top {
+    display: grid;
+    gap: var(--space-10);
+  }
+  .head {
+    display: grid;
+    gap: var(--space-5);
+  }
+  .title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(2.25rem, 1.5rem + 3vw, 4rem);
+    font-weight: 500;
+    letter-spacing: var(--tracking-display);
+    line-height: 1.05;
+    overflow-wrap: anywhere;
+  }
+  .title img {
+    flex: none;
+    width: 0.9em;
+    height: 0.9em;
+  }
+  .subtitle {
+    margin: 0;
+    max-width: 36rem;
+    color: var(--text-secondary);
+    font-size: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+    line-height: 1.45;
+    text-wrap: pretty;
+  }
+
+  /* The facts: hairline rows, the label in mono on the left. */
+  .facts {
+    display: grid;
+    margin: 0;
+    border-top: 1px solid var(--border);
+  }
+  .facts > div {
+    display: grid;
+    grid-template-columns: 7rem minmax(0, 1fr);
+    gap: var(--space-4);
+    padding-block: var(--space-4);
+    border-bottom: 1px solid var(--border);
+  }
+  .facts dt {
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    line-height: 1.6;
+  }
+  .facts dd {
+    margin: 0;
+    text-wrap: pretty;
+  }
+  .facts .stack {
+    grid-template-columns: minmax(0, 1fr);
+    padding-top: var(--space-5);
+    border-bottom: 0;
+  }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-6);
+    font-weight: 500;
+  }
+  .only-in {
+    margin: 0;
+    color: var(--accent);
+  }
+
+  .demo {
+    max-width: calc(68rem + 2 * var(--gutter));
+    margin-block: var(--space-12) 0;
+  }
+  .demo video {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-surface);
+    background: var(--surface-muted);
+  }
+
+  .read-body {
+    padding-top: var(--space-12);
+  }
+
+  /* The close: an invitation to write, then the next project. */
+  .end {
+    display: grid;
+    gap: var(--space-10);
+    margin-top: var(--space-16);
+  }
+  .talk {
+    display: grid;
+    gap: var(--space-3);
+    padding-top: var(--space-10);
+    border-top: 1px solid var(--border);
+  }
+  .talk h2 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 1.25rem + 1vw, 2rem);
+    font-weight: 500;
+    letter-spacing: var(--tracking-display);
+    line-height: 1.2;
+    text-wrap: balance;
+  }
+  .talk p {
+    margin: 0;
+    color: var(--text-secondary);
+    text-wrap: pretty;
+  }
+  .talk .btn {
+    margin-top: var(--space-3);
+  }
+  .next {
+    display: grid;
+    gap: var(--space-2);
+    padding-top: var(--space-8);
+    border-top: 1px solid var(--border);
+    text-decoration: none;
+  }
+  .next .mono {
+    color: var(--text-secondary);
+  }
+  .next-name {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    font-weight: 500;
+    letter-spacing: var(--tracking-display);
+    transition: color var(--duration-fast) var(--ease-standard);
+  }
+  .next:hover .next-name {
+    color: var(--accent);
+  }
+
+  @media (min-width: 64rem) {
+    .top {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      gap: clamp(2rem, 1rem + 4vw, 5rem);
+      align-items: start;
+    }
+  }
+</style>

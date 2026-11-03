@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { KOJIMA_PAGE, MUSIC_PAGE, PICS_PAGE, PROJECTS_PAGE, SITE_URL } from "../data";
 import { getPosts, postPath } from "../lib/posts";
+import { casePath, getCaseStudies } from "../lib/work";
 
 /**
  * The pages search engines should list, each with its French twin (hreflang). Hidden pages stay out,
@@ -14,6 +15,7 @@ export const GET: APIRoute = async () => {
     PICS_PAGE && "/pics/",
     KOJIMA_PAGE && "/kojima/",
     MUSIC_PAGE && "/music/",
+    ...(PROJECTS_PAGE ? (await getCaseStudies("en")).map((study) => casePath("en", study.project.id)) : []),
   ].filter((path): path is string => Boolean(path));
   const twin = (path: string) => `
     <xhtml:link rel="alternate" hreflang="en" href="${SITE_URL}${path}"/>

@@ -6,6 +6,7 @@ import CardBack from "./CardBack.astro";
 import TechList from "./TechList.astro";
 import { PROJECTS, PROJECTS_PAGE } from "../data";
 import { localePath, type Dict, type Locale } from "../i18n";
+import { casePath, getCaseStudies } from "../lib/work";
 
 interface Props {
   t: Dict;
@@ -13,6 +14,8 @@ interface Props {
 }
 
 const { t, locale } = Astro.props;
+// Projects with a case study: the panel leads to it first (only while /projects is shown).
+const studies = new Set(PROJECTS_PAGE ? (await getCaseStudies(locale)).map((study) => study.project.id) : []);
 /** Plain backs under the projects, so the deck has the thickness of a real one. */
 const SPARE = 2;
 // Lucide icons (ISC), the set Arc uses, drawn at Arc's 1.75 stroke: a barrier for work under way, a
@@ -171,8 +174,14 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
                   </dl>
                   <TechList stack={project.stack} label={t.work.stack} more={t.work.more} less={t.work.less} />
                   <p class="actions">
+                    {studies.has(project.id) && (
+                      <a class="btn btn-primary" href={casePath(locale, project.id)}>
+                        {t.caseStudy.short}
+                        <span class="sr-only">: {copy.name}</span>
+                      </a>
+                    )}
                     {project.site && (
-                      <a class="btn btn-primary" href={project.site} target="_blank" rel="noopener noreferrer">
+                      <a class:list={["btn", studies.has(project.id) ? "btn-secondary" : "btn-primary"]} href={project.site} target="_blank" rel="noopener noreferrer">
                         {t.work.site}
                         <span class="sr-only">: {copy.name}</span>
                       </a>
@@ -1090,6 +1099,10 @@ const month = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
 
   /* ─── Desktop: the table on the left, the panel on the right ─── */
   @media (min-width: 64rem) {
+    /* More air between "My projects" and the cards than on a phone (Joel, 2026-11-03). */
+    .pin {
+      gap: var(--space-10);
+    }
     .board {
       grid-template-columns: minmax(0, 8fr) minmax(0, 5fr);
       gap: clamp(2rem, 1rem + 3vw, 4rem);

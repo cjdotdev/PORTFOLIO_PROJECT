@@ -154,6 +154,14 @@ picked by `matchMedia("(max-width: 39.99rem)")` and written to `data-mode`:
 - `/projects` is shown (`PROJECTS_PAGE = true`): every project of the deck as a long row (screenshot, or
   the trailer for in-progress ones), with a "Home" link on top (`BackLink.astro`, also on `/blog`).
   `false` hides it again (no links, `noindex`) without deleting it.
+- **Case studies** (since 2026-11-03): each shipped project has `/projects/<id>/` and `/fr/projects/<id>/`
+  (`src/pages/projects/[id].astro`, `src/sections/CaseStudy.astro`), its story in Markdown in
+  `src/content/work/<id>.md` and `<id>.fr.md` (frontmatter `subtitle`, `role`; name, logo, stack, links,
+  demo and date come from `PROJECTS`). Linked from the `/projects` rows and the deck panel ("Case study").
+  It shares the blog's reading layout: `src/styles/prose.css`, `Contents.astro`, `src/lib/prose.ts`. A
+  step diagram is raw HTML in the Markdown: `<figure class="flow"><ol><li><strong>…</strong> …</li>`,
+  `class="aside"` for a branch. MakiSend credit: not Joel's idea, he built most of it; one honest line,
+  no story. linkedin-scheduler's next version is planned as an npm package.
 
 **Tech lists** (`TechList.astro`): logo and name grid; on phones a list longer than six folds behind
 "See more (+n)".
